@@ -1,5 +1,0 @@
-/Users/test/Documents/client_app/CMakeFiles/client.dir
-/Users/test/Documents/client_app/CMakeFiles/edit_cache.dir
-/Users/test/Documents/client_app/CMakeFiles/rebuild_cache.dir
-/Users/test/Documents/client_app/CMakeFiles/client_autogen_timestamp_deps.dir
-/Users/test/Documents/client_app/CMakeFiles/client_autogen.dir
