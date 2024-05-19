@@ -1,0 +1,41 @@
+QLabel {
+    color: #000000;
+}
+
+QLineEdit {
+    background-color: #FFFFFF;
+    border: 1px solid #0055AA;
+    border-radius: 3px;
+    padding: 5px;
+    color: #000000;
+}
+
+QGroupBox {
+    border: 1px solid #0055AA;
+    border-radius: 5px;
+    margin-top: 10px;
+}
+
+QComboBox {
+    background-color: #FFFFFF;
+    border: 1px solid #0055AA;
+    border-radius: 3px;
+    padding: 5px;
+    color: #000000;
+}
+
+QListWidget {
+    background-color: #FFFFFF;
+    border: 1px solid #0055AA;
+    border-radius: 5px;
+}
+
+QListWidget::item {
+    color: #000000;
+}
+
+QStatusBar {
+    background-color: #0077CC;
+    color: #000000;
+    border-top: 1px solid #0055AA;
+}
