@@ -1,0 +1,16 @@
+# ninja log v6
+2	2039	1716103849340456398	client_autogen/timestamp	661b8c031002bcae
+2	2039	1716103849340456398	client_autogen/mocs_compilation.cpp	661b8c031002bcae
+2	2039	1716103849340456398	/Users/test/Documents/client_app/build/client_autogen/timestamp	661b8c031002bcae
+2	2039	1716103849340456398	/Users/test/Documents/client_app/build/client_autogen/mocs_compilation.cpp	661b8c031002bcae
+2045	2082	1716103849396526332	.rcc/qrc_client_images.cpp	ca1981f12249dbe3
+2045	2082	1716103849396526332	/Users/test/Documents/client_app/build/.rcc/qrc_client_images.cpp	ca1981f12249dbe3
+2084	2183	1716103849398615405	CMakeFiles/client.dir/build/.rcc/qrc_client_images.cpp.o	139432b64400ccaf
+2083	4648	1716103849398367661	CMakeFiles/client.dir/chat_line.cpp.o	b94b32dacec13e26
+2083	4953	1716103849397753926	CMakeFiles/client.dir/client_manager.cpp.o	b6bb62603d422d30
+2083	5049	1716103849397525890	CMakeFiles/client.dir/client_main.cpp.o	b1841c4afb9de360
+2083	5125	1716103849398042086	CMakeFiles/client.dir/chat_protocol.cpp.o	9cb393c1ff49f59f
+2082	5774	1716103849397289146	CMakeFiles/client.dir/client_autogen/mocs_compilation.cpp.o	a7252f9aff636736
+2083	5812	1716103849397647012	CMakeFiles/client.dir/client_main_window.cpp.o	d2612d1051bfc2c9
+2083	5915	1716103849397867090	CMakeFiles/client.dir/client_chat_window.cpp.o	302b0ee9d164d080
+5915	6018	1716103853229643468	client.app/Contents/MacOS/client	800894eff4e4df0b
