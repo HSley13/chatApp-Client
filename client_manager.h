@@ -54,7 +54,7 @@ public:
 
 private:
     static QWebSocket *_socket;
-    QHostAddress _ip = QHostAddress::LocalHost;
+    QHostAddress _ip = QHostAddress("172.20.10.2");
     int _port = 12345;
 
     static chat_protocol *_protocol;
