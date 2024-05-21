@@ -267,6 +267,7 @@ void client_main_window::on_sign_up()
 
     QMessageBox review;
     review.setWindowTitle("Information Review");
+    review.setStyleSheet("color: black;");
     review.setText(full_name);
     review.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
     int result = review.exec();
