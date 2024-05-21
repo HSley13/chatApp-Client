@@ -42,7 +42,7 @@ public:
         audio,
         save_data,
 
-        sign_in,
+        sign_up,
 
         login_request
     };

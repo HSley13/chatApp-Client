@@ -84,7 +84,7 @@ signals:
     void audio_received(QString sender, QString path);
 
     void client_added_you(int conversation_ID, QString name, QString ID);
-    void lookup_friend_result(int conversation_ID, QString name);
+    void lookup_friend_result(int conversation_ID, QString name, bool true_or_false);
 
     void login_request(QString hashed_password, bool true_or_false, QHash<int, QHash<QString, int>> friend_list, QList<QString> online_friends, QHash<int, QVector<QString>> messages, QHash<int, QHash<QString, QByteArray>> binary_data);
 

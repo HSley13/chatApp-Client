@@ -104,7 +104,7 @@ void client_manager::on_binary_message_received(const QByteArray &message)
         break;
 
     case chat_protocol::lookup_friend:
-        emit lookup_friend_result(_protocol->conversation_ID(), _protocol->client_name());
+        emit lookup_friend_result(_protocol->conversation_ID(), _protocol->client_name(), _protocol->true_or_false());
 
         break;
 

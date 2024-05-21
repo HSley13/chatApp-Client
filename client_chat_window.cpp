@@ -391,8 +391,8 @@ void client_chat_window::set_up_window()
         connect(_client, &client_manager::client_added_you, this, [=](int conversation_ID, QString name, QString ID)
                 { emit client_added_you(conversation_ID, name, ID); });
 
-        connect(_client, &client_manager::lookup_friend_result, this, [=](int conversation_ID, QString name)
-                { emit lookup_friend_result(conversation_ID, name); });
+        connect(_client, &client_manager::lookup_friend_result, this, [=](int conversation_ID, QString name, bool true_or_false)
+                { emit lookup_friend_result(conversation_ID, name, true_or_false); });
 
         connect(_client, &client_manager::audio_received, this, [=](QString sender, QString path)
                 { emit audio_received(sender, path); });

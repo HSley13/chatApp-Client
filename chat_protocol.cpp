@@ -210,7 +210,7 @@ QByteArray chat_protocol::set_sign_up_message(QString phone_number, QString firs
     QDataStream out(&byte, QIODevice::WriteOnly);
     out.setVersion(QDataStream::Qt_6_0);
 
-    out << sign_in << phone_number << first_name << last_name << password << secret_question << secret_answer;
+    out << sign_up << phone_number << first_name << last_name << password << secret_question << secret_answer;
 
     return byte;
 }
@@ -324,7 +324,8 @@ void chat_protocol::load_data(QByteArray data)
         break;
 
     case lookup_friend:
-        in >> _conversation_ID >> _client_name;
+        in >> _conversation_ID >> _client_name << _true_or_false;
+        qDebug() << "True or False received: " << _true_or_false;
 
         break;
 

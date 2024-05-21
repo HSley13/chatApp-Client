@@ -26,8 +26,8 @@ client_main_window::client_main_window(QWidget *parent)
 
     QWidget *login_widget = new QWidget();
 
-    QLabel *id_label = new QLabel("Enter Your ID: ", login_widget);
-    _user_phone_number = new QLineEdit(login_widget);
+    QLabel *id_label = new QLabel("Enter Your ID: ", this);
+    _user_phone_number = new QLineEdit(this);
 
     QHBoxLayout *hbox = new QHBoxLayout();
     hbox->addWidget(id_label);
@@ -41,7 +41,7 @@ client_main_window::client_main_window(QWidget *parent)
     hbox_1->addWidget(password_label);
     hbox_1->addWidget(_user_password);
 
-    QPushButton *log_in = new QPushButton("Log In", login_widget);
+    QPushButton *log_in = new QPushButton("Log In", this);
     log_in->setStyleSheet("background-color: #0077CC;"
                           "color: white;"
                           "border: 1px solid #0055AA;"
@@ -254,21 +254,19 @@ void client_main_window::on_sign_up()
 
     _insert_secret_question->setStyleSheet("border: 1px solid gray;");
 
-    QString full_name = QString("First Name : %1\nLast Name : %2\nPhone Number : %3\nSecret Question : %4\nSecret Answer : %5")
-                            .arg(_insert_first_name->text())
-                            .arg(_insert_last_name->text())
-                            .arg(_insert_phone_number->text())
-                            .arg(_insert_secret_question->text())
-                            .arg(_insert_secret_answer->text());
-
-    qDebug() << "Full Name Info: " << full_name;
+    QString info = QString("First Name : %1\nLast Name : %2\nPhone Number : %3\nSecret Question : %4\nSecret Answer : %5")
+                       .arg(_insert_first_name->text())
+                       .arg(_insert_last_name->text())
+                       .arg(_insert_phone_number->text())
+                       .arg(_insert_secret_question->text())
+                       .arg(_insert_secret_answer->text());
 
     bool OK;
 
     QMessageBox *review = new QMessageBox(this);
     review->setWindowTitle("Information Review");
     review->setStyleSheet("color: black;");
-    review->setText(full_name);
+    review->setText(info);
     review->setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
     int result = review->exec();
 
@@ -276,17 +274,13 @@ void client_main_window::on_sign_up()
         return;
 
     if (!_server_wid)
+    {
         _server_wid = new client_chat_window(_user_phone_number->text(), this);
+        QTimer::singleShot(2000, this, [=]()
+                           { _server_wid->_client->send_sign_up_message(_insert_phone_number->text(), _insert_first_name->text(), _insert_last_name->text(), _insert_password->text(), _insert_secret_question->text(), _insert_secret_answer->text()); });
+    }
 
-    _server_wid->_client->send_sign_up_message(_insert_phone_number->text(), _insert_first_name->text(), _insert_last_name->text(), _insert_password->text(), _insert_secret_question->text(), _insert_secret_answer->text());
-
-    _insert_phone_number->clear();
-    _insert_first_name->clear();
-    _insert_last_name->clear();
-    _insert_password->clear();
-    _insert_password_confirmation->clear();
-    _insert_secret_question->clear();
-    _insert_secret_answer->clear();
+    _status_bar->showMessage(QString("Account Created Successfully"), 5000);
 }
 
 void client_main_window::on_login_request(QString hashed_password, bool true_or_false, QHash<int, QHash<QString, int>> list_g, QList<QString> online_friends, QHash<int, QVector<QString>> messages, QHash<int, QHash<QString, QByteArray>> binary_datas)
@@ -390,10 +384,7 @@ void client_main_window::on_login_request(QString hashed_password, bool true_or_
     {
         _user_password->setStyleSheet("border: 1px solid red");
 
-        QMessageBox *warning = new QMessageBox(this);
-        warning->setWindowTitle("Password Incorrect");
-        warning->setText("The entered password is incorrect, Verify it and try again");
-        warning->setStandardButtons(QMessageBox::Ok);
+        _status_bar->showMessage(QString("The entered password is incorrect, Verify it and try again"), 3000);
 
         return;
     }
@@ -447,8 +438,6 @@ void client_main_window::on_client_disconnected(QString client_name)
 
         _status_bar->showMessage(QString("%1 is Disconnected").arg(client_name), 3000);
     }
-    else
-        qDebug() << "client_main_window ---> on_client_disconnected() --> client_name to Disconnect not FOUND: " << client_name;
 }
 
 void client_main_window::on_client_connected(QString client_name)
@@ -468,8 +457,6 @@ void client_main_window::on_client_connected(QString client_name)
 
         _status_bar->showMessage(QString("%1 is Connected").arg(client_name), 3000);
     }
-    else
-        qDebug() << "client_main_window ---> on_client_connected() --> client_name to show online not FOUND: " << client_name;
 }
 
 void client_main_window::on_text_message_received(QString sender, QString review)
@@ -544,15 +531,21 @@ void client_main_window::on_swipe_right()
         _stack->setCurrentIndex(0);
 }
 
-void client_main_window::on_lookup_friend_result(int conversation_ID, QString name)
+void client_main_window::on_lookup_friend_result(int conversation_ID, QString name, bool true_or_false)
 {
     if (name == "")
         return;
 
-    if (_friend_list->findText(name, Qt::MatchExactly) == -1)
+    QIcon online_icon = create_dot_icon(Qt::green, 10);
+    QIcon offline_icon = create_dot_icon(Qt::red, 10);
 
+    if (_friend_list->findText(name, Qt::MatchExactly) == -1)
     {
+        QIcon valid_icon = (true_or_false) ? online_icon : offline_icon;
+
         _friend_list->addItem(name);
+
+        _friend_list->setItemIcon(_friend_list->count() - 1, valid_icon);
 
         client_chat_window *wid = new client_chat_window(conversation_ID, _search_phone_number->text(), name, this);
         connect(wid, &client_chat_window::swipe_right, this, &client_main_window::on_swipe_right);
@@ -565,6 +558,8 @@ void client_main_window::on_lookup_friend_result(int conversation_ID, QString na
         _stack->addWidget(wid);
 
         _window_map.insert(name, wid);
+
+        _status_bar->showMessage(QString("%1 known as %2 is now in your friend_list").arg(_search_phone_number->text(), name), 5000);
     }
     else
         _status_bar->showMessage(QString("%1 known as %2 is already in your friend_list").arg(_search_phone_number->text(), name), 5000);
@@ -587,6 +582,8 @@ void client_main_window::on_client_added_you(int conversation_ID, QString name, 
     if (_friend_list->findText(name, Qt::MatchExactly) == -1)
     {
         _friend_list->addItem(name);
+
+        _friend_list->setItemIcon(_friend_list->count() - 1, create_dot_icon(Qt::green, 10));
 
         client_chat_window *wid = new client_chat_window(conversation_ID, ID, name, this);
         if (!wid)

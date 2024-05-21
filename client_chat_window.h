@@ -147,7 +147,7 @@ signals:
     void data_received_sent(QString client_name);
 
     void client_added_you(int conversation_ID, QString name, QString ID);
-    void lookup_friend_result(int conversation_ID, QString name);
+    void lookup_friend_result(int conversation_ID, QString name, bool true_or_false);
 
     void audio_received(QString sender, QString path);
     void file_saved(QString sender, QString path);
