@@ -390,7 +390,10 @@ void client_main_window::on_login_request(QString hashed_password, bool true_or_
     {
         _user_password->setStyleSheet("border: 1px solid red");
 
-        QMessageBox::warning(nullptr, "!!!", "Password Incorrect");
+        QMessageBox *warning = new QMessageBox(this);
+        warning->setWindowTitle("Password Incorrect");
+        warning->setText("The entered password is incorrect, Verify it and try again");
+        warning->setStandardButtons(QMessageBox::Ok);
 
         return;
     }
