@@ -61,23 +61,23 @@ client_main_window::client_main_window(QWidget *parent)
     QGroupBox *group_box = new QGroupBox();
     group_box->setLayout(VBOX);
 
-    QPushButton *sign_in = new QPushButton("Sign Up", this);
-    sign_in->setStyleSheet("background-color: #0077CC;"
+    QPushButton *sign_up = new QPushButton("Sign Up", this);
+    sign_up->setStyleSheet("background-color: #0077CC;"
                            "color: white;"
                            "border: 1px solid #0055AA;"
                            "border-radius: 5px;"
                            "padding: 5px 10px;");
-    connect(sign_in, &QPushButton::clicked, this, [=]()
+    connect(sign_up, &QPushButton::clicked, this, [=]()
             { _stack->setCurrentIndex(1); });
 
     QGridLayout *grid = new QGridLayout(login_widget);
     grid->addWidget(group_box, 0, 0, 1, 1, Qt::AlignCenter);
-    grid->addWidget(sign_in, 1, 0, 1, 1, Qt::AlignBottom | Qt::AlignLeft);
+    grid->addWidget(sign_up, 1, 0, 1, 1, Qt::AlignBottom | Qt::AlignLeft);
 
     /*-----------------------------------¬------------------------------------------------------------------------------------------------------------------------------------*/
 
-    QWidget *sign_in_widget = new QWidget();
-    sign_in_widget->setWindowIconText("Sign In");
+    QWidget *sign_up_widget = new QWidget();
+    sign_up_widget->setWindowIconText("Sign In");
 
     QLabel *first_name_label = new QLabel("First Name: ", this);
     _insert_first_name = new QLineEdit(this);
@@ -123,29 +123,29 @@ client_main_window::client_main_window(QWidget *parent)
     secret_answer_layout->addWidget(secret_answer_label);
     secret_answer_layout->addWidget(_insert_secret_answer);
 
-    QPushButton *sign_in_button = new QPushButton("Sign In", this);
-    sign_in_button->setStyleSheet("background-color: #0077CC;"
+    QPushButton *sign_up_button = new QPushButton("Sign In", this);
+    sign_up_button->setStyleSheet("background-color: #0077CC;"
                                   "color: white;"
                                   "border: 1px solid #0055AA;"
                                   "border-radius: 5px;"
                                   "padding: 5px 10px;");
-    connect(sign_in_button, &QPushButton::clicked, this, &client_main_window::on_sign_in);
+    connect(sign_up_button, &QPushButton::clicked, this, &client_main_window::on_sign_up);
 
-    QVBoxLayout *sign_in_layout = new QVBoxLayout();
-    sign_in_layout->addLayout(first_name_layout);
-    sign_in_layout->addLayout(last_name_layout);
-    sign_in_layout->addLayout(phone_number_layout);
-    sign_in_layout->addLayout(password_layout);
-    sign_in_layout->addLayout(password_confirm_layout);
-    sign_in_layout->addLayout(secret_question_layout);
-    sign_in_layout->addLayout(secret_answer_layout);
-    sign_in_layout->addWidget(sign_in_button);
+    QVBoxLayout *sign_up_layout = new QVBoxLayout();
+    sign_up_layout->addLayout(first_name_layout);
+    sign_up_layout->addLayout(last_name_layout);
+    sign_up_layout->addLayout(phone_number_layout);
+    sign_up_layout->addLayout(password_layout);
+    sign_up_layout->addLayout(password_confirm_layout);
+    sign_up_layout->addLayout(secret_question_layout);
+    sign_up_layout->addLayout(secret_answer_layout);
+    sign_up_layout->addWidget(sign_up_button);
 
     QGroupBox *group_box_2 = new QGroupBox();
-    group_box_2->setLayout(sign_in_layout);
+    group_box_2->setLayout(sign_up_layout);
 
-    QGridLayout *sign_in_grid = new QGridLayout(sign_in_widget);
-    sign_in_grid->addWidget(group_box_2, 0, 0, 1, 1, Qt::AlignCenter);
+    QGridLayout *sign_up_grid = new QGridLayout(sign_up_widget);
+    sign_up_grid->addWidget(group_box_2, 0, 0, 1, 1, Qt::AlignCenter);
 
     /*-----------------------------------¬------------------------------------------------------------------------------------------------------------------------------------*/
 
@@ -192,7 +192,7 @@ client_main_window::client_main_window(QWidget *parent)
     /*-----------------------------------¬------------------------------------------------------------------------------------------------------------------------------------*/
 
     _stack->addWidget(login_widget);
-    _stack->addWidget(sign_in_widget);
+    _stack->addWidget(sign_up_widget);
     _stack->addWidget(chat_widget);
 }
 
@@ -203,7 +203,7 @@ client_main_window::~client_main_window()
 
 /*-------------------------------------------------------------------- Slots --------------------------------------------------------------*/
 
-void client_main_window::on_sign_in()
+void client_main_window::on_sign_up()
 {
     if (_insert_phone_number->text().toInt() == 0)
     {
@@ -277,7 +277,7 @@ void client_main_window::on_sign_in()
     if (!_server_wid)
         _server_wid = new client_chat_window(_user_phone_number->text(), this);
 
-    _server_wid->_client->send_sign_in_message(_insert_phone_number->text(), _insert_first_name->text(), _insert_last_name->text(), _insert_password->text(), _insert_secret_question->text(), _insert_secret_answer->text());
+    _server_wid->_client->send_sign_up_message(_insert_phone_number->text(), _insert_first_name->text(), _insert_last_name->text(), _insert_password->text(), _insert_secret_question->text(), _insert_secret_answer->text());
 
     _insert_phone_number->clear();
     _insert_first_name->clear();
