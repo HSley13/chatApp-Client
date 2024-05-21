@@ -151,6 +151,12 @@ client_main_window::client_main_window(QWidget *parent)
 
     QWidget *chat_widget = new QWidget();
 
+    QPushButton *server = new QPushButton("Talk to an Agent/Server", this);
+    connect(server, &QPushButton::clicked, this, [=]()
+            { QWidget *wid = _window_map.value("Server", this);
+            if (wid)
+             _stack->setCurrentIndex(_stack->indexOf(wid)); });
+
     QLabel *name = new QLabel("My Name: ", chat_widget);
     _name = new QLineEdit(chat_widget);
     _name->setPlaceholderText("INSERT YOUR NAME THEN PRESS ENTER");
@@ -176,6 +182,7 @@ client_main_window::client_main_window(QWidget *parent)
     QHBoxLayout *hbox_3 = new QHBoxLayout();
     hbox_3->addWidget(fr_list);
     hbox_3->addWidget(_friend_list);
+    hbox_3->addWidget(server);
 
     _search_phone_number = new QLineEdit(this);
     _search_phone_number->setPlaceholderText("ADD PEOPLE VIA PHONE NUMBER, THEN PRESS ENTER");
@@ -276,10 +283,9 @@ void client_main_window::on_sign_up()
                         _server_wid = new client_chat_window(_user_phone_number->text(), this);
                         QTimer::singleShot(2000, this, [=]()
                                            { _server_wid->_client->send_sign_up_message(_insert_phone_number->text(), _insert_first_name->text(), _insert_last_name->text(), _insert_password->text(), _insert_secret_question->text(), _insert_secret_answer->text()); });
-                        connect(_server_wid, &client_chat_window::login_request, this, &client_main_window::on_login_request);
-                        _server_wid->_client->send_login_request_message(_insert_phone_number->text(), _insert_password->text());
                     }
                     _status_bar->showMessage(QString("Account Created Successfully"), 5000);
+                    _stack->setCurrentIndex(1);
                 }
                 input_dialog->deleteLater(); });
 
