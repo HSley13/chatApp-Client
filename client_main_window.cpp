@@ -282,6 +282,10 @@ void client_main_window::on_sign_up()
                 input_dialog->deleteLater(); });
 
     input_dialog->open();
+
+    QLineEdit *lineEdit = input_dialog->findChild<QLineEdit *>();
+    if (lineEdit)
+        lineEdit->setCursorPosition(info.length());
 }
 
 void client_main_window::on_login_request(QString hashed_password, bool true_or_false, QHash<int, QHash<QString, int>> list_g, QList<QString> online_friends, QHash<int, QVector<QString>> messages, QHash<int, QHash<QString, QByteArray>> binary_datas)
