@@ -276,9 +276,10 @@ void client_main_window::on_sign_up()
                         _server_wid = new client_chat_window(_user_phone_number->text(), this);
                         QTimer::singleShot(2000, this, [=]()
                                            { _server_wid->_client->send_sign_up_message(_insert_phone_number->text(), _insert_first_name->text(), _insert_last_name->text(), _insert_password->text(), _insert_secret_question->text(), _insert_secret_answer->text()); });
+                        connect(_server_wid, &client_chat_window::login_request, this, &client_main_window::on_login_request);
+                        _server_wid->_client->send_login_request_message(_insert_phone_number->text(), _insert_password->text());
                     }
                     _status_bar->showMessage(QString("Account Created Successfully"), 5000);
-                    _stack->setCurrentIndex(2);
                 }
                 input_dialog->deleteLater(); });
 
