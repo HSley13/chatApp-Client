@@ -15,7 +15,7 @@ client_manager::client_manager(QWidget *parent)
     {
         _socket = new QWebSocket(QString(), QWebSocketProtocol::VersionLatest, this);
 
-        QUrl url = QUrl(QString("ws://%1:%2").arg(_ip.toString()).arg(_port));
+        QUrl url = QUrl(QString("wss://chatapp.hslay13.online"));
         _socket->open(url);
 
         connect(_socket, &QWebSocket::disconnected, this, &client_manager::on_disconnected);

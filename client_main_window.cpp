@@ -51,7 +51,7 @@ client_main_window::client_main_window(QWidget *parent)
             {     if (!_server_wid)
                 _server_wid = new client_chat_window(_user_phone_number->text(), this);
                 connect(_server_wid, &client_chat_window::login_request, this, &client_main_window::on_login_request);
-                QTimer::singleShot(1000, this, [=]() { _server_wid->_client->send_login_request_message(_user_phone_number->text(), _user_password->text());}); });
+                QTimer::singleShot(2000, this, [=]() { _server_wid->_client->send_login_request_message(_user_phone_number->text(), _user_password->text());}); });
 
     QVBoxLayout *VBOX = new QVBoxLayout();
     VBOX->addLayout(hbox);
