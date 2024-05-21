@@ -26,7 +26,7 @@ client_main_window::client_main_window(QWidget *parent)
 
     QWidget *login_widget = new QWidget();
 
-    QLabel *id_label = new QLabel("Enter Your ID: ", this);
+    QLabel *id_label = new QLabel("Enter Your Phone Number: ", this);
     _user_phone_number = new QLineEdit(this);
 
     QHBoxLayout *hbox = new QHBoxLayout();
@@ -278,14 +278,11 @@ void client_main_window::on_sign_up()
                                            { _server_wid->_client->send_sign_up_message(_insert_phone_number->text(), _insert_first_name->text(), _insert_last_name->text(), _insert_password->text(), _insert_secret_question->text(), _insert_secret_answer->text()); });
                     }
                     _status_bar->showMessage(QString("Account Created Successfully"), 5000);
+                    _stack->setCurrentIndex(2);
                 }
                 input_dialog->deleteLater(); });
 
     input_dialog->open();
-
-    QLineEdit *lineEdit = input_dialog->findChild<QLineEdit *>();
-    if (lineEdit)
-        lineEdit->setCursorPosition(info.length());
 }
 
 void client_main_window::on_login_request(QString hashed_password, bool true_or_false, QHash<int, QHash<QString, int>> list_g, QList<QString> online_friends, QHash<int, QVector<QString>> messages, QHash<int, QHash<QString, QByteArray>> binary_datas)
