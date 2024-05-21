@@ -254,24 +254,24 @@ void client_main_window::on_sign_up()
 
     _insert_secret_question->setStyleSheet("border: 1px solid gray;");
 
-    QString info = QString("First Name : %1\nLast Name : %2\nPhone Number : %3\nSecret Question : %4\nSecret Answer : %5")
-                       .arg(_insert_first_name->text())
-                       .arg(_insert_last_name->text())
-                       .arg(_insert_phone_number->text())
-                       .arg(_insert_secret_question->text())
-                       .arg(_insert_secret_answer->text());
+    // QString info = QString("First Name : %1\nLast Name : %2\nPhone Number : %3\nSecret Question : %4\nSecret Answer : %5")
+    //                    .arg(_insert_first_name->text())
+    //                    .arg(_insert_last_name->text())
+    //                    .arg(_insert_phone_number->text())
+    //                    .arg(_insert_secret_question->text())
+    //                    .arg(_insert_secret_answer->text());
 
-    bool OK;
+    // bool OK;
 
-    QMessageBox *review = new QMessageBox(this);
-    review->setWindowTitle("Information Review");
-    review->setStyleSheet("color: black;");
-    review->setText(info);
-    review->setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
-    int result = review->exec();
+    // QMessageBox *review = new QMessageBox(this);
+    // review->setWindowTitle("Information Review");
+    // review->setStyleSheet("color: black;");
+    // review->setText(info);
+    // review->setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
+    // int result = review->exec();
 
-    if (result == QMessageBox::Cancel)
-        return;
+    // if (result == QMessageBox::Cancel)
+    //     return;
 
     if (!_server_wid)
     {
