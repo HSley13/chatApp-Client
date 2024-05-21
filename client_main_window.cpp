@@ -182,7 +182,6 @@ client_main_window::client_main_window(QWidget *parent)
     QHBoxLayout *hbox_3 = new QHBoxLayout();
     hbox_3->addWidget(fr_list);
     hbox_3->addWidget(_friend_list);
-    hbox_3->addWidget(server);
 
     _search_phone_number = new QLineEdit(this);
     _search_phone_number->setPlaceholderText("ADD PEOPLE VIA PHONE NUMBER, THEN PRESS ENTER");
@@ -192,6 +191,7 @@ client_main_window::client_main_window(QWidget *parent)
     QVBoxLayout *VBOX_2 = new QVBoxLayout(chat_widget);
     VBOX_2->addLayout(hbox_2);
     VBOX_2->addLayout(hbox_3);
+    VBOX_2->addWidget(server);
     VBOX_2->addWidget(chats_label);
     VBOX_2->addWidget(_list);
     VBOX_2->addWidget(_search_phone_number);
@@ -310,8 +310,6 @@ void client_main_window::on_login_request(QString hashed_password, bool true_or_
         QWidget *wid = _window_map.value("Server");
         if (!wid)
         {
-            _list->addItem("Server");
-
             _server_wid->setObjectName("Server");
             _stack->addWidget(_server_wid);
 
