@@ -254,33 +254,28 @@ void client_main_window::on_sign_up()
 
     _insert_secret_question->setStyleSheet("border: 1px solid gray;");
 
-    // QString info = QString("First Name : %1\nLast Name : %2\nPhone Number : %3\nSecret Question : %4\nSecret Answer : %5")
-    //                    .arg(_insert_first_name->text())
-    //                    .arg(_insert_last_name->text())
-    //                    .arg(_insert_phone_number->text())
-    //                    .arg(_insert_secret_question->text())
-    //                    .arg(_insert_secret_answer->text());
+    QString info = QString("First Name : %1\nLast Name : %2\nPhone Number : %3\nSecret Question : %4\nSecret Answer : %5")
+                       .arg(_insert_first_name->text())
+                       .arg(_insert_last_name->text())
+                       .arg(_insert_phone_number->text())
+                       .arg(_insert_secret_question->text())
+                       .arg(_insert_secret_answer->text());
 
-    // bool OK;
-
-    // QMessageBox *review = new QMessageBox(this);
-    // review->setWindowTitle("Information Review");
-    // review->setStyleSheet("color: black;");
-    // review->setText(info);
-    // review->setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
-    // int result = review->exec();
-
-    // if (result == QMessageBox::Cancel)
-    //     return;
-
-    if (!_server_wid)
+    bool ok;
+    QString confirm_info = QInputDialog::getMultiLineText(this, "Review Information", "Please review the information below:", info, &ok);
+    if (ok)
     {
-        _server_wid = new client_chat_window(_user_phone_number->text(), this);
-        QTimer::singleShot(2000, this, [=]()
-                           { _server_wid->_client->send_sign_up_message(_insert_phone_number->text(), _insert_first_name->text(), _insert_last_name->text(), _insert_password->text(), _insert_secret_question->text(), _insert_secret_answer->text()); });
-    }
+        if (!_server_wid)
+        {
+            _server_wid = new client_chat_window(_user_phone_number->text(), this);
+            QTimer::singleShot(2000, this, [=]()
+                               { _server_wid->_client->send_sign_up_message(_insert_phone_number->text(), _insert_first_name->text(), _insert_last_name->text(), _insert_password->text(), _insert_secret_question->text(), _insert_secret_answer->text()); });
+        }
 
-    _status_bar->showMessage(QString("Account Created Successfully"), 5000);
+        _status_bar->showMessage(QString("Account Created Successfully"), 5000);
+    }
+    else
+        return;
 }
 
 void client_main_window::on_login_request(QString hashed_password, bool true_or_false, QHash<int, QHash<QString, int>> list_g, QList<QString> online_friends, QHash<int, QVector<QString>> messages, QHash<int, QHash<QString, QByteArray>> binary_datas)
