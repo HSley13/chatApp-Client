@@ -77,7 +77,7 @@ client_main_window::client_main_window(QWidget *parent)
     /*-----------------------------------¬------------------------------------------------------------------------------------------------------------------------------------*/
 
     QWidget *sign_up_widget = new QWidget();
-    sign_up_widget->setWindowIconText("Sign In");
+    sign_up_widget->setWindowIconText("Sign Up");
 
     QLabel *first_name_label = new QLabel("First Name: ", this);
     _insert_first_name = new QLineEdit(this);
@@ -123,7 +123,7 @@ client_main_window::client_main_window(QWidget *parent)
     secret_answer_layout->addWidget(secret_answer_label);
     secret_answer_layout->addWidget(_insert_secret_answer);
 
-    QPushButton *sign_up_button = new QPushButton("Sign In", this);
+    QPushButton *sign_up_button = new QPushButton("Sign Up", this);
     sign_up_button->setStyleSheet("background-color: #0077CC;"
                                   "color: white;"
                                   "border: 1px solid #0055AA;"
