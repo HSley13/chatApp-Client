@@ -61,7 +61,7 @@ client_main_window::client_main_window(QWidget *parent)
     QGroupBox *group_box = new QGroupBox();
     group_box->setLayout(VBOX);
 
-    QPushButton *sign_in = new QPushButton("Sign In", this);
+    QPushButton *sign_in = new QPushButton("Sign Up", this);
     sign_in->setStyleSheet("background-color: #0077CC;"
                            "color: white;"
                            "border: 1px solid #0055AA;"
