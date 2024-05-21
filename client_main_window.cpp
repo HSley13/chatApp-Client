@@ -254,23 +254,23 @@ void client_main_window::on_sign_up()
 
     _insert_secret_question->setStyleSheet("border: 1px solid gray;");
 
-    QString full_name = "First Name : " + _insert_first_name->text() + "\n"
-                                                                       "Last Name : " +
-                        _insert_last_name->text() + "\n"
-                                                    " Phone Number : " +
-                        _insert_phone_number->text() + "\n"
-                                                       "Secret Question : " +
-                        _insert_secret_question->text() + "\n"
-                                                          "Secret Answer : " +
-                        _insert_secret_answer->text() + "\n";
+    QString full_name = QString("First Name : %1\nLast Name : %2\nPhone Number : %3\nSecret Question : %4\nSecret Answer : %5")
+                            .arg(_insert_first_name->text())
+                            .arg(_insert_last_name->text())
+                            .arg(_insert_phone_number->text())
+                            .arg(_insert_secret_question->text())
+                            .arg(_insert_secret_answer->text());
+
+    qDebug() << "Full Name Info: " << full_name;
+
     bool OK;
 
-    QMessageBox review;
-    review.setWindowTitle("Information Review");
-    review.setStyleSheet("color: black;");
-    review.setText(full_name);
-    review.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
-    int result = review.exec();
+    QMessageBox *review = new QMessageBox(this);
+    review->setWindowTitle("Information Review");
+    review->setStyleSheet("color: black;");
+    review->setText(full_name);
+    review->setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
+    int result = review->exec();
 
     if (result == QMessageBox::Cancel)
         return;
