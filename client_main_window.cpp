@@ -261,18 +261,27 @@ void client_main_window::on_sign_up()
                        .arg(_insert_secret_question->text())
                        .arg(_insert_secret_answer->text());
 
-    bool ok;
-    QString confirm_info = QInputDialog::getMultiLineText(this, "Information Review", "Please Review the Information below carefully:", info, &ok);
-    if (ok)
-    {
-        _server_wid = new client_chat_window(_user_phone_number->text(), this);
-        QTimer::singleShot(2000, this, [=]()
-                           { _server_wid->_client->send_sign_up_message(_insert_phone_number->text(), _insert_first_name->text(), _insert_last_name->text(), _insert_password->text(), _insert_secret_question->text(), _insert_secret_answer->text()); });
+    QInputDialog *input_dialog = new QInputDialog(this);
+    input_dialog->setWindowTitle("Information Review");
+    input_dialog->setLabelText("Please Review the Information below carefully:");
+    input_dialog->setTextValue(info);
+    input_dialog->setOption(QInputDialog::UsePlainTextEditForTextInput, true);
 
-        _status_bar->showMessage(QString("Account Created Successfully"), 5000);
-    }
-    else
-        return;
+    connect(input_dialog, &QInputDialog::finished, this, [=](int result)
+            {
+                if (result == QDialog::Accepted)
+                {
+                    if (!_server_wid)
+                    {
+                        _server_wid = new client_chat_window(_user_phone_number->text(), this);
+                        QTimer::singleShot(2000, this, [=]()
+                                           { _server_wid->_client->send_sign_up_message(_insert_phone_number->text(), _insert_first_name->text(), _insert_last_name->text(), _insert_password->text(), _insert_secret_question->text(), _insert_secret_answer->text()); });
+                    }
+                    _status_bar->showMessage(QString("Account Created Successfully"), 5000);
+                }
+                input_dialog->deleteLater(); });
+
+    input_dialog->open();
 }
 
 void client_main_window::on_login_request(QString hashed_password, bool true_or_false, QHash<int, QHash<QString, int>> list_g, QList<QString> online_friends, QHash<int, QVector<QString>> messages, QHash<int, QHash<QString, QByteArray>> binary_datas)
