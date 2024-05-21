@@ -325,8 +325,7 @@ void chat_protocol::load_data(QByteArray data)
         break;
 
     case lookup_friend:
-        in >> _conversation_ID >> _client_name << _true_or_false;
-        qDebug() << "True or False received: " << _true_or_false;
+        in >> _conversation_ID >> _client_name >> _true_or_false;
 
         break;
 
