@@ -71,7 +71,7 @@ public:
 
     QByteArray set_save_data_message(int conversation_ID, QString sender, QString receiver, QString file_name, QString type);
 
-    QByteArray set_sign_in_message(QString phone_number, QString first_name, QString last_name, QString password, QString secret_question, QString secret_answer);
+    QByteArray set_sign_up_message(QString phone_number, QString first_name, QString last_name, QString password, QString secret_question, QString secret_answer);
 
     QByteArray set_login_request_message(QString phone_number, QString password);
 

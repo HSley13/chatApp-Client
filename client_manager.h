@@ -43,7 +43,7 @@ public:
 
     void send_save_audio_message(int conversation_ID, QString sender, QString receiver, QString audio_name, QString type);
 
-    void send_sign_in_message(QString phone_number, QString first_name, QString last_name, QString password, QString secret_question, QString secret_answer);
+    void send_sign_up_message(QString phone_number, QString first_name, QString last_name, QString password, QString secret_question, QString secret_answer);
 
     void send_login_request_message(QString phone_number, QString password);
 

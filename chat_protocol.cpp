@@ -203,7 +203,7 @@ QByteArray chat_protocol::set_save_message_message(int conversation_ID, QString 
     return byte;
 }
 
-QByteArray chat_protocol::set_sign_in_message(QString phone_number, QString first_name, QString last_name, QString password, QString secret_question, QString secret_answer)
+QByteArray chat_protocol::set_sign_up_message(QString phone_number, QString first_name, QString last_name, QString password, QString secret_question, QString secret_answer)
 {
     QByteArray byte;
 

@@ -310,9 +310,9 @@ void client_manager::send_save_conversation_message(int conversation_ID, QString
     _socket->sendBinaryMessage(_protocol->set_save_message_message(conversation_ID, sender, receiver, content));
 }
 
-void client_manager::send_sign_in_message(QString phone_number, QString first_name, QString last_name, QString password, QString secret_question, QString secret_answer)
+void client_manager::send_sign_up_message(QString phone_number, QString first_name, QString last_name, QString password, QString secret_question, QString secret_answer)
 {
-    _socket->sendBinaryMessage(_protocol->set_sign_in_message(phone_number, first_name, last_name, password, secret_question, secret_answer));
+    _socket->sendBinaryMessage(_protocol->set_sign_up_message(phone_number, first_name, last_name, password, secret_question, secret_answer));
 }
 
 void client_manager::send_login_request_message(QString phone_number, QString password)
