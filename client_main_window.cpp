@@ -262,15 +262,12 @@ void client_main_window::on_sign_up()
                        .arg(_insert_secret_answer->text());
 
     bool ok;
-    QString confirm_info = QInputDialog::getMultiLineText(this, "Review Information", "Please review the information below:", info, &ok);
+    QString confirm_info = QInputDialog::getMultiLineText(this, "Information Review", "Please Review the Information below carefully:", info, &ok);
     if (ok)
     {
-        if (!_server_wid)
-        {
-            _server_wid = new client_chat_window(_user_phone_number->text(), this);
-            QTimer::singleShot(2000, this, [=]()
-                               { _server_wid->_client->send_sign_up_message(_insert_phone_number->text(), _insert_first_name->text(), _insert_last_name->text(), _insert_password->text(), _insert_secret_question->text(), _insert_secret_answer->text()); });
-        }
+        _server_wid = new client_chat_window(_user_phone_number->text(), this);
+        QTimer::singleShot(2000, this, [=]()
+                           { _server_wid->_client->send_sign_up_message(_insert_phone_number->text(), _insert_first_name->text(), _insert_last_name->text(), _insert_password->text(), _insert_secret_question->text(), _insert_secret_answer->text()); });
 
         _status_bar->showMessage(QString("Account Created Successfully"), 5000);
     }
@@ -280,7 +277,7 @@ void client_main_window::on_sign_up()
 
 void client_main_window::on_login_request(QString hashed_password, bool true_or_false, QHash<int, QHash<QString, int>> list_g, QList<QString> online_friends, QHash<int, QVector<QString>> messages, QHash<int, QHash<QString, QByteArray>> binary_datas)
 {
-    if (!hashed_password.compare(""))
+    if (hashed_password.isEmpty())
     {
         _user_phone_number->setStyleSheet("border: 1px solid red");
 
@@ -482,7 +479,6 @@ void client_main_window::on_item_clicked(QListWidgetItem *item)
 {
     QWidget *wid = _window_map.value(item->text(), this);
     if (wid)
-
         _stack->setCurrentIndex(_stack->indexOf(wid));
     else
         qDebug() << "client_main_window--> on_item_clicked()--> Widget not found in _window_map for name:" << item->text();
@@ -528,7 +524,7 @@ void client_main_window::on_swipe_right()
 
 void client_main_window::on_lookup_friend_result(int conversation_ID, QString name, bool true_or_false)
 {
-    if (name == "")
+    if (name.isEmpty())
         return;
 
     QIcon online_icon = create_dot_icon(Qt::green, 10);
