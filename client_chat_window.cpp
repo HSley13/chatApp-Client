@@ -53,32 +53,46 @@ void client_chat_window::on_item_deleted(QListWidgetItem *item)
 
 void client_chat_window::on_init_receiving_file(QString file_name, qint64 file_size)
 {
-    QString message = QString("-------- %1 --------\n  %2 wants to send a File. Willing to accept it or not?\n File Name: %3\n File Size: %4 bytes").arg(my_name(), "Server").arg(file_name).arg(file_size);
+    QString message = QString("-------- %1 --------\n  %2 wants to send a File. Willing to accept it or not?\n File Name: %3\n File Size: %4 bytes")
+                          .arg(my_name(), "Server")
+                          .arg(file_name)
+                          .arg(file_size);
 
-    QMessageBox::StandardButton result = QMessageBox::question(this, "Receiving File", message);
+    QInputDialog *input_dialog = new QInputDialog(this);
+    input_dialog->setWindowTitle("Receiving file");
+    input_dialog->setTextValue(message);
 
-    if (result == QMessageBox::Yes)
-    {
-        _client->send_accept_file();
-        emit data_received_sent(_window_name);
-    }
-    else
-        _client->send_reject_file();
+    connect(input_dialog, &QInputDialog::finished, this, [=](int result)
+            {
+                if(result == QDialog::Accepted)
+                {
+                    _client->send_accept_file();
+                    emit data_received_sent(_window_name);
+                }
+                else
+                    _client->send_reject_file(); });
 }
 
 void client_chat_window::on_init_receiving_file_client(QString sender, QString ID, QString file_name, qint64 file_size)
 {
-    QString message = QString("-------- %1 --------\n  %2 wants to send a File. Willing to accept it or not?\n File Name: %3\n File Size: %4 bytes").arg(my_name(), sender).arg(file_name).arg(file_size);
+    QString message = QString("-------- %1 --------\n  %2 wants to send a File. Willing to accept it or not?\n File Name: %3\n File Size: %4 bytes")
+                          .arg(my_name(), "Server")
+                          .arg(file_name)
+                          .arg(file_size);
 
-    QMessageBox::StandardButton result = QMessageBox::question(this, "Receiving File", message);
+    QInputDialog *input_dialog = new QInputDialog(this);
+    input_dialog->setWindowTitle("Receiving file");
+    input_dialog->setTextValue(message);
 
-    if (result == QMessageBox::Yes)
-    {
-        _client->send_accept_file_client(ID);
-        emit data_received_sent(_window_name);
-    }
-    else
-        _client->send_reject_file_client(my_name(), ID);
+    connect(input_dialog, &QInputDialog::finished, this, [=](int result)
+            {
+                if(result == QDialog::Accepted)
+                {
+                    _client->send_accept_file_client(ID);
+                    emit data_received_sent(_window_name);
+                }
+                else
+                    _client->send_reject_file_client(my_name(), ID); });
 }
 
 void client_chat_window::on_file_saved(QString path)
@@ -166,7 +180,9 @@ void client_chat_window::on_duration_changed(qint64 duration)
     if (_recorder->error() != QMediaRecorder::NoError || duration < 1000)
         return;
 
-    QString duration_str = QString("Recording... %1:%2").arg(duration / 60000, 2, 10, QChar('0')).arg((duration % 60000) / 1000, 2, 10, QChar('0'));
+    QString duration_str = QString("Recording... %1:%2")
+                               .arg(duration / 60000, 2, 10, QChar('0'))
+                               .arg((duration % 60000) / 1000, 2, 10, QChar('0'));
 
     _duration_label->setText(duration_str);
 }

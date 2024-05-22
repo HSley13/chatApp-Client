@@ -272,7 +272,6 @@ void client_main_window::on_sign_up()
     input_dialog->setWindowTitle("Information Review");
     input_dialog->setLabelText("Please Review the Information below carefully:");
     input_dialog->setTextValue(info);
-    input_dialog->setOption(QInputDialog::UsePlainTextEditForTextInput, true);
 
     connect(input_dialog, &QInputDialog::finished, this, [=](int result)
             {
