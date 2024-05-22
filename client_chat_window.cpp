@@ -125,17 +125,6 @@ void client_chat_window::ask_microphone_permission()
 
         break;
     }
-
-#if defined(Q_OS_ANDROID)
-    QtAndroid::PermissionResult r = QtAndroid::checkPermission("android.permission.READ_EXTERNAL_STORAGE");
-    if (r == QtAndroid::PermissionResult::Denied)
-    {
-        QtAndroid::requestPermissionsSync(QStringList() << "android.permission.READ_EXTERNAL_STORAGE");
-        r = QtAndroid::checkPermission("android.permission.READ_EXTERNAL_STORAGE");
-        if (r == QtAndroid::PermissionResult::Denied)
-            return;
-    }
-#endif
 }
 
 void client_chat_window::start_recording()
@@ -292,57 +281,45 @@ void client_chat_window::message_received(QString message)
 
 void client_chat_window::send_file()
 {
-#ifdef Q_OS_ANDROID
-    QString file_name = QFileDialog::getOpenFileName(this, tr("Select a File"), QStandardPaths::writableLocation(QStandardPaths::DownloadLocation));
-#else
-    QString file_name = QFileDialog::getOpenFileName(this, tr("Select a File"), "/home");
-#endif
-
-    if (!file_name.isEmpty())
+    std::function<void(const QString &, const QByteArray &)> file_content_ready = [this](const QString &file_name, const QByteArray &file_content)
     {
-        _client->send_init_sending_file(file_name);
+        if (!file_name.isEmpty())
+        {
+            _client->send_init_sending_file_client(my_name(), _destinator, file_name);
 
-        connect(_client, &client_manager::file_accepted, this, [=]()
-                { add_file(QFileInfo(file_name).absoluteFilePath(), true); });
+            connect(_client, &client_manager::file_accepted_client, this, [=]()
+                    { add_file(QFileInfo(file_name).absoluteFilePath(), true); });
+        }
+    };
 
-        file_name.clear();
-    }
+    QFileDialog::getOpenFileContent("All Files (*)", file_content_ready);
 }
 
 void client_chat_window::send_file_client()
 {
-
-#ifdef Q_OS_ANDROID
-    QString file_name = QFileDialog::getOpenFileName(this, tr("Select a File"), QStandardPaths::writableLocation(QStandardPaths::DownloadLocation));
-#else
-    QString file_name = QFileDialog::getOpenFileName(this, tr("Select a File"), "/home");
-#endif
-
-    if (!file_name.isEmpty())
+    std::function<void(const QString &, const QByteArray &)> file_content_ready = [this](const QString &file_name, const QByteArray &file_content)
     {
-        _client->send_init_sending_file_client(my_name(), _destinator, file_name);
+        if (!file_name.isEmpty())
+        {
+            _client->send_init_sending_file_client(my_name(), _destinator, file_name);
 
-        connect(_client, &client_manager::file_accepted_client, this, [=]()
-                { add_file(QFileInfo(file_name).absoluteFilePath(), true);
+            connect(_client, &client_manager::file_accepted_client, this, [=]()
+                    { add_file(QFileInfo(file_name).absoluteFilePath(), true);
                     _client->send_save_data_message(_conversation_ID, _client->_my_ID, _destinator, "file"); });
+        }
+    };
 
-        file_name.clear();
-    }
+    QFileDialog::getOpenFileContent("All Files (*)", file_content_ready);
 }
 
 void client_chat_window::folder()
 {
-#ifdef Q_OS_ANDROID
-    QString selected_file_path = QFileDialog::getExistingDirectory(this, tr("Open Directory"), QStandardPaths::writableLocation(QStandardPaths::DownloadLocation));
-#else
     QString executable_directory = QApplication::applicationDirPath();
     QString full_client_directory = QDir(executable_directory).filePath(_window_name);
 
-    QString selected_file_path = QFileDialog::getExistingDirectory(this, tr("Open Directory"), full_client_directory);
-#endif
+    QString selected_file_path = QFileDialog::getOpenFileName(this, "Open Directory", full_client_directory);
 
-    if (!selected_file_path.isEmpty())
-        QDesktopServices::openUrl(QUrl::fromLocalFile(selected_file_path));
+    QDesktopServices::openUrl(QUrl::fromLocalFile(selected_file_path));
 }
 
 void client_chat_window::set_up_window()
