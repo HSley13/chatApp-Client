@@ -301,9 +301,9 @@ void client_chat_window::send_file()
     {
         if (!file_name.isEmpty())
         {
-            _client->send_init_sending_file_client(my_name(), _destinator, file_name);
+            _client->send_init_sending_file(file_name);
 
-            connect(_client, &client_manager::file_accepted_client, this, [=]()
+            connect(_client, &client_manager::file_accepted, this, [=]()
                     { add_file(QFileInfo(file_name).absoluteFilePath(), true); });
         }
     };

@@ -1,0 +1,188 @@
+
+---
+events:
+  -
+    kind: "message-v1"
+    backtrace:
+      - "/opt/homebrew/Cellar/cmake/3.29.3/share/cmake/Modules/CMakeDetermineSystem.cmake:200 (message)"
+      - "CMakeLists.txt:2 (project)"
+    message: |
+      The target system is: Emscripten - 1 - x86
+      The host system is: Darwin - 23.4.0 - arm64
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/opt/homebrew/Cellar/cmake/3.29.3/share/cmake/Modules/Internal/CheckSourceCompiles.cmake:101 (try_compile)"
+      - "/opt/homebrew/Cellar/cmake/3.29.3/share/cmake/Modules/CheckCXXSourceCompiles.cmake:52 (cmake_check_source_compiles)"
+      - "/Users/test/qt-wasm/qtbase/lib/cmake/Qt6/FindWrapAtomic.cmake:36 (check_cxx_source_compiles)"
+      - "/opt/homebrew/Cellar/cmake/3.29.3/share/cmake/Modules/CMakeFindDependencyMacro.cmake:76 (find_package)"
+      - "/Users/test/qt-wasm/qtbase/lib/cmake/Qt6/QtPublicDependencyHelpers.cmake:36 (find_dependency)"
+      - "/Users/test/qt-wasm/qtbase/lib/cmake/Qt6Core/Qt6CoreDependencies.cmake:33 (_qt_internal_find_third_party_dependencies)"
+      - "/Users/test/qt-wasm/qtbase/lib/cmake/Qt6Core/Qt6CoreConfig.cmake:45 (include)"
+      - "/Users/test/qt-wasm/qtbase/lib/cmake/Qt6/Qt6Config.cmake:167 (find_package)"
+      - "CMakeLists.txt:7 (find_package)"
+    checks:
+      - "Performing Test HAVE_STDATOMIC"
+    directories:
+      source: "/Users/test/Documents/client_app/CMakeFiles/CMakeScratch/TryCompile-YlLCkq"
+      binary: "/Users/test/Documents/client_app/CMakeFiles/CMakeScratch/TryCompile-YlLCkq"
+    cmakeVariables:
+      CMAKE_CXX_COMPILER_CLANG_SCAN_DEPS: "CMAKE_CXX_COMPILER_CLANG_SCAN_DEPS-NOTFOUND"
+      CMAKE_CXX_FLAGS: ""
+      CMAKE_CXX_FLAGS_DEBUG: "-g"
+      CMAKE_EXE_LINKER_FLAGS: ""
+      CMAKE_MODULE_PATH: "/Users/test/qt-wasm/qtbase/lib/cmake/Qt6/platforms;/Users/test/qt-wasm/qtbase/lib/cmake/Qt6/platforms;/Users/test/Documents/emsdk/upstream/emscripten/cmake/Modules;/Users/test/Documents/emsdk/upstream/emscripten/cmake/Modules;/Users/test/Documents/emsdk/upstream/emscripten/cmake/Modules;/Users/test/Documents/emsdk/upstream/emscripten/cmake/Modules;/Users/test/qt-wasm/qtbase/lib/cmake/Qt6;/Users/test/qt-wasm/qtbase/lib/cmake/Qt6/3rdparty/extra-cmake-modules/find-modules;/Users/test/qt-wasm/qtbase/lib/cmake/Qt6/3rdparty/kwin"
+      QT_ADDITIONAL_PACKAGES_PREFIX_PATH: ""
+      QT_CHAINLOAD_TOOLCHAIN_FILE: ""
+      QT_TOOLCHAIN_INCLUDE_FILE: ""
+      QT_TOOLCHAIN_RELOCATABLE_CMAKE_DIR: "/Users/test/qt-wasm/qtbase/lib/cmake"
+      QT_TOOLCHAIN_RELOCATABLE_PREFIX: ""
+    buildResult:
+      variable: "HAVE_STDATOMIC"
+      cached: true
+      stdout: |
+        Change Dir: '/Users/test/Documents/client_app/CMakeFiles/CMakeScratch/TryCompile-YlLCkq'
+        
+        Run Build Command(s): /opt/homebrew/Cellar/cmake/3.29.3/bin/cmake -E env VERBOSE=1 /usr/bin/make -f Makefile cmTC_7f056/fast
+        /Applications/Xcode.app/Contents/Developer/usr/bin/make  -f CMakeFiles/cmTC_7f056.dir/build.make CMakeFiles/cmTC_7f056.dir/build
+        Building CXX object CMakeFiles/cmTC_7f056.dir/src.cxx.o
+        /Users/test/Documents/emsdk/upstream/emscripten/em++ -DHAVE_STDATOMIC  -std=gnu++17 -MD -MT CMakeFiles/cmTC_7f056.dir/src.cxx.o -MF CMakeFiles/cmTC_7f056.dir/src.cxx.o.d -o CMakeFiles/cmTC_7f056.dir/src.cxx.o -c /Users/test/Documents/client_app/CMakeFiles/CMakeScratch/TryCompile-YlLCkq/src.cxx
+        Linking CXX executable cmTC_7f056.js
+        /opt/homebrew/Cellar/cmake/3.29.3/bin/cmake -E cmake_link_script CMakeFiles/cmTC_7f056.dir/link.txt --verbose=1
+        /Users/test/Documents/emsdk/upstream/emscripten/em++ @CMakeFiles/cmTC_7f056.dir/objects1.rsp -o cmTC_7f056.js
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/opt/homebrew/Cellar/cmake/3.29.3/share/cmake/Modules/Internal/CheckSourceCompiles.cmake:101 (try_compile)"
+      - "/opt/homebrew/Cellar/cmake/3.29.3/share/cmake/Modules/CheckCXXSourceCompiles.cmake:52 (cmake_check_source_compiles)"
+      - "/Users/test/qt-wasm/qtbase/lib/cmake/Qt6/FindWrapRt.cmake:23 (check_cxx_source_compiles)"
+      - "/opt/homebrew/Cellar/cmake/3.29.3/share/cmake/Modules/CMakeFindDependencyMacro.cmake:76 (find_package)"
+      - "/Users/test/qt-wasm/qtbase/lib/cmake/Qt6/QtPublicDependencyHelpers.cmake:36 (find_dependency)"
+      - "/Users/test/qt-wasm/qtbase/lib/cmake/Qt6Core/Qt6CoreDependencies.cmake:33 (_qt_internal_find_third_party_dependencies)"
+      - "/Users/test/qt-wasm/qtbase/lib/cmake/Qt6Core/Qt6CoreConfig.cmake:45 (include)"
+      - "/Users/test/qt-wasm/qtbase/lib/cmake/Qt6/Qt6Config.cmake:167 (find_package)"
+      - "CMakeLists.txt:7 (find_package)"
+    checks:
+      - "Performing Test HAVE_GETTIME"
+    directories:
+      source: "/Users/test/Documents/client_app/CMakeFiles/CMakeScratch/TryCompile-mrIXCD"
+      binary: "/Users/test/Documents/client_app/CMakeFiles/CMakeScratch/TryCompile-mrIXCD"
+    cmakeVariables:
+      CMAKE_CXX_COMPILER_CLANG_SCAN_DEPS: "CMAKE_CXX_COMPILER_CLANG_SCAN_DEPS-NOTFOUND"
+      CMAKE_CXX_FLAGS: ""
+      CMAKE_CXX_FLAGS_DEBUG: "-g"
+      CMAKE_EXE_LINKER_FLAGS: ""
+      CMAKE_MODULE_PATH: "/Users/test/qt-wasm/qtbase/lib/cmake/Qt6/platforms;/Users/test/qt-wasm/qtbase/lib/cmake/Qt6/platforms;/Users/test/Documents/emsdk/upstream/emscripten/cmake/Modules;/Users/test/Documents/emsdk/upstream/emscripten/cmake/Modules;/Users/test/Documents/emsdk/upstream/emscripten/cmake/Modules;/Users/test/Documents/emsdk/upstream/emscripten/cmake/Modules;/Users/test/qt-wasm/qtbase/lib/cmake/Qt6;/Users/test/qt-wasm/qtbase/lib/cmake/Qt6/3rdparty/extra-cmake-modules/find-modules;/Users/test/qt-wasm/qtbase/lib/cmake/Qt6/3rdparty/kwin"
+      QT_ADDITIONAL_PACKAGES_PREFIX_PATH: ""
+      QT_CHAINLOAD_TOOLCHAIN_FILE: ""
+      QT_TOOLCHAIN_INCLUDE_FILE: ""
+      QT_TOOLCHAIN_RELOCATABLE_CMAKE_DIR: "/Users/test/qt-wasm/qtbase/lib/cmake"
+      QT_TOOLCHAIN_RELOCATABLE_PREFIX: ""
+    buildResult:
+      variable: "HAVE_GETTIME"
+      cached: true
+      stdout: |
+        Change Dir: '/Users/test/Documents/client_app/CMakeFiles/CMakeScratch/TryCompile-mrIXCD'
+        
+        Run Build Command(s): /opt/homebrew/Cellar/cmake/3.29.3/bin/cmake -E env VERBOSE=1 /usr/bin/make -f Makefile cmTC_8ccb4/fast
+        /Applications/Xcode.app/Contents/Developer/usr/bin/make  -f CMakeFiles/cmTC_8ccb4.dir/build.make CMakeFiles/cmTC_8ccb4.dir/build
+        Building CXX object CMakeFiles/cmTC_8ccb4.dir/src.cxx.o
+        /Users/test/Documents/emsdk/upstream/emscripten/em++ -DHAVE_GETTIME  -std=gnu++17 -MD -MT CMakeFiles/cmTC_8ccb4.dir/src.cxx.o -MF CMakeFiles/cmTC_8ccb4.dir/src.cxx.o.d -o CMakeFiles/cmTC_8ccb4.dir/src.cxx.o -c /Users/test/Documents/client_app/CMakeFiles/CMakeScratch/TryCompile-mrIXCD/src.cxx
+        Linking CXX executable cmTC_8ccb4.js
+        /opt/homebrew/Cellar/cmake/3.29.3/bin/cmake -E cmake_link_script CMakeFiles/cmTC_8ccb4.dir/link.txt --verbose=1
+        /Users/test/Documents/emsdk/upstream/emscripten/em++ @CMakeFiles/cmTC_8ccb4.dir/objects1.rsp -o cmTC_8ccb4.js
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/opt/homebrew/Cellar/cmake/3.29.3/share/cmake/Modules/Internal/CheckSourceCompiles.cmake:101 (try_compile)"
+      - "/opt/homebrew/Cellar/cmake/3.29.3/share/cmake/Modules/CheckCXXSourceCompiles.cmake:52 (cmake_check_source_compiles)"
+      - "/Users/test/qt-wasm/qtbase/lib/cmake/Qt6/FindWrapRt.cmake:34 (check_cxx_source_compiles)"
+      - "/opt/homebrew/Cellar/cmake/3.29.3/share/cmake/Modules/CMakeFindDependencyMacro.cmake:76 (find_package)"
+      - "/Users/test/qt-wasm/qtbase/lib/cmake/Qt6/QtPublicDependencyHelpers.cmake:36 (find_dependency)"
+      - "/Users/test/qt-wasm/qtbase/lib/cmake/Qt6Core/Qt6CoreDependencies.cmake:33 (_qt_internal_find_third_party_dependencies)"
+      - "/Users/test/qt-wasm/qtbase/lib/cmake/Qt6Core/Qt6CoreConfig.cmake:45 (include)"
+      - "/Users/test/qt-wasm/qtbase/lib/cmake/Qt6/Qt6Config.cmake:167 (find_package)"
+      - "CMakeLists.txt:7 (find_package)"
+    checks:
+      - "Performing Test HAVE_SHM_OPEN_SHM_UNLINK"
+    directories:
+      source: "/Users/test/Documents/client_app/CMakeFiles/CMakeScratch/TryCompile-YOdfax"
+      binary: "/Users/test/Documents/client_app/CMakeFiles/CMakeScratch/TryCompile-YOdfax"
+    cmakeVariables:
+      CMAKE_CXX_COMPILER_CLANG_SCAN_DEPS: "CMAKE_CXX_COMPILER_CLANG_SCAN_DEPS-NOTFOUND"
+      CMAKE_CXX_FLAGS: ""
+      CMAKE_CXX_FLAGS_DEBUG: "-g"
+      CMAKE_EXE_LINKER_FLAGS: ""
+      CMAKE_MODULE_PATH: "/Users/test/qt-wasm/qtbase/lib/cmake/Qt6/platforms;/Users/test/qt-wasm/qtbase/lib/cmake/Qt6/platforms;/Users/test/Documents/emsdk/upstream/emscripten/cmake/Modules;/Users/test/Documents/emsdk/upstream/emscripten/cmake/Modules;/Users/test/Documents/emsdk/upstream/emscripten/cmake/Modules;/Users/test/Documents/emsdk/upstream/emscripten/cmake/Modules;/Users/test/qt-wasm/qtbase/lib/cmake/Qt6;/Users/test/qt-wasm/qtbase/lib/cmake/Qt6/3rdparty/extra-cmake-modules/find-modules;/Users/test/qt-wasm/qtbase/lib/cmake/Qt6/3rdparty/kwin"
+      QT_ADDITIONAL_PACKAGES_PREFIX_PATH: ""
+      QT_CHAINLOAD_TOOLCHAIN_FILE: ""
+      QT_TOOLCHAIN_INCLUDE_FILE: ""
+      QT_TOOLCHAIN_RELOCATABLE_CMAKE_DIR: "/Users/test/qt-wasm/qtbase/lib/cmake"
+      QT_TOOLCHAIN_RELOCATABLE_PREFIX: ""
+    buildResult:
+      variable: "HAVE_SHM_OPEN_SHM_UNLINK"
+      cached: true
+      stdout: |
+        Change Dir: '/Users/test/Documents/client_app/CMakeFiles/CMakeScratch/TryCompile-YOdfax'
+        
+        Run Build Command(s): /opt/homebrew/Cellar/cmake/3.29.3/bin/cmake -E env VERBOSE=1 /usr/bin/make -f Makefile cmTC_0f558/fast
+        /Applications/Xcode.app/Contents/Developer/usr/bin/make  -f CMakeFiles/cmTC_0f558.dir/build.make CMakeFiles/cmTC_0f558.dir/build
+        Building CXX object CMakeFiles/cmTC_0f558.dir/src.cxx.o
+        /Users/test/Documents/emsdk/upstream/emscripten/em++ -DHAVE_SHM_OPEN_SHM_UNLINK  -std=gnu++17 -MD -MT CMakeFiles/cmTC_0f558.dir/src.cxx.o -MF CMakeFiles/cmTC_0f558.dir/src.cxx.o.d -o CMakeFiles/cmTC_0f558.dir/src.cxx.o -c /Users/test/Documents/client_app/CMakeFiles/CMakeScratch/TryCompile-YOdfax/src.cxx
+        Linking CXX executable cmTC_0f558.js
+        /opt/homebrew/Cellar/cmake/3.29.3/bin/cmake -E cmake_link_script CMakeFiles/cmTC_0f558.dir/link.txt --verbose=1
+        /Users/test/Documents/emsdk/upstream/emscripten/em++ @CMakeFiles/cmTC_0f558.dir/objects1.rsp -o cmTC_0f558.js
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/opt/homebrew/Cellar/cmake/3.29.3/share/cmake/Modules/Internal/CheckSourceCompiles.cmake:101 (try_compile)"
+      - "/opt/homebrew/Cellar/cmake/3.29.3/share/cmake/Modules/CheckCXXSourceCompiles.cmake:52 (cmake_check_source_compiles)"
+      - "/Users/test/qt-wasm/qtbase/lib/cmake/Qt6/3rdparty/extra-cmake-modules/find-modules/FindEGL.cmake:127 (check_cxx_source_compiles)"
+      - "/opt/homebrew/Cellar/cmake/3.29.3/share/cmake/Modules/CMakeFindDependencyMacro.cmake:76 (find_package)"
+      - "/Users/test/qt-wasm/qtbase/lib/cmake/Qt6/QtPublicDependencyHelpers.cmake:36 (find_dependency)"
+      - "/Users/test/qt-wasm/qtbase/lib/cmake/Qt6Gui/Qt6GuiDependencies.cmake:33 (_qt_internal_find_third_party_dependencies)"
+      - "/Users/test/qt-wasm/qtbase/lib/cmake/Qt6Gui/Qt6GuiConfig.cmake:43 (include)"
+      - "/opt/homebrew/Cellar/cmake/3.29.3/share/cmake/Modules/CMakeFindDependencyMacro.cmake:76 (find_package)"
+      - "/Users/test/qt-wasm/qtbase/lib/cmake/Qt6/QtPublicDependencyHelpers.cmake:111 (find_dependency)"
+      - "/Users/test/qt-wasm/qtbase/lib/cmake/Qt6Widgets/Qt6WidgetsDependencies.cmake:42 (_qt_internal_find_qt_dependencies)"
+      - "/Users/test/qt-wasm/qtbase/lib/cmake/Qt6Widgets/Qt6WidgetsConfig.cmake:43 (include)"
+      - "/Users/test/qt-wasm/qtbase/lib/cmake/Qt6/Qt6Config.cmake:167 (find_package)"
+      - "CMakeLists.txt:7 (find_package)"
+    checks:
+      - "Performing Test HAVE_EGL"
+    directories:
+      source: "/Users/test/Documents/client_app/CMakeFiles/CMakeScratch/TryCompile-svhx25"
+      binary: "/Users/test/Documents/client_app/CMakeFiles/CMakeScratch/TryCompile-svhx25"
+    cmakeVariables:
+      CMAKE_CXX_COMPILER_CLANG_SCAN_DEPS: "CMAKE_CXX_COMPILER_CLANG_SCAN_DEPS-NOTFOUND"
+      CMAKE_CXX_FLAGS: ""
+      CMAKE_CXX_FLAGS_DEBUG: "-g"
+      CMAKE_EXE_LINKER_FLAGS: ""
+      CMAKE_MODULE_PATH: "/Users/test/qt-wasm/qtbase/lib/cmake/Qt6/platforms;/Users/test/qt-wasm/qtbase/lib/cmake/Qt6/platforms;/Users/test/Documents/emsdk/upstream/emscripten/cmake/Modules;/Users/test/Documents/emsdk/upstream/emscripten/cmake/Modules;/Users/test/Documents/emsdk/upstream/emscripten/cmake/Modules;/Users/test/Documents/emsdk/upstream/emscripten/cmake/Modules;/Users/test/qt-wasm/qtbase/lib/cmake/Qt6;/Users/test/qt-wasm/qtbase/lib/cmake/Qt6/3rdparty/extra-cmake-modules/find-modules;/Users/test/qt-wasm/qtbase/lib/cmake/Qt6/3rdparty/kwin"
+      QT_ADDITIONAL_PACKAGES_PREFIX_PATH: ""
+      QT_CHAINLOAD_TOOLCHAIN_FILE: ""
+      QT_TOOLCHAIN_INCLUDE_FILE: ""
+      QT_TOOLCHAIN_RELOCATABLE_CMAKE_DIR: "/Users/test/qt-wasm/qtbase/lib/cmake"
+      QT_TOOLCHAIN_RELOCATABLE_PREFIX: ""
+    buildResult:
+      variable: "HAVE_EGL"
+      cached: true
+      stdout: |
+        Change Dir: '/Users/test/Documents/client_app/CMakeFiles/CMakeScratch/TryCompile-svhx25'
+        
+        Run Build Command(s): /opt/homebrew/Cellar/cmake/3.29.3/bin/cmake -E env VERBOSE=1 /usr/bin/make -f Makefile cmTC_9f8d4/fast
+        /Applications/Xcode.app/Contents/Developer/usr/bin/make  -f CMakeFiles/cmTC_9f8d4.dir/build.make CMakeFiles/cmTC_9f8d4.dir/build
+        Building CXX object CMakeFiles/cmTC_9f8d4.dir/src.cxx.o
+        /Users/test/Documents/emsdk/upstream/emscripten/em++ -DHAVE_EGL  -std=gnu++17 -MD -MT CMakeFiles/cmTC_9f8d4.dir/src.cxx.o -MF CMakeFiles/cmTC_9f8d4.dir/src.cxx.o.d -o CMakeFiles/cmTC_9f8d4.dir/src.cxx.o -c /Users/test/Documents/client_app/CMakeFiles/CMakeScratch/TryCompile-svhx25/src.cxx
+        Linking CXX executable cmTC_9f8d4.js
+        /opt/homebrew/Cellar/cmake/3.29.3/bin/cmake -E cmake_link_script CMakeFiles/cmTC_9f8d4.dir/link.txt --verbose=1
+        /Users/test/Documents/emsdk/upstream/emscripten/em++ @CMakeFiles/cmTC_9f8d4.dir/objects1.rsp -o cmTC_9f8d4.js
+        
+      exitCode: 0
+...
