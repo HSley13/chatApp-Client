@@ -125,6 +125,17 @@ void client_chat_window::ask_microphone_permission()
 
         break;
     }
+
+#if defined(Q_OS_ANDROID)
+    QtAndroid::PermissionResult r = QtAndroid::checkPermission("android.permission.READ_EXTERNAL_STORAGE");
+    if (r == QtAndroid::PermissionResult::Denied)
+    {
+        QtAndroid::requestPermissionsSync(QStringList() << "android.permission.READ_EXTERNAL_STORAGE");
+        r = QtAndroid::checkPermission("android.permission.READ_EXTERNAL_STORAGE");
+        if (r == QtAndroid::PermissionResult::Denied)
+            return;
+    }
+#endif
 }
 
 void client_chat_window::start_recording()
@@ -281,7 +292,12 @@ void client_chat_window::message_received(QString message)
 
 void client_chat_window::send_file()
 {
-    QString file_name = QFileDialog::getOpenFileName(this, "Select a File", "/home");
+#ifdef Q_OS_ANDROID
+    QString file_name = QFileDialog::getOpenFileName(this, tr("Select a File"), QStandardPaths::writableLocation(QStandardPaths::DownloadLocation));
+#else
+    QString file_name = QFileDialog::getOpenFileName(this, tr("Select a File"), "/home");
+#endif
+
     if (!file_name.isEmpty())
     {
         _client->send_init_sending_file(file_name);
@@ -295,7 +311,13 @@ void client_chat_window::send_file()
 
 void client_chat_window::send_file_client()
 {
-    QString file_name = QFileDialog::getOpenFileName(this, "Select a File", "/home");
+
+#ifdef Q_OS_ANDROID
+    QString file_name = QFileDialog::getOpenFileName(this, tr("Select a File"), QStandardPaths::writableLocation(QStandardPaths::DownloadLocation));
+#else
+    QString file_name = QFileDialog::getOpenFileName(this, tr("Select a File"), "/home");
+#endif
+
     if (!file_name.isEmpty())
     {
         _client->send_init_sending_file_client(my_name(), _destinator, file_name);
@@ -310,12 +332,17 @@ void client_chat_window::send_file_client()
 
 void client_chat_window::folder()
 {
+#ifdef Q_OS_ANDROID
+    QString selected_file_path = QFileDialog::getExistingDirectory(this, tr("Open Directory"), QStandardPaths::writableLocation(QStandardPaths::DownloadLocation));
+#else
     QString executable_directory = QApplication::applicationDirPath();
     QString full_client_directory = QDir(executable_directory).filePath(_window_name);
 
-    QString selected_file_path = QFileDialog::getOpenFileName(this, "Open Directory", full_client_directory);
+    QString selected_file_path = QFileDialog::getExistingDirectory(this, tr("Open Directory"), full_client_directory);
+#endif
 
-    QDesktopServices::openUrl(QUrl::fromLocalFile(selected_file_path));
+    if (!selected_file_path.isEmpty())
+        QDesktopServices::openUrl(QUrl::fromLocalFile(selected_file_path));
 }
 
 void client_chat_window::set_up_window()
