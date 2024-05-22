@@ -314,10 +314,15 @@ void client_chat_window::send_file_client()
 
 void client_chat_window::folder()
 {
+    QString selected_file_path;
+
+#ifdef Q_OS_WASM
+    selected_file_path = QFileDialog::getOpenFileName(this, "Open Directory", QDir::homePath());
+#else
     QString executable_directory = QApplication::applicationDirPath();
     QString full_client_directory = QDir(executable_directory).filePath(_window_name);
-
-    QString selected_file_path = QFileDialog::getOpenFileName(this, "Open Directory", full_client_directory);
+    selected_file_path = QFileDialog::getOpenFileName(this, "Open Directory", full_client_directory);
+#endif
 
     QDesktopServices::openUrl(QUrl::fromLocalFile(selected_file_path));
 }

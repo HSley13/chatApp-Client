@@ -242,6 +242,9 @@ void client_manager::save_file(QString date_time)
 
 void client_manager::save_file_client(QString sender, QString file_name, QByteArray file_data, QString date_time)
 {
+#ifdef Q_OS_WASM
+    QFileDialog::saveFileContent(file_data, file_name);
+#else
     QDir dir;
     if (!sender.isEmpty() && !sender.isNull())
         dir.mkdir(sender);
@@ -258,6 +261,7 @@ void client_manager::save_file_client(QString sender, QString file_name, QByteAr
     }
     else
         qDebug() << "client_manager ---> save_file_client() ---> Couldn't open the file to write to it";
+#endif
 }
 
 void client_manager::send_save_data_message(int conversation_ID, QString sender, QString receiver, QString type)

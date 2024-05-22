@@ -1,0 +1,50 @@
+[
+{
+  "directory": "/Users/test/Documents/client_app/build",
+  "command": "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++ -DQT_CORE_LIB -DQT_GUI_LIB -DQT_MULTIMEDIA_LIB -DQT_NETWORK_LIB -DQT_WEBSOCKETS_LIB -DQT_WIDGETS_LIB -isystem /Users/test/Documents/client_app/build/client_autogen/include -isystem /opt/homebrew/lib/QtCore.framework/Headers -iframework /opt/homebrew/lib -isystem /opt/homebrew/share/qt/mkspecs/macx-clang -isystem /opt/homebrew/include -isystem /opt/homebrew/lib/QtWidgets.framework/Headers -isystem /opt/homebrew/lib/QtGui.framework/Headers -isystem /opt/homebrew/lib/QtMultimedia.framework/Headers -isystem /opt/homebrew/lib/QtNetwork.framework/Headers -isystem /opt/homebrew/lib/QtWebSockets.framework/Headers -g -std=gnu++17 -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk -mmacosx-version-min=14.4 -o CMakeFiles/client.dir/client_autogen/mocs_compilation.cpp.o -c /Users/test/Documents/client_app/build/client_autogen/mocs_compilation.cpp",
+  "file": "/Users/test/Documents/client_app/build/client_autogen/mocs_compilation.cpp",
+  "output": "CMakeFiles/client.dir/client_autogen/mocs_compilation.cpp.o"
+},
+{
+  "directory": "/Users/test/Documents/client_app/build",
+  "command": "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++ -DQT_CORE_LIB -DQT_GUI_LIB -DQT_MULTIMEDIA_LIB -DQT_NETWORK_LIB -DQT_WEBSOCKETS_LIB -DQT_WIDGETS_LIB -isystem /Users/test/Documents/client_app/build/client_autogen/include -isystem /opt/homebrew/lib/QtCore.framework/Headers -iframework /opt/homebrew/lib -isystem /opt/homebrew/share/qt/mkspecs/macx-clang -isystem /opt/homebrew/include -isystem /opt/homebrew/lib/QtWidgets.framework/Headers -isystem /opt/homebrew/lib/QtGui.framework/Headers -isystem /opt/homebrew/lib/QtMultimedia.framework/Headers -isystem /opt/homebrew/lib/QtNetwork.framework/Headers -isystem /opt/homebrew/lib/QtWebSockets.framework/Headers -g -std=gnu++17 -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk -mmacosx-version-min=14.4 -o CMakeFiles/client.dir/client_main.cpp.o -c /Users/test/Documents/client_app/client_main.cpp",
+  "file": "/Users/test/Documents/client_app/client_main.cpp",
+  "output": "CMakeFiles/client.dir/client_main.cpp.o"
+},
+{
+  "directory": "/Users/test/Documents/client_app/build",
+  "command": "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++ -DQT_CORE_LIB -DQT_GUI_LIB -DQT_MULTIMEDIA_LIB -DQT_NETWORK_LIB -DQT_WEBSOCKETS_LIB -DQT_WIDGETS_LIB -isystem /Users/test/Documents/client_app/build/client_autogen/include -isystem /opt/homebrew/lib/QtCore.framework/Headers -iframework /opt/homebrew/lib -isystem /opt/homebrew/share/qt/mkspecs/macx-clang -isystem /opt/homebrew/include -isystem /opt/homebrew/lib/QtWidgets.framework/Headers -isystem /opt/homebrew/lib/QtGui.framework/Headers -isystem /opt/homebrew/lib/QtMultimedia.framework/Headers -isystem /opt/homebrew/lib/QtNetwork.framework/Headers -isystem /opt/homebrew/lib/QtWebSockets.framework/Headers -g -std=gnu++17 -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk -mmacosx-version-min=14.4 -o CMakeFiles/client.dir/client_main_window.cpp.o -c /Users/test/Documents/client_app/client_main_window.cpp",
+  "file": "/Users/test/Documents/client_app/client_main_window.cpp",
+  "output": "CMakeFiles/client.dir/client_main_window.cpp.o"
+},
+{
+  "directory": "/Users/test/Documents/client_app/build",
+  "command": "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++ -DQT_CORE_LIB -DQT_GUI_LIB -DQT_MULTIMEDIA_LIB -DQT_NETWORK_LIB -DQT_WEBSOCKETS_LIB -DQT_WIDGETS_LIB -isystem /Users/test/Documents/client_app/build/client_autogen/include -isystem /opt/homebrew/lib/QtCore.framework/Headers -iframework /opt/homebrew/lib -isystem /opt/homebrew/share/qt/mkspecs/macx-clang -isystem /opt/homebrew/include -isystem /opt/homebrew/lib/QtWidgets.framework/Headers -isystem /opt/homebrew/lib/QtGui.framework/Headers -isystem /opt/homebrew/lib/QtMultimedia.framework/Headers -isystem /opt/homebrew/lib/QtNetwork.framework/Headers -isystem /opt/homebrew/lib/QtWebSockets.framework/Headers -g -std=gnu++17 -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk -mmacosx-version-min=14.4 -o CMakeFiles/client.dir/client_manager.cpp.o -c /Users/test/Documents/client_app/client_manager.cpp",
+  "file": "/Users/test/Documents/client_app/client_manager.cpp",
+  "output": "CMakeFiles/client.dir/client_manager.cpp.o"
+},
+{
+  "directory": "/Users/test/Documents/client_app/build",
+  "command": "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++ -DQT_CORE_LIB -DQT_GUI_LIB -DQT_MULTIMEDIA_LIB -DQT_NETWORK_LIB -DQT_WEBSOCKETS_LIB -DQT_WIDGETS_LIB -isystem /Users/test/Documents/client_app/build/client_autogen/include -isystem /opt/homebrew/lib/QtCore.framework/Headers -iframework /opt/homebrew/lib -isystem /opt/homebrew/share/qt/mkspecs/macx-clang -isystem /opt/homebrew/include -isystem /opt/homebrew/lib/QtWidgets.framework/Headers -isystem /opt/homebrew/lib/QtGui.framework/Headers -isystem /opt/homebrew/lib/QtMultimedia.framework/Headers -isystem /opt/homebrew/lib/QtNetwork.framework/Headers -isystem /opt/homebrew/lib/QtWebSockets.framework/Headers -g -std=gnu++17 -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk -mmacosx-version-min=14.4 -o CMakeFiles/client.dir/client_chat_window.cpp.o -c /Users/test/Documents/client_app/client_chat_window.cpp",
+  "file": "/Users/test/Documents/client_app/client_chat_window.cpp",
+  "output": "CMakeFiles/client.dir/client_chat_window.cpp.o"
+},
+{
+  "directory": "/Users/test/Documents/client_app/build",
+  "command": "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++ -DQT_CORE_LIB -DQT_GUI_LIB -DQT_MULTIMEDIA_LIB -DQT_NETWORK_LIB -DQT_WEBSOCKETS_LIB -DQT_WIDGETS_LIB -isystem /Users/test/Documents/client_app/build/client_autogen/include -isystem /opt/homebrew/lib/QtCore.framework/Headers -iframework /opt/homebrew/lib -isystem /opt/homebrew/share/qt/mkspecs/macx-clang -isystem /opt/homebrew/include -isystem /opt/homebrew/lib/QtWidgets.framework/Headers -isystem /opt/homebrew/lib/QtGui.framework/Headers -isystem /opt/homebrew/lib/QtMultimedia.framework/Headers -isystem /opt/homebrew/lib/QtNetwork.framework/Headers -isystem /opt/homebrew/lib/QtWebSockets.framework/Headers -g -std=gnu++17 -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk -mmacosx-version-min=14.4 -o CMakeFiles/client.dir/chat_protocol.cpp.o -c /Users/test/Documents/client_app/chat_protocol.cpp",
+  "file": "/Users/test/Documents/client_app/chat_protocol.cpp",
+  "output": "CMakeFiles/client.dir/chat_protocol.cpp.o"
+},
+{
+  "directory": "/Users/test/Documents/client_app/build",
+  "command": "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++ -DQT_CORE_LIB -DQT_GUI_LIB -DQT_MULTIMEDIA_LIB -DQT_NETWORK_LIB -DQT_WEBSOCKETS_LIB -DQT_WIDGETS_LIB -isystem /Users/test/Documents/client_app/build/client_autogen/include -isystem /opt/homebrew/lib/QtCore.framework/Headers -iframework /opt/homebrew/lib -isystem /opt/homebrew/share/qt/mkspecs/macx-clang -isystem /opt/homebrew/include -isystem /opt/homebrew/lib/QtWidgets.framework/Headers -isystem /opt/homebrew/lib/QtGui.framework/Headers -isystem /opt/homebrew/lib/QtMultimedia.framework/Headers -isystem /opt/homebrew/lib/QtNetwork.framework/Headers -isystem /opt/homebrew/lib/QtWebSockets.framework/Headers -g -std=gnu++17 -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk -mmacosx-version-min=14.4 -o CMakeFiles/client.dir/chat_line.cpp.o -c /Users/test/Documents/client_app/chat_line.cpp",
+  "file": "/Users/test/Documents/client_app/chat_line.cpp",
+  "output": "CMakeFiles/client.dir/chat_line.cpp.o"
+},
+{
+  "directory": "/Users/test/Documents/client_app/build",
+  "command": "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++ -DQT_CORE_LIB -DQT_GUI_LIB -DQT_MULTIMEDIA_LIB -DQT_NETWORK_LIB -DQT_WEBSOCKETS_LIB -DQT_WIDGETS_LIB -isystem /Users/test/Documents/client_app/build/client_autogen/include -isystem /opt/homebrew/lib/QtCore.framework/Headers -iframework /opt/homebrew/lib -isystem /opt/homebrew/share/qt/mkspecs/macx-clang -isystem /opt/homebrew/include -isystem /opt/homebrew/lib/QtWidgets.framework/Headers -isystem /opt/homebrew/lib/QtGui.framework/Headers -isystem /opt/homebrew/lib/QtMultimedia.framework/Headers -isystem /opt/homebrew/lib/QtNetwork.framework/Headers -isystem /opt/homebrew/lib/QtWebSockets.framework/Headers -g -std=gnu++17 -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk -mmacosx-version-min=14.4 -o CMakeFiles/client.dir/build/.rcc/qrc_client_images.cpp.o -c /Users/test/Documents/client_app/build/.rcc/qrc_client_images.cpp",
+  "file": "/Users/test/Documents/client_app/build/.rcc/qrc_client_images.cpp",
+  "output": "CMakeFiles/client.dir/build/.rcc/qrc_client_images.cpp.o"
+}
+]
