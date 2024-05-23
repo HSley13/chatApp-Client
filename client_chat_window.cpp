@@ -66,8 +66,6 @@ void client_chat_window::on_init_send_file_received(QString sender, QString send
     message_box->setInformativeText(message);
     message_box->setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
     message_box->setDefaultButton(QMessageBox::Ok);
-    message_box->setStyleSheet("color: white;");
-
     connect(message_box, &QMessageBox::accepted, this, [=]()
             { _client->send_file_accepted(my_name(), sender_ID); });
 
@@ -530,7 +528,7 @@ void client_chat_window::retrieve_conversation(QVector<QString> &messages, QHash
         {
             if (!type.compare("file"))
             {
-                _client->save_file(_destinator_name, content, binary_data.value(date_time), date_time);
+                _client->save_file(my_name(), content, binary_data.value(date_time), date_time);
 
                 QDir dir;
                 if (!_destinator_name.isEmpty() && !_destinator_name.isNull())
@@ -543,7 +541,7 @@ void client_chat_window::retrieve_conversation(QVector<QString> &messages, QHash
             }
             else if (!type.compare("audio"))
             {
-                _client->save_audio(_destinator_name, content, binary_data.value(date_time), date_time);
+                _client->save_audio(my_name(), content, binary_data.value(date_time), date_time);
 
                 QDir dir;
                 if (!_destinator_name.isEmpty() && !_destinator_name.isNull())

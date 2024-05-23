@@ -140,8 +140,6 @@ QByteArray chat_protocol::set_save_data_message(int conversation_ID, QString sen
 
         out << save_data << conversation_ID << sender << receiver << info.fileName() << file.readAll() << type;
 
-        qDebug() << "file sent to save";
-
         file.close();
     }
     else

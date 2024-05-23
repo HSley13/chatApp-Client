@@ -133,6 +133,7 @@ void client_manager::save_file(QString sender, QString file_name, QByteArray fil
 {
 #ifdef Q_OS_WASM
     QFileDialog::saveFileContent(file_data, file_name);
+    emit file_received(sender, "");
 #else
     QDir dir;
     if (!sender.isEmpty() && !sender.isNull())
