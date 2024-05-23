@@ -521,7 +521,7 @@ void client_chat_window::set_retrieve_message_window(QString type, QString conte
 
         QString path = QString("%1/%2/%3_%4").arg(dir.canonicalPath(), my_name(), date_time, content);
 
-        add_file(path, true, date_time);
+        add_file(path, true_or_false, date_time);
         return;
     }
     else if (!type.compare("audio"))
@@ -534,7 +534,7 @@ void client_chat_window::set_retrieve_message_window(QString type, QString conte
 
         QString path = QString("%1/%2/%3_%4").arg(dir.canonicalPath(), my_name(), date_time, content);
 
-        add_audio(path, true, date_time);
+        add_audio(path, true_or_false, date_time);
         return;
     }
 
