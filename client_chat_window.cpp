@@ -534,7 +534,7 @@ void client_chat_window::retrieve_conversation(QVector<QString> &messages, QHash
 
                 _client->save_file(my_name(), content, binary_data.value(date_time), date_time);
 
-                QString path = QString("%1/%2/%3_%4").arg(dir.canonicalPath(), _destinator_name, date_time, content);
+                QString path = QString("%1/%2/%3_%4").arg(dir.canonicalPath(), my_name(), date_time, content);
 
                 add_file(path, true, date_time);
                 continue;
@@ -547,7 +547,7 @@ void client_chat_window::retrieve_conversation(QVector<QString> &messages, QHash
 
                 _client->save_audio(my_name(), content, binary_data.value(date_time), date_time);
 
-                QString path = QString("%1/%2/%3_%4").arg(dir.canonicalPath(), _destinator_name, date_time, content);
+                QString path = QString("%1/%2/%3_%4").arg(dir.canonicalPath(), my_name(), date_time, content);
 
                 add_audio(path, true, date_time);
                 continue;
