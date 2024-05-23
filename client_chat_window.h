@@ -129,6 +129,8 @@ private:
 
     void set_up_window();
 
+    void set_retrieve_message_window(QString type, QString content, QByteArray file_data, QString date_time, bool true_or_false);
+
 signals:
     void swipe_right();
 

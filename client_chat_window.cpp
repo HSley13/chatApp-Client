@@ -294,7 +294,7 @@ void client_chat_window::folder()
     QString selected_file_path;
 
 #ifdef Q_OS_WASM
-    selected_file_path = QFileDialog::getOpenFileName(this, "Open Directory", QDir::homePath());
+    QDesktopServices::openUrl(QUrl("downloads://"));
 #else
     QString executable_directory = QApplication::applicationDirPath();
     QString full_client_directory = QDir(executable_directory).filePath(_window_name);
@@ -509,6 +509,46 @@ void client_chat_window::add_audio(const QUrl &source, bool is_mine, QString dat
     _list->setItemWidget(line, wid);
 }
 
+void client_chat_window::set_retrieve_message_window(QString type, QString content, QByteArray file_data, QString date_time, bool true_or_false)
+{
+    if (!type.compare("file"))
+    {
+        QDir dir;
+        if (!my_name().isEmpty() && !my_name().isNull())
+            dir.mkdir(my_name());
+
+        _client->save_file(my_name(), content, file_data, date_time);
+
+        QString path = QString("%1/%2/%3_%4").arg(dir.canonicalPath(), my_name(), date_time, content);
+
+        add_file(path, true, date_time);
+        return;
+    }
+    else if (!type.compare("audio"))
+    {
+        QDir dir;
+        if (!my_name().isEmpty() && !my_name().isNull())
+            dir.mkdir(my_name());
+
+        _client->save_audio(my_name(), content, file_data, date_time);
+
+        QString path = QString("%1/%2/%3_%4").arg(dir.canonicalPath(), my_name(), date_time, content);
+
+        add_audio(path, true, date_time);
+        return;
+    }
+
+    chat_line *wid = new chat_line(this);
+    wid->set_message(content, true_or_false, date_time);
+    wid->setStyleSheet("color: black;");
+
+    QListWidgetItem *line = new QListWidgetItem(_list);
+    line->setBackground(QBrush(QColorConstants::Svg::blue));
+    line->setSizeHint(QSize(0, 60));
+
+    _list->setItemWidget(line, wid);
+}
+
 void client_chat_window::retrieve_conversation(QVector<QString> &messages, QHash<QString, QByteArray> &binary_data)
 {
     if (messages.isEmpty())
@@ -524,83 +564,10 @@ void client_chat_window::retrieve_conversation(QVector<QString> &messages, QHash
         QString date_time = parts.at(3);
         QString type = parts.last();
 
-        if (sender_ID == _client->_my_ID)
-        {
-            if (!type.compare("file"))
-            {
-                QDir dir;
-                if (!my_name().isEmpty() && !my_name().isNull())
-                    dir.mkdir(my_name());
-
-                _client->save_file(my_name(), content, binary_data.value(date_time), date_time);
-
-                QString path = QString("%1/%2/%3_%4").arg(dir.canonicalPath(), my_name(), date_time, content);
-
-                add_file(path, true, date_time);
-                continue;
-            }
-            else if (!type.compare("audio"))
-            {
-                QDir dir;
-                if (!my_name().isEmpty() && !my_name().isNull())
-                    dir.mkdir(my_name());
-
-                _client->save_audio(my_name(), content, binary_data.value(date_time), date_time);
-
-                QString path = QString("%1/%2/%3_%4").arg(dir.canonicalPath(), my_name(), date_time, content);
-
-                add_audio(path, true, date_time);
-                continue;
-            }
-
-            chat_line *wid = new chat_line(this);
-            wid->set_message(content, true, date_time);
-            wid->setStyleSheet("color: black;");
-
-            QListWidgetItem *line = new QListWidgetItem(_list);
-            line->setBackground(QBrush(QColorConstants::Svg::blue));
-            line->setSizeHint(QSize(0, 60));
-
-            _list->setItemWidget(line, wid);
-        }
+        if (!sender_ID.compare(_client->_my_ID))
+            set_retrieve_message_window(type, content, binary_data.value(date_time), date_time, true);
         else
-        {
-            if (!type.compare("file"))
-            {
-                QDir dir;
-                if (!my_name().isEmpty() && !my_name().isNull())
-                    dir.mkdir(my_name());
-
-                _client->save_file(my_name(), content, binary_data.value(date_time), date_time);
-                QString path = QString("%1/%2/%3_%4").arg(dir.canonicalPath(), my_name(), date_time, content);
-
-                add_file(path, false, date_time);
-                continue;
-            }
-            else if (!type.compare("audio"))
-            {
-                _client->save_audio(my_name(), content, binary_data.value(date_time), date_time);
-
-                QDir dir;
-                if (!my_name().isEmpty() && !my_name().isNull())
-                    dir.mkdir(my_name());
-
-                QString path = QString("%1/%2/%3_%4").arg(dir.canonicalPath(), my_name(), date_time, content);
-
-                add_audio(path, false, date_time);
-                continue;
-            }
-
-            chat_line *wid = new chat_line(this);
-            wid->set_message(content, false, date_time);
-            wid->setStyleSheet("color: black;");
-
-            QListWidgetItem *line = new QListWidgetItem(_list);
-            line->setBackground(QBrush(QColorConstants::Svg::gray));
-            line->setSizeHint(QSize(0, 60));
-
-            _list->setItemWidget(line, wid);
-        }
+            set_retrieve_message_window(type, content, binary_data.value(date_time), date_time, false);
     }
 }
 
