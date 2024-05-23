@@ -612,7 +612,7 @@ void client_main_window::on_client_added_you(int conversation_ID, QString name, 
     }
 }
 
-void client_main_window::on_audio_received(QString sender, QString path)
+void client_main_window::on_audio_received(QString sender, QUrl source)
 {
     QWidget *win = _window_map.value(sender);
     if (win)
@@ -620,7 +620,7 @@ void client_main_window::on_audio_received(QString sender, QString path)
         client_chat_window *wid = qobject_cast<client_chat_window *>(win);
         if (wid)
         {
-            wid->add_audio(path);
+            wid->add_audio(source);
             add_on_top(sender);
         }
         else

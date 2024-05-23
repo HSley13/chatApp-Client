@@ -59,7 +59,7 @@ signals:
 
     void socket_disconnected();
 
-    void audio_received(QString sender, QString path);
+    void audio_received(QString sender, QUrl source);
 
     void client_added_you(int conversation_ID, QString name, QString ID);
     void lookup_friend_result(int conversation_ID, QString name, bool true_or_false);

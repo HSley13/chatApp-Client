@@ -165,15 +165,15 @@ void client_manager::save_audio(QString sender, QString file_name, QByteArray fi
     if (!sender.isEmpty() && !sender.isNull())
         dir.mkdir(sender);
 
-    QString path = QString("%1/%2/%3_%4").arg(dir.canonicalPath(), sender, date_time, file_name);
+    QUrl source = QUrl::fromLocalFile(QCoreApplication::applicationDirPath() + "/" + date_time + file_name);
 
-    QFile file(path);
+    QFile file(source.toLocalFile());
     if (file.open(QIODevice::WriteOnly))
     {
         file.write(file_data);
         file.close();
 
-        emit audio_received(sender, path);
+        emit audio_received(sender, source);
     }
     else
         qDebug() << "client_manager ---> save_audio() ---> Couldn't open the file to write to it";

@@ -45,6 +45,7 @@ client_chat_window::client_chat_window(int conversation_ID, QString destinator, 
 
 void client_chat_window::on_item_deleted(QListWidgetItem *item)
 {
+    // Implement later on
 }
 
 /*-------------------------------------------------------------------- Slots --------------------------------------------------------------*/
@@ -371,8 +372,8 @@ void client_chat_window::set_up_window()
         connect(_client, &client_manager::lookup_friend_result, this, [=](int conversation_ID, QString name, bool true_or_false)
                 { emit lookup_friend_result(conversation_ID, name, true_or_false); });
 
-        connect(_client, &client_manager::audio_received, this, [=](QString sender, QString path)
-                { emit audio_received(sender, path); });
+        connect(_client, &client_manager::audio_received, this, [=](QString sender, QUrl source)
+                { emit audio_received(sender, source); });
 
         connect(_client, &client_manager::file_received, this, [=](QString sender, QString path)
                 { emit file_received(sender, path); });
