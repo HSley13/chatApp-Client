@@ -528,11 +528,11 @@ void client_chat_window::retrieve_conversation(QVector<QString> &messages, QHash
         {
             if (!type.compare("file"))
             {
-                _client->save_file(my_name(), content, binary_data.value(date_time), date_time);
-
                 QDir dir;
-                if (!_destinator_name.isEmpty() && !_destinator_name.isNull())
-                    dir.mkdir(_destinator_name);
+                if (!my_name().isEmpty() && !my_name().isNull())
+                    dir.mkdir(my_name());
+
+                _client->save_file(my_name(), content, binary_data.value(date_time), date_time);
 
                 QString path = QString("%1/%2/%3_%4").arg(dir.canonicalPath(), _destinator_name, date_time, content);
 
@@ -541,11 +541,11 @@ void client_chat_window::retrieve_conversation(QVector<QString> &messages, QHash
             }
             else if (!type.compare("audio"))
             {
-                _client->save_audio(my_name(), content, binary_data.value(date_time), date_time);
-
                 QDir dir;
-                if (!_destinator_name.isEmpty() && !_destinator_name.isNull())
-                    dir.mkdir(_destinator_name);
+                if (!my_name().isEmpty() && !my_name().isNull())
+                    dir.mkdir(my_name());
+
+                _client->save_audio(my_name(), content, binary_data.value(date_time), date_time);
 
                 QString path = QString("%1/%2/%3_%4").arg(dir.canonicalPath(), _destinator_name, date_time, content);
 
