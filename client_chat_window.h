@@ -150,7 +150,7 @@ signals:
     void lookup_friend_result(int conversation_ID, QString name, bool true_or_false);
 
     void audio_received(QString sender, QString path);
-    void file_saved(QString sender, QString path);
+    void file_received(QString sender, QString path);
 
     void item_deleted(QListWidgetItem *item);
 
@@ -160,13 +160,11 @@ private slots:
     void send_message();
 
     void send_file();
-    void send_file_client();
 
     void folder();
     void on_file_saved(QString path);
 
-    void on_init_receiving_file(QString file_name, qint64 file_size);
-    void on_init_receiving_file_client(QString sender, QString ID, QString file_name, qint64 file_size);
+    void on_init_send_file_received(QString sender, QString sender_ID, QString file_name, qint64 file_size);
 
     void start_recording();
     void on_duration_changed(qint64 duration);

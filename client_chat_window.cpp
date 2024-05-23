@@ -7,12 +7,7 @@ QString client_chat_window::_insert_name = nullptr;
 client_manager *client_chat_window::_client = nullptr;
 
 client_chat_window::client_chat_window(QString my_ID, QWidget *parent)
-    : QMainWindow(parent), _my_ID(my_ID)
-{
-    set_up_window();
-
-    connect(_send_file_button, &QPushButton::clicked, this, &client_chat_window::send_file);
-}
+    : QMainWindow(parent), _my_ID(my_ID) { set_up_window(); }
 
 client_chat_window::client_chat_window(int conversation_ID, QString destinator, QString name, QWidget *parent)
     : QMainWindow(parent), _conversation_ID(conversation_ID), _destinator(destinator), _destinator_name(name)
@@ -40,9 +35,12 @@ client_chat_window::client_chat_window(int conversation_ID, QString destinator, 
     _dir.mkdir(_destinator_name);
     _dir.setPath("./" + _destinator_name);
 
-    _client->send_create_conversation_message(_conversation_ID, _client->_my_name, _client->_my_ID.toInt(), _destinator_name, _destinator.toInt());
+    _client->send_create_conversation(_conversation_ID, _client->_my_name, _client->_my_ID.toInt(), _destinator_name, _destinator.toInt());
 
-    connect(_send_file_button, &QPushButton::clicked, this, &client_chat_window::send_file_client);
+    _send_file_button = new QPushButton("...", this);
+    connect(_send_file_button, &QPushButton::clicked, this, &client_chat_window::send_file);
+
+    _hbox->insertWidget(1, _send_file_button);
 }
 
 void client_chat_window::on_item_deleted(QListWidgetItem *item)
@@ -51,48 +49,32 @@ void client_chat_window::on_item_deleted(QListWidgetItem *item)
 
 /*-------------------------------------------------------------------- Slots --------------------------------------------------------------*/
 
-void client_chat_window::on_init_receiving_file(QString file_name, qint64 file_size)
+void client_chat_window::on_init_send_file_received(QString sender, QString sender_ID, QString file_name, qint64 file_size)
 {
-    QString message = QString("-------- %1 --------\n  %2 wants to send a File. Willing to accept it or not?\n File Name: %3\n File Size: %4 bytes")
-                          .arg(my_name(), "Server")
+    QString message = QString("-------- %1 --------\n"
+                              "%2 wants to send a file. Willing to accept it or not?\n"
+                              "File Name: %3\n"
+                              "File Size: %4 bytes")
+                          .arg(my_name())
+                          .arg(sender)
                           .arg(file_name)
-                          .arg(file_size);
+                          .arg(QString::number(file_size));
 
-    QInputDialog *input_dialog = new QInputDialog(this);
-    input_dialog->setWindowTitle("Receiving file");
-    input_dialog->setTextValue(message);
+    QMessageBox *message_box = new QMessageBox(this);
+    message_box->setWindowTitle("Receiving file");
+    message_box->setText("Please review the information below carefully:");
+    message_box->setInformativeText(message);
+    message_box->setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
+    message_box->setDefaultButton(QMessageBox::Ok);
+    message_box->setStyleSheet("color: white;");
 
-    connect(input_dialog, &QInputDialog::finished, this, [=](int result)
-            {
-                if(result == QDialog::Accepted)
-                {
-                    _client->send_accept_file();
-                    emit data_received_sent(_window_name);
-                }
-                else
-                    _client->send_reject_file(); });
-}
+    connect(message_box, &QMessageBox::accepted, this, [=]()
+            { _client->send_file_accepted(my_name(), sender_ID); });
 
-void client_chat_window::on_init_receiving_file_client(QString sender, QString ID, QString file_name, qint64 file_size)
-{
-    QString message = QString("-------- %1 --------\n  %2 wants to send a File. Willing to accept it or not?\n File Name: %3\n File Size: %4 bytes")
-                          .arg(my_name(), "Server")
-                          .arg(file_name)
-                          .arg(file_size);
+    connect(message_box, &QMessageBox::rejected, this, [=]()
+            { _client->send_file_rejected(my_name(), sender_ID); });
 
-    QInputDialog *input_dialog = new QInputDialog(this);
-    input_dialog->setWindowTitle("Receiving file");
-    input_dialog->setTextValue(message);
-
-    connect(input_dialog, &QInputDialog::finished, this, [=](int result)
-            {
-                if(result == QDialog::Accepted)
-                {
-                    _client->send_accept_file_client(ID);
-                    emit data_received_sent(_window_name);
-                }
-                else
-                    _client->send_reject_file_client(my_name(), ID); });
+    message_box->exec();
 }
 
 void client_chat_window::on_file_saved(QString path)
@@ -100,8 +82,6 @@ void client_chat_window::on_file_saved(QString path)
     QMessageBox::information(this, "File Saved", QString("File save at: %1").arg(path));
 
     add_file(path);
-
-    _client->send_save_data_message(_conversation_ID, _destinator, _client->_my_ID, "file");
 
     emit data_received_sent(_window_name);
 }
@@ -167,9 +147,9 @@ void client_chat_window::start_recording()
 
         add_audio(_recorder->outputLocation(), true);
 
-        _client->send_audio_message(my_name(), _destinator, _recorder->outputLocation().toLocalFile());
+        _client->send_audio(my_name(), _destinator, _recorder->outputLocation().toLocalFile());
 
-        _client->send_save_audio_message(_conversation_ID, _client->_my_ID, _destinator, _recorder->outputLocation().toLocalFile(), "audio");
+        _client->send_save_data(_conversation_ID, _client->_my_ID, _destinator, _recorder->outputLocation().toLocalFile(), "audio");
 
         emit data_received_sent(_window_name);
     }
@@ -272,8 +252,6 @@ void client_chat_window::send_message()
 
     _client->send_text(my_name(), _destinator, message);
 
-    _client->send_save_conversation_message(_conversation_ID, _client->_my_ID, _destinator, message);
-
     _insert_message->clear();
 
     emit data_received_sent(_window_name);
@@ -292,36 +270,21 @@ void client_chat_window::message_received(QString message)
     _list->addItem(line);
     _list->setItemWidget(line, wid);
 
-    _client->send_save_conversation_message(_conversation_ID, _destinator, _client->_my_ID, message);
+    _client->send_save_conversation(_conversation_ID, _destinator, _client->_my_ID, message);
 }
 
 void client_chat_window::send_file()
 {
-    std::function<void(const QString &, const QByteArray &)> file_content_ready = [this](const QString &file_name, const QByteArray &file_content)
+    std::function<void(const QString &, const QByteArray &)> file_content_ready = [this](const QString &file_name, const QByteArray &file_data)
     {
         if (!file_name.isEmpty())
         {
-            _client->send_init_sending_file(file_name);
+            _client->send_init_send_file(my_name(), _client->_my_ID, _destinator, QFileInfo(file_name).fileName(), QFileInfo(file_name).size());
 
-            connect(_client, &client_manager::file_accepted, this, [=]()
-                    { add_file(QFileInfo(file_name).absoluteFilePath(), true); });
-        }
-    };
-
-    QFileDialog::getOpenFileContent("All Files (*)", file_content_ready);
-}
-
-void client_chat_window::send_file_client()
-{
-    std::function<void(const QString &, const QByteArray &)> file_content_ready = [this](const QString &file_name, const QByteArray &file_content)
-    {
-        if (!file_name.isEmpty())
-        {
-            _client->send_init_sending_file_client(my_name(), _destinator, file_name);
-
-            connect(_client, &client_manager::file_accepted_client, this, [=]()
+            connect(_client, &client_manager::file_accepted, this, [=](QString receiver)
                     { add_file(QFileInfo(file_name).absoluteFilePath(), true);
-                    _client->send_save_data_message(_conversation_ID, _client->_my_ID, _destinator, "file"); });
+                _client->send_file(my_name(), _destinator, QFileInfo(file_name).fileName(), file_data);
+                _client->send_save_data(_conversation_ID, _destinator, _client->_my_ID, QFileInfo(file_name).absoluteFilePath(), "file"); });
         }
     };
 
@@ -358,8 +321,6 @@ void client_chat_window::set_up_window()
     _list = new Swipeable_list_widget(this);
     _list->setItemDelegate(new separator_delegate(_list));
 
-    _send_file_button = new QPushButton("...", this);
-
     _insert_message = new QLineEdit(this);
     _insert_message->setPlaceholderText("Insert New Message");
     connect(_insert_message, &QLineEdit::textChanged, this, [=]()
@@ -377,7 +338,6 @@ void client_chat_window::set_up_window()
     connect(send_button, &QPushButton::clicked, this, &client_chat_window::send_message);
 
     _hbox = new QHBoxLayout();
-    _hbox->addWidget(_send_file_button);
     _hbox->addWidget(_insert_message);
     _hbox->addWidget(send_button);
 
@@ -394,12 +354,6 @@ void client_chat_window::set_up_window()
 
         connect(_client, &client_manager::is_typing_received, this, [=](QString sender)
                 { emit is_typing_received(sender); });
-
-        connect(_client, &client_manager::reject_receiving_file, this, [=]()
-                { QMessageBox::critical(this, "File Rejected", QString("-------- %1 --------\n Server Rejected Your request to send the file").arg(my_name())); });
-
-        connect(_client, &client_manager::reject_receiving_file_client, this, [=](QString sender)
-                { QMessageBox::critical(this, "File Rejected", QString("-------- %1 --------\n %2 Rejected Your request to send the file").arg(my_name(), sender)); });
 
         connect(_client, &client_manager::client_disconnected, this, [=](QString client_name)
                 { emit client_disconnected(client_name); });
@@ -422,14 +376,17 @@ void client_chat_window::set_up_window()
         connect(_client, &client_manager::audio_received, this, [=](QString sender, QString path)
                 { emit audio_received(sender, path); });
 
-        connect(_client, &client_manager::file_saved, this, [=](QString sender, QString path)
-                { emit file_saved(sender, path); });
+        connect(_client, &client_manager::file_received, this, [=](QString sender, QString path)
+                { emit file_received(sender, path); });
 
         connect(_client, &client_manager::login_request, this, [=](QString hashed_password, bool true_or_false, QHash<int, QHash<QString, int>> friend_list, QList<QString> online_friends, QHash<int, QVector<QString>> messages, QHash<int, QHash<QString, QByteArray>> binary_data)
                 { emit login_request(hashed_password, true_or_false, friend_list, online_friends, messages, binary_data); });
 
-        connect(_client, &client_manager::init_receiving_file, this, &client_chat_window::on_init_receiving_file);
-        connect(_client, &client_manager::init_receiving_file_client, this, &client_chat_window::on_init_receiving_file_client);
+        connect(_client, &client_manager::init_send_file_received, this, &client_chat_window::on_init_send_file_received);
+
+        connect(_client, &client_manager::file_rejected, this, [=](QString sender)
+                { QMessageBox *info = new QMessageBox(this); 
+                  info->information(this, "File Rejected", QString("%1 has rejected receiving your file").arg(sender)); });
     }
 }
 
@@ -573,7 +530,7 @@ void client_chat_window::retrieve_conversation(QVector<QString> &messages, QHash
         {
             if (!type.compare("file"))
             {
-                _client->save_file_client(_destinator_name, content, binary_data.value(date_time), date_time);
+                _client->save_file(_destinator_name, content, binary_data.value(date_time), date_time);
 
                 QDir dir;
                 if (!_destinator_name.isEmpty() && !_destinator_name.isNull())
@@ -616,7 +573,7 @@ void client_chat_window::retrieve_conversation(QVector<QString> &messages, QHash
                 if (!my_name().isEmpty() && !my_name().isNull())
                     dir.mkdir(my_name());
 
-                _client->save_file_client(my_name(), content, binary_data.value(date_time), date_time);
+                _client->save_file(my_name(), content, binary_data.value(date_time), date_time);
                 QString path = QString("%1/%2/%3_%4").arg(dir.canonicalPath(), my_name(), date_time, content);
 
                 add_file(path, false, date_time);

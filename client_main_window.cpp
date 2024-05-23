@@ -51,7 +51,7 @@ client_main_window::client_main_window(QWidget *parent)
             {     if (!_server_wid)
                 _server_wid = new client_chat_window(_user_phone_number->text(), this);
                 connect(_server_wid, &client_chat_window::login_request, this, &client_main_window::on_login_request);
-                QTimer::singleShot(2000, this, [=]() { _server_wid->_client->send_login_request_message(_user_phone_number->text(), _user_password->text());}); });
+                QTimer::singleShot(2000, this, [=]() { _server_wid->_client->send_login_request(_user_phone_number->text(), _user_password->text());}); });
 
     QVBoxLayout *VBOX = new QVBoxLayout();
     VBOX->addLayout(hbox);
@@ -281,7 +281,7 @@ void client_main_window::on_sign_up()
                     {
                         _server_wid = new client_chat_window(_user_phone_number->text(), this);
                         QTimer::singleShot(2000, this, [=]()
-                                           { _server_wid->_client->send_sign_up_message(_insert_phone_number->text(), _insert_first_name->text(), _insert_last_name->text(), _insert_password->text(), _insert_secret_question->text(), _insert_secret_answer->text()); });
+                                           { _server_wid->_client->send_sign_up(_insert_phone_number->text(), _insert_first_name->text(), _insert_last_name->text(), _insert_password->text(), _insert_secret_question->text(), _insert_secret_answer->text()); });
                     }
                     _status_bar->showMessage(QString("Account Created Successfully"), 5000);
                     _stack->setCurrentIndex(1);
@@ -325,7 +325,7 @@ void client_main_window::on_login_request(QString hashed_password, bool true_or_
         connect(_server_wid, &client_chat_window::client_disconnected, this, &client_main_window::on_client_disconnected);
         connect(_server_wid, &client_chat_window::client_connected, this, &client_main_window::on_client_connected);
         connect(_server_wid, &client_chat_window::audio_received, this, &client_main_window::on_audio_received);
-        connect(_server_wid, &client_chat_window::file_saved, this, &client_main_window::on_file_saved);
+        connect(_server_wid, &client_chat_window::file_received, this, &client_main_window::on_file_received);
 
         connect(_server_wid, &client_chat_window::is_typing_received, this, [=](QString sender)
                 { _status_bar->showMessage(QString("%1 is typing...").arg(sender), 1000); });
@@ -628,7 +628,7 @@ void client_main_window::on_audio_received(QString sender, QString path)
     }
 }
 
-void client_main_window::on_file_saved(QString sender, QString path)
+void client_main_window::on_file_received(QString sender, QString path)
 {
     QWidget *win = _window_map.value(sender);
     if (win)

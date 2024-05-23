@@ -43,46 +43,6 @@ void client_manager::on_binary_message_received(const QByteArray &message)
 
         break;
 
-    case chat_protocol::init_sending_file:
-        emit init_receiving_file(_protocol->file_name(), _protocol->file_size());
-
-        break;
-
-    case chat_protocol::init_sending_file_client:
-        emit init_receiving_file_client(_protocol->sender(), _protocol->clients_ID(), _protocol->file_name_client(), _protocol->file_size_client());
-
-        break;
-
-    case chat_protocol::accept_sending_file:
-        send_file();
-
-        break;
-
-    case chat_protocol::accept_sending_file_client:
-        send_file_client(_protocol->port_transfer());
-
-        break;
-
-    case chat_protocol::reject_sending_file:
-        emit reject_receiving_file();
-
-        break;
-
-    case chat_protocol::reject_sending_file_client:
-        emit reject_receiving_file_client(_protocol->sender());
-
-        break;
-
-    case chat_protocol::send_file:
-        save_file(QDateTime::currentDateTime().toString("yyyyMMdd_HHmmss"));
-
-        break;
-
-    case chat_protocol::send_file_client:
-        save_file_client(_protocol->sender(), _protocol->file_name_client(), _protocol->file_data_client(), QDateTime::currentDateTime().toString("yyyyMMdd_HHmmss"));
-
-        break;
-
     case chat_protocol::client_new_name:
         emit client_name_changed(_protocol->old_name(), _protocol->client_name());
 
@@ -122,6 +82,26 @@ void client_manager::on_binary_message_received(const QByteArray &message)
 
     break;
 
+    case chat_protocol::init_send_file:
+        emit init_send_file_received(_protocol->file_sender(), _protocol->clients_ID(), _protocol->file_name(), _protocol->file_size());
+
+        break;
+
+    case chat_protocol::file_accepted:
+        emit file_accepted(_protocol->file_sender());
+
+        break;
+
+    case chat_protocol::file_rejected:
+        emit file_rejected(_protocol->file_sender());
+
+        break;
+
+    case chat_protocol::file:
+        save_file(_protocol->file_sender(), _protocol->file_name(), _protocol->file_data(), QDateTime::currentDateTime().toString("yyyyMMdd_HHmmss"));
+
+        break;
+
     default:
         break;
     }
@@ -149,98 +129,7 @@ void client_manager::send_is_typing(QString sender, QString receiver)
     _socket->sendBinaryMessage(_protocol->set_is_typing_message(sender, receiver));
 }
 
-void client_manager::send_init_sending_file(QString file_name)
-{
-    _file_name = file_name;
-    _socket->sendBinaryMessage(_protocol->set_init_sending_file_message(file_name));
-}
-
-void client_manager::send_init_sending_file_client(QString sender, QString receiver, QString file_name)
-{
-    _file_name_client = file_name;
-    _socket->sendBinaryMessage(_protocol->set_init_sending_file_message_client(sender, _my_ID, receiver, file_name));
-}
-
-void client_manager::send_accept_file()
-{
-    _socket->sendBinaryMessage(_protocol->set_accept_file_message());
-}
-
-void client_manager::send_accept_file_client(QString receiver)
-{
-    _socket->sendBinaryMessage(_protocol->set_accept_file_message_client(receiver, _protocol->port()));
-
-    if (!_file_server)
-    {
-        _file_server = new QWebSocketServer(QString("ClientFile Server"), QWebSocketServer::NonSecureMode, this);
-
-        _file_server->listen(QHostAddress::LocalHost, _protocol->port());
-        connect(_file_server, &QWebSocketServer::newConnection, this, &client_manager::on_new_connection);
-    }
-}
-
-void client_manager::on_new_connection()
-{
-    _file_socket = _file_server->nextPendingConnection();
-    connect(_file_socket, &QWebSocket::binaryMessageReceived, this, &client_manager::file_connect);
-}
-
-void client_manager::file_connect(const QByteArray &message)
-{
-    _protocol->load_data(message);
-
-    save_file_client(_protocol->sender(), _protocol->file_name_client(), _protocol->file_data_client(), QDateTime::currentDateTime().toString("yyyyMMdd_HHmmss"));
-}
-
-void client_manager::send_reject_file()
-{
-    _socket->sendBinaryMessage(_protocol->set_reject_file_message());
-}
-
-void client_manager::send_reject_file_client(QString sender, QString receiver)
-{
-    _socket->sendBinaryMessage(_protocol->set_reject_file_message_client(sender, receiver));
-}
-
-void client_manager::send_file()
-{
-    emit file_accepted();
-
-    _socket->sendBinaryMessage(_protocol->set_file_message(_file_name));
-}
-
-void client_manager::send_file_client(int port_transfer)
-{
-    emit file_accepted_client();
-
-    QWebSocket *temp = new QWebSocket(QString(), QWebSocketProtocol::VersionLatest, this);
-
-    QUrl temp_Url = QUrl(QString("ws://%1:%2").arg(QHostAddress(QHostAddress::LocalHost).toString()).arg(port_transfer));
-    temp->open(temp_Url);
-
-    temp->sendBinaryMessage(_protocol->set_file_message_client(_file_name_client, _protocol->my_name()));
-}
-
-void client_manager::save_file(QString date_time)
-{
-    QDir dir;
-    dir.mkdir("Server");
-
-    QString path = QString("%1/%2/%3_%4").arg(dir.canonicalPath(), "Server", date_time, _protocol->file_name());
-
-    QFile file(path);
-    if (file.open(QIODevice::WriteOnly))
-    {
-        file.write(_protocol->file_data());
-        file.close();
-
-        emit file_saved("Server", path);
-    }
-    else
-        qDebug() << "client_manager ---> save_file() ---> Couldn't open the file to write to it";
-}
-
-void client_manager::save_file_client(QString sender, QString file_name, QByteArray file_data, QString date_time)
+void client_manager::save_file(QString sender, QString file_name, QByteArray file_data, QString date_time)
 {
 #ifdef Q_OS_WASM
     QFileDialog::saveFileContent(file_data, file_name);
@@ -257,21 +146,16 @@ void client_manager::save_file_client(QString sender, QString file_name, QByteAr
         file.write(file_data);
         file.close();
 
-        emit file_saved(sender, path);
+        emit file_received(sender, path);
     }
     else
-        qDebug() << "client_manager ---> save_file_client() ---> Couldn't open the file to write to it";
+        qDebug() << "client_manager ---> save_file() ---> Couldn't open the file to write to it";
 #endif
 }
 
-void client_manager::send_save_data_message(int conversation_ID, QString sender, QString receiver, QString type)
+void client_manager::send_save_data(int conversation_ID, QString sender, QString receiver, QString data_name, QString type)
 {
-    _socket->sendBinaryMessage(_protocol->set_save_data_message(conversation_ID, sender, receiver, _file_name_client, type));
-}
-
-void client_manager::send_save_audio_message(int conversation_ID, QString sender, QString receiver, QString audio_name, QString type)
-{
-    _socket->sendBinaryMessage(_protocol->set_save_data_message(conversation_ID, sender, receiver, audio_name, type));
+    _socket->sendBinaryMessage(_protocol->set_save_data_message(conversation_ID, sender, receiver, data_name, type));
 }
 
 void client_manager::save_audio(QString sender, QString file_name, QByteArray file_data, QString date_time)
@@ -294,7 +178,7 @@ void client_manager::save_audio(QString sender, QString file_name, QByteArray fi
         qDebug() << "client_manager ---> save_audio() ---> Couldn't open the file to write to it";
 }
 
-void client_manager::send_audio_message(QString sender, QString receiver, QString audio_name)
+void client_manager::send_audio(QString sender, QString receiver, QString audio_name)
 {
     _socket->sendBinaryMessage(_protocol->set_audio_message(sender, receiver, audio_name));
 }
@@ -304,23 +188,44 @@ void client_manager::send_lookup_friend(QString ID)
     _socket->sendBinaryMessage(_protocol->set_lookup_friend_message(ID));
 }
 
-void client_manager::send_create_conversation_message(int conversation_ID, QString participant1, int participant1_ID, QString participant2, int participant2_ID)
+void client_manager::send_create_conversation(int conversation_ID, QString participant1, int participant1_ID, QString participant2, int participant2_ID)
 {
     _socket->sendBinaryMessage(_protocol->set_create_conversation_message(conversation_ID, participant1, participant1_ID, participant2, participant2_ID));
 }
 
-void client_manager::send_save_conversation_message(int conversation_ID, QString sender, QString receiver, QString content)
+void client_manager::send_save_conversation(int conversation_ID, QString sender, QString receiver, QString content)
 {
     _socket->sendBinaryMessage(_protocol->set_save_message_message(conversation_ID, sender, receiver, content));
 }
 
-void client_manager::send_sign_up_message(QString phone_number, QString first_name, QString last_name, QString password, QString secret_question, QString secret_answer)
+void client_manager::send_sign_up(QString phone_number, QString first_name, QString last_name, QString password, QString secret_question, QString secret_answer)
 {
     _socket->sendBinaryMessage(_protocol->set_sign_up_message(phone_number, first_name, last_name, password, secret_question, secret_answer));
 }
 
-void client_manager::send_login_request_message(QString phone_number, QString password)
+void client_manager::send_login_request(QString phone_number, QString password)
 {
     _my_ID = phone_number;
     _socket->sendBinaryMessage(_protocol->set_login_request_message(phone_number, password));
+}
+
+void client_manager::send_init_send_file(QString sender, QString my_ID, QString receiver, QString file_name, qint64 file_size)
+{
+    _socket->sendBinaryMessage(_protocol->set_init_send_file_message(sender, my_ID, receiver, file_name, file_size));
+}
+
+void client_manager::send_file_accepted(QString sender, QString receiver)
+{
+    _socket->sendBinaryMessage(_protocol->set_file_accepted_message(sender, receiver));
+}
+
+void client_manager::send_file_rejected(QString sender, QString receiver)
+{
+    _socket->sendBinaryMessage(_protocol->set_file_rejected_message(sender, receiver));
+}
+
+void client_manager::send_file(QString sender, QString receiver, QString file_name, QByteArray file_data)
+{
+    _file_name = file_name;
+    _socket->sendBinaryMessage(_protocol->set_file_message(sender, receiver, file_name, file_data));
 }
