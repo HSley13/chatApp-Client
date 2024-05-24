@@ -112,7 +112,10 @@ void client_chat_window::ask_microphone_permission()
         connect(_recorder, &QMediaRecorder::durationChanged, this, &client_chat_window::on_duration_changed);
         _session->setRecorder(_recorder);
 
-        _recorder->setOutputLocation(QUrl::fromLocalFile(QCoreApplication::applicationDirPath() + "/" + QDateTime::currentDateTime().toString("yyyyMMdd_HHmmss") + "_audio.m4a"));
+        QString output_directory = QStandardPaths::writableLocation(QStandardPaths::MusicLocation);
+        QString output_location = output_directory + "/" + QDateTime::currentDateTime().toString("yyyyMMdd_HHmmss") + "_audio.m4a";
+
+        _recorder->setOutputLocation(QUrl::fromLocalFile(output_location));
         _recorder->setQuality(QMediaRecorder::VeryHighQuality);
         _recorder->setEncodingMode(QMediaRecorder::ConstantQualityEncoding);
 
@@ -533,7 +536,10 @@ void client_chat_window::set_retrieve_message_window(QString type, QString conte
 
         _client->save_audio(my_name(), content, file_data, date_time);
 
-        QUrl source = QUrl::fromLocalFile(QCoreApplication::applicationDirPath() + "/" + date_time + content);
+        QString output_directory = QStandardPaths::writableLocation(QStandardPaths::MusicLocation);
+        QString output_location = output_directory + "/" + date_time + "_" + content;
+
+        QUrl source = QUrl::fromLocalFile(output_location);
 
         add_audio(source, true_or_false, date_time);
         return;
