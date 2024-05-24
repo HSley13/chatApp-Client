@@ -48,10 +48,14 @@ client_main_window::client_main_window(QWidget *parent)
                           "border-radius: 5px;"
                           "padding: 5px 10px;");
     connect(log_in, &QPushButton::clicked, this, [=]()
-            {     if (!_server_wid)
+            {  
+                log_in->setDisabled(true);
+                   if (!_server_wid)
                 _server_wid = new client_chat_window(_user_phone_number->text(), this);
                 connect(_server_wid, &client_chat_window::login_request, this, &client_main_window::on_login_request);
-                QTimer::singleShot(2000, this, [=]() { _server_wid->_client->send_login_request(_user_phone_number->text(), _user_password->text());}); });
+                _status_bar->showMessage("Loading Your data...", 3000);
+                QTimer::singleShot(2000, this, [=]() { _server_wid->_client->send_login_request(_user_phone_number->text(), _user_password->text());});
+                QTimer::singleShot(5000, this, [=](){log_in->setEnabled(true); }); });
 
     QVBoxLayout *VBOX = new QVBoxLayout();
     VBOX->addLayout(hbox);
