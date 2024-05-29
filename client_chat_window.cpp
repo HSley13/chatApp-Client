@@ -537,23 +537,15 @@ void client_chat_window::set_retrieve_message_window(QString type, QString conte
 {
     if (!type.compare("file"))
     {
-        QDir dir;
-        if (!my_name().isEmpty() && !my_name().isNull())
-            dir.mkdir(my_name());
-
         _client->save_file(my_name(), content, file_data, date_time);
 
-        QString path = QString("%1/%2/%3_%4").arg(dir.canonicalPath(), my_name(), date_time, content);
+        QString file_name = QString("%1_%2").arg(date_time, content);
 
-        add_file(path, true_or_false, date_time);
+        add_file(file_name, true_or_false, date_time);
         return;
     }
     else if (!type.compare("audio"))
     {
-        QDir dir;
-        if (!my_name().isEmpty() && !my_name().isNull())
-            dir.mkdir(my_name());
-
         QString audio_name = QString("%1_%2").arg(date_time, content);
 
         _client->IDBFS_save_audio(audio_name, file_data, static_cast<int>(file_data.size()));

@@ -165,16 +165,7 @@ void client_manager::save_audio(QString sender, QString file_name, QByteArray fi
 {
     QString audio_name = QString("%1_%2").arg(date_time, file_name);
 
-    qDebug() << "audio_name_saved" << audio_name;
-
     IDBFS_save_audio(audio_name, file_data, static_cast<int>(file_data.size()));
-
-    EM_ASM({
-        FS.syncfs(function(err) {
-            assert(!err);
-            console.log('Audio file saved and synced');
-        });
-    });
 
     emit audio_received(sender, audio_name);
 }
@@ -246,8 +237,6 @@ void client_manager::IDBFS_save_audio(QString file_name, QByteArray data, int si
 {
     std::string file_path = "/audio/";
     file_path += file_name.toStdString();
-
-    qDebug() << "full_name_when_saving_file" << file_path;
 
     FILE *file = fopen(file_path.c_str(), "wb");
     if (file)
