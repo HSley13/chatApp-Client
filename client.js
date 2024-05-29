@@ -246,8 +246,6 @@ legacyModuleProp("readBinary", "readBinary");
 
 legacyModuleProp("setWindowTitle", "setWindowTitle");
 
-var IDBFS = "IDBFS is no longer included by default; build with -lidbfs.js";
-
 var PROXYFS = "PROXYFS is no longer included by default; build with -lproxyfs.js";
 
 var WORKERFS = "WORKERFS is no longer included by default; build with -lworkerfs.js";
@@ -1887,6 +1885,282 @@ var FS_getMode = (canRead, canWrite) => {
  return mode;
 };
 
+var IDBFS = {
+ dbs: {},
+ indexedDB: () => {
+  if (typeof indexedDB != "undefined") return indexedDB;
+  var ret = null;
+  if (typeof window == "object") ret = window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB;
+  assert(ret, "IDBFS used, but indexedDB not supported");
+  return ret;
+ },
+ DB_VERSION: 21,
+ DB_STORE_NAME: "FILE_DATA",
+ mount: function(mount) {
+  return MEMFS.mount.apply(null, arguments);
+ },
+ syncfs: (mount, populate, callback) => {
+  IDBFS.getLocalSet(mount, (err, local) => {
+   if (err) return callback(err);
+   IDBFS.getRemoteSet(mount, (err, remote) => {
+    if (err) return callback(err);
+    var src = populate ? remote : local;
+    var dst = populate ? local : remote;
+    IDBFS.reconcile(src, dst, callback);
+   });
+  });
+ },
+ quit: () => {
+  Object.values(IDBFS.dbs).forEach(value => value.close());
+  IDBFS.dbs = {};
+ },
+ getDB: (name, callback) => {
+  var db = IDBFS.dbs[name];
+  if (db) {
+   return callback(null, db);
+  }
+  var req;
+  try {
+   req = IDBFS.indexedDB().open(name, IDBFS.DB_VERSION);
+  } catch (e) {
+   return callback(e);
+  }
+  if (!req) {
+   return callback("Unable to connect to IndexedDB");
+  }
+  req.onupgradeneeded = e => {
+   var db = /** @type {IDBDatabase} */ (e.target.result);
+   var transaction = e.target.transaction;
+   var fileStore;
+   if (db.objectStoreNames.contains(IDBFS.DB_STORE_NAME)) {
+    fileStore = transaction.objectStore(IDBFS.DB_STORE_NAME);
+   } else {
+    fileStore = db.createObjectStore(IDBFS.DB_STORE_NAME);
+   }
+   if (!fileStore.indexNames.contains("timestamp")) {
+    fileStore.createIndex("timestamp", "timestamp", {
+     unique: false
+    });
+   }
+  };
+  req.onsuccess = () => {
+   db = /** @type {IDBDatabase} */ (req.result);
+   IDBFS.dbs[name] = db;
+   callback(null, db);
+  };
+  req.onerror = e => {
+   callback(e.target.error);
+   e.preventDefault();
+  };
+ },
+ getLocalSet: (mount, callback) => {
+  var entries = {};
+  function isRealDir(p) {
+   return p !== "." && p !== "..";
+  }
+  function toAbsolute(root) {
+   return p => PATH.join2(root, p);
+  }
+  var check = FS.readdir(mount.mountpoint).filter(isRealDir).map(toAbsolute(mount.mountpoint));
+  while (check.length) {
+   var path = check.pop();
+   var stat;
+   try {
+    stat = FS.stat(path);
+   } catch (e) {
+    return callback(e);
+   }
+   if (FS.isDir(stat.mode)) {
+    check.push.apply(check, FS.readdir(path).filter(isRealDir).map(toAbsolute(path)));
+   }
+   entries[path] = {
+    "timestamp": stat.mtime
+   };
+  }
+  return callback(null, {
+   type: "local",
+   entries: entries
+  });
+ },
+ getRemoteSet: (mount, callback) => {
+  var entries = {};
+  IDBFS.getDB(mount.mountpoint, (err, db) => {
+   if (err) return callback(err);
+   try {
+    var transaction = db.transaction([ IDBFS.DB_STORE_NAME ], "readonly");
+    transaction.onerror = e => {
+     callback(e.target.error);
+     e.preventDefault();
+    };
+    var store = transaction.objectStore(IDBFS.DB_STORE_NAME);
+    var index = store.index("timestamp");
+    index.openKeyCursor().onsuccess = event => {
+     var cursor = event.target.result;
+     if (!cursor) {
+      return callback(null, {
+       type: "remote",
+       db: db,
+       entries: entries
+      });
+     }
+     entries[cursor.primaryKey] = {
+      "timestamp": cursor.key
+     };
+     cursor.continue();
+    };
+   } catch (e) {
+    return callback(e);
+   }
+  });
+ },
+ loadLocalEntry: (path, callback) => {
+  var stat, node;
+  try {
+   var lookup = FS.lookupPath(path);
+   node = lookup.node;
+   stat = FS.stat(path);
+  } catch (e) {
+   return callback(e);
+  }
+  if (FS.isDir(stat.mode)) {
+   return callback(null, {
+    "timestamp": stat.mtime,
+    "mode": stat.mode
+   });
+  } else if (FS.isFile(stat.mode)) {
+   node.contents = MEMFS.getFileDataAsTypedArray(node);
+   return callback(null, {
+    "timestamp": stat.mtime,
+    "mode": stat.mode,
+    "contents": node.contents
+   });
+  } else {
+   return callback(new Error("node type not supported"));
+  }
+ },
+ storeLocalEntry: (path, entry, callback) => {
+  try {
+   if (FS.isDir(entry["mode"])) {
+    FS.mkdirTree(path, entry["mode"]);
+   } else if (FS.isFile(entry["mode"])) {
+    FS.writeFile(path, entry["contents"], {
+     canOwn: true
+    });
+   } else {
+    return callback(new Error("node type not supported"));
+   }
+   FS.chmod(path, entry["mode"]);
+   FS.utime(path, entry["timestamp"], entry["timestamp"]);
+  } catch (e) {
+   return callback(e);
+  }
+  callback(null);
+ },
+ removeLocalEntry: (path, callback) => {
+  try {
+   var stat = FS.stat(path);
+   if (FS.isDir(stat.mode)) {
+    FS.rmdir(path);
+   } else if (FS.isFile(stat.mode)) {
+    FS.unlink(path);
+   }
+  } catch (e) {
+   return callback(e);
+  }
+  callback(null);
+ },
+ loadRemoteEntry: (store, path, callback) => {
+  var req = store.get(path);
+  req.onsuccess = event => callback(null, event.target.result);
+  req.onerror = e => {
+   callback(e.target.error);
+   e.preventDefault();
+  };
+ },
+ storeRemoteEntry: (store, path, entry, callback) => {
+  try {
+   var req = store.put(entry, path);
+  } catch (e) {
+   callback(e);
+   return;
+  }
+  req.onsuccess = event => callback();
+  req.onerror = e => {
+   callback(e.target.error);
+   e.preventDefault();
+  };
+ },
+ removeRemoteEntry: (store, path, callback) => {
+  var req = store.delete(path);
+  req.onsuccess = event => callback();
+  req.onerror = e => {
+   callback(e.target.error);
+   e.preventDefault();
+  };
+ },
+ reconcile: (src, dst, callback) => {
+  var total = 0;
+  var create = [];
+  Object.keys(src.entries).forEach(function(key) {
+   var e = src.entries[key];
+   var e2 = dst.entries[key];
+   if (!e2 || e["timestamp"].getTime() != e2["timestamp"].getTime()) {
+    create.push(key);
+    total++;
+   }
+  });
+  var remove = [];
+  Object.keys(dst.entries).forEach(function(key) {
+   if (!src.entries[key]) {
+    remove.push(key);
+    total++;
+   }
+  });
+  if (!total) {
+   return callback(null);
+  }
+  var errored = false;
+  var db = src.type === "remote" ? src.db : dst.db;
+  var transaction = db.transaction([ IDBFS.DB_STORE_NAME ], "readwrite");
+  var store = transaction.objectStore(IDBFS.DB_STORE_NAME);
+  function done(err) {
+   if (err && !errored) {
+    errored = true;
+    return callback(err);
+   }
+  }
+  transaction.onerror = e => {
+   done(this.error);
+   e.preventDefault();
+  };
+  transaction.oncomplete = e => {
+   if (!errored) {
+    callback(null);
+   }
+  };
+  create.sort().forEach(path => {
+   if (dst.type === "local") {
+    IDBFS.loadRemoteEntry(store, path, (err, entry) => {
+     if (err) return done(err);
+     IDBFS.storeLocalEntry(path, entry, done);
+    });
+   } else {
+    IDBFS.loadLocalEntry(path, (err, entry) => {
+     if (err) return done(err);
+     IDBFS.storeRemoteEntry(store, path, entry, done);
+    });
+   }
+  });
+  remove.sort().reverse().forEach(path => {
+   if (dst.type === "local") {
+    IDBFS.removeLocalEntry(path, done);
+   } else {
+    IDBFS.removeRemoteEntry(store, path, done);
+   }
+  });
+ }
+};
+
 var ERRNO_MESSAGES = {
  0: "Success",
  1: "Arg list too long",
@@ -3269,7 +3543,8 @@ var FS = {
   FS.createDefaultDevices();
   FS.createSpecialDirectories();
   FS.filesystems = {
-   "MEMFS": MEMFS
+   "MEMFS": MEMFS,
+   "IDBFS": IDBFS
   };
  },
  init(input, output, error) {
@@ -16030,7 +16305,7 @@ var missingLibrarySymbols = [ "writeI53ToI64Clamped", "writeI53ToI64Signaling", 
 
 missingLibrarySymbols.forEach(missingLibrarySymbol);
 
-var unexportedSymbols = [ "run", "addOnPreRun", "addOnInit", "addOnPreMain", "addOnExit", "addOnPostRun", "addRunDependency", "removeRunDependency", "FS_createFolder", "FS_createPath", "FS_createLazyFile", "FS_createLink", "FS_createDevice", "FS_readFile", "out", "err", "abort", "wasmMemory", "wasmExports", "stackAlloc", "stackSave", "stackRestore", "getTempRet0", "setTempRet0", "writeStackCookie", "checkStackCookie", "writeI53ToI64", "readI53FromI64", "readI53FromU64", "convertI32PairToI53", "convertU32PairToI53", "MAX_INT53", "MIN_INT53", "bigintToI53Checked", "ptrToString", "zeroMemory", "exitJS", "getHeapMax", "growMemory", "ENV", "MONTH_DAYS_REGULAR", "MONTH_DAYS_LEAP", "MONTH_DAYS_REGULAR_CUMULATIVE", "MONTH_DAYS_LEAP_CUMULATIVE", "isLeapYear", "ydayFromDate", "arraySum", "addDays", "ERRNO_CODES", "ERRNO_MESSAGES", "setErrNo", "inetPton4", "inetNtop4", "inetPton6", "inetNtop6", "readSockaddr", "writeSockaddr", "DNS", "Protocols", "Sockets", "initRandomFill", "randomFill", "timers", "warnOnce", "getCallstack", "emscriptenLog", "UNWIND_CACHE", "readEmAsmArgsArray", "readEmAsmArgs", "runEmAsmFunction", "jstoi_q", "getExecutableName", "listenOnce", "autoResumeAudioContext", "handleException", "keepRuntimeAlive", "callUserCallback", "maybeExit", "asyncLoad", "alignMemory", "mmapAlloc", "handleAllocatorInit", "HandleAllocator", "wasmTable", "noExitRuntime", "freeTableIndexes", "functionsInTableMap", "reallyNegative", "unSign", "strLen", "reSign", "formatString", "setValue", "getValue", "PATH", "PATH_FS", "UTF8Decoder", "UTF8ArrayToString", "UTF8ToString", "stringToUTF8Array", "stringToUTF8", "lengthBytesUTF8", "intArrayFromString", "stringToAscii", "UTF16Decoder", "lengthBytesUTF16", "UTF32ToString", "stringToUTF32", "lengthBytesUTF32", "stringToNewUTF8", "stringToUTF8OnStack", "writeArrayToMemory", "registerKeyEventCallback", "maybeCStringToJsString", "findEventTarget", "findCanvasEventTarget", "getBoundingClientRect", "fillMouseEventData", "registerWheelEventCallback", "registerUiEventCallback", "currentFullscreenStrategy", "restoreOldWindowedStyle", "demangle", "demangleAll", "jsStackTrace", "ExitStatus", "getEnvStrings", "doReadv", "doWritev", "safeSetTimeout", "promiseMap", "uncaughtExceptionCount", "exceptionLast", "exceptionCaught", "ExceptionInfo", "findMatchingCatch", "Browser", "setMainLoop", "wget", "SYSCALLS", "getSocketFromFD", "getSocketAddress", "preloadPlugins", "FS_createPreloadedFile", "FS_modeStringToFlags", "FS_getMode", "FS_stdin_getChar_buffer", "FS_stdin_getChar", "FS_createDataFile", "MEMFS", "TTY", "PIPEFS", "SOCKFS", "_setNetworkCallback", "tempFixedLengthArray", "miniTempWebGLFloatBuffers", "miniTempWebGLIntBuffers", "heapObjectForWebGLType", "heapAccessShiftForWebGLHeap", "webgl_enable_ANGLE_instanced_arrays", "webgl_enable_OES_vertex_array_object", "webgl_enable_WEBGL_draw_buffers", "webgl_enable_WEBGL_multi_draw", "GL", "emscriptenWebGLGet", "computeUnpackAlignedImageSize", "colorChannelsInGlTextureFormat", "emscriptenWebGLGetTexPixelData", "__glGenObject", "emscriptenWebGLGetUniform", "webglGetUniformLocation", "webglPrepareUniformLocationsBeforeFirstUse", "webglGetLeftBracePos", "emscriptenWebGLGetVertexAttrib", "__glGetActiveAttribOrUniform", "emscripten_webgl_power_preferences", "AL", "GLUT", "EGL", "GLEW", "IDBStore", "SDL", "SDL_gfx", "emscriptenWebGLGetIndexed", "webgl_enable_WEBGL_draw_instanced_base_vertex_base_instance", "webgl_enable_WEBGL_multi_draw_instanced_base_vertex_base_instance", "allocateUTF8", "allocateUTF8OnStack", "Fetch", "WS", "InternalError", "BindingError", "throwInternalError", "throwBindingError", "registeredTypes", "awaitingDependencies", "typeDependencies", "tupleRegistrations", "structRegistrations", "sharedRegisterType", "whenDependentTypesAreResolved", "embind_charCodes", "embind_init_charCodes", "readLatin1String", "getTypeName", "getFunctionName", "heap32VectorToArray", "requireRegisteredType", "UnboundTypeError", "PureVirtualError", "GenericWireTypeSize", "throwUnboundTypeError", "ensureOverloadTable", "exposePublicSymbol", "replacePublicSymbol", "extendError", "createNamedFunction", "embindRepr", "registeredInstances", "registeredPointers", "registerType", "integerReadValueFromPointer", "floatReadValueFromPointer", "simpleReadValueFromPointer", "readPointer", "runDestructors", "newFunc", "craftInvokerFunction", "embind__requireFunction", "finalizationRegistry", "detachFinalizer_deps", "deletionQueue", "delayFunction", "emval_handles", "emval_symbols", "init_emval", "count_emval_handles", "getStringOrSymbol", "Emval", "emval_get_global", "emval_returnValue", "emval_lookupTypes", "emval_methodCallers", "emval_addMethodCaller", "reflectConstruct" ];
+var unexportedSymbols = [ "run", "addOnPreRun", "addOnInit", "addOnPreMain", "addOnExit", "addOnPostRun", "addRunDependency", "removeRunDependency", "FS_createFolder", "FS_createPath", "FS_createLazyFile", "FS_createLink", "FS_createDevice", "FS_readFile", "out", "err", "abort", "wasmMemory", "wasmExports", "stackAlloc", "stackSave", "stackRestore", "getTempRet0", "setTempRet0", "writeStackCookie", "checkStackCookie", "writeI53ToI64", "readI53FromI64", "readI53FromU64", "convertI32PairToI53", "convertU32PairToI53", "MAX_INT53", "MIN_INT53", "bigintToI53Checked", "ptrToString", "zeroMemory", "exitJS", "getHeapMax", "growMemory", "ENV", "MONTH_DAYS_REGULAR", "MONTH_DAYS_LEAP", "MONTH_DAYS_REGULAR_CUMULATIVE", "MONTH_DAYS_LEAP_CUMULATIVE", "isLeapYear", "ydayFromDate", "arraySum", "addDays", "ERRNO_CODES", "ERRNO_MESSAGES", "setErrNo", "inetPton4", "inetNtop4", "inetPton6", "inetNtop6", "readSockaddr", "writeSockaddr", "DNS", "Protocols", "Sockets", "initRandomFill", "randomFill", "timers", "warnOnce", "getCallstack", "emscriptenLog", "UNWIND_CACHE", "readEmAsmArgsArray", "readEmAsmArgs", "runEmAsmFunction", "jstoi_q", "getExecutableName", "listenOnce", "autoResumeAudioContext", "handleException", "keepRuntimeAlive", "callUserCallback", "maybeExit", "asyncLoad", "alignMemory", "mmapAlloc", "handleAllocatorInit", "HandleAllocator", "wasmTable", "noExitRuntime", "freeTableIndexes", "functionsInTableMap", "reallyNegative", "unSign", "strLen", "reSign", "formatString", "setValue", "getValue", "PATH", "PATH_FS", "UTF8Decoder", "UTF8ArrayToString", "UTF8ToString", "stringToUTF8Array", "stringToUTF8", "lengthBytesUTF8", "intArrayFromString", "stringToAscii", "UTF16Decoder", "lengthBytesUTF16", "UTF32ToString", "stringToUTF32", "lengthBytesUTF32", "stringToNewUTF8", "stringToUTF8OnStack", "writeArrayToMemory", "registerKeyEventCallback", "maybeCStringToJsString", "findEventTarget", "findCanvasEventTarget", "getBoundingClientRect", "fillMouseEventData", "registerWheelEventCallback", "registerUiEventCallback", "currentFullscreenStrategy", "restoreOldWindowedStyle", "demangle", "demangleAll", "jsStackTrace", "ExitStatus", "getEnvStrings", "doReadv", "doWritev", "safeSetTimeout", "promiseMap", "uncaughtExceptionCount", "exceptionLast", "exceptionCaught", "ExceptionInfo", "findMatchingCatch", "Browser", "setMainLoop", "wget", "SYSCALLS", "getSocketFromFD", "getSocketAddress", "preloadPlugins", "FS_createPreloadedFile", "FS_modeStringToFlags", "FS_getMode", "FS_stdin_getChar_buffer", "FS_stdin_getChar", "FS_createDataFile", "MEMFS", "TTY", "PIPEFS", "SOCKFS", "_setNetworkCallback", "tempFixedLengthArray", "miniTempWebGLFloatBuffers", "miniTempWebGLIntBuffers", "heapObjectForWebGLType", "heapAccessShiftForWebGLHeap", "webgl_enable_ANGLE_instanced_arrays", "webgl_enable_OES_vertex_array_object", "webgl_enable_WEBGL_draw_buffers", "webgl_enable_WEBGL_multi_draw", "GL", "emscriptenWebGLGet", "computeUnpackAlignedImageSize", "colorChannelsInGlTextureFormat", "emscriptenWebGLGetTexPixelData", "__glGenObject", "emscriptenWebGLGetUniform", "webglGetUniformLocation", "webglPrepareUniformLocationsBeforeFirstUse", "webglGetLeftBracePos", "emscriptenWebGLGetVertexAttrib", "__glGetActiveAttribOrUniform", "emscripten_webgl_power_preferences", "AL", "GLUT", "EGL", "GLEW", "IDBStore", "SDL", "SDL_gfx", "emscriptenWebGLGetIndexed", "webgl_enable_WEBGL_draw_instanced_base_vertex_base_instance", "webgl_enable_WEBGL_multi_draw_instanced_base_vertex_base_instance", "allocateUTF8", "allocateUTF8OnStack", "Fetch", "IDBFS", "WS", "InternalError", "BindingError", "throwInternalError", "throwBindingError", "registeredTypes", "awaitingDependencies", "typeDependencies", "tupleRegistrations", "structRegistrations", "sharedRegisterType", "whenDependentTypesAreResolved", "embind_charCodes", "embind_init_charCodes", "readLatin1String", "getTypeName", "getFunctionName", "heap32VectorToArray", "requireRegisteredType", "UnboundTypeError", "PureVirtualError", "GenericWireTypeSize", "throwUnboundTypeError", "ensureOverloadTable", "exposePublicSymbol", "replacePublicSymbol", "extendError", "createNamedFunction", "embindRepr", "registeredInstances", "registeredPointers", "registerType", "integerReadValueFromPointer", "floatReadValueFromPointer", "simpleReadValueFromPointer", "readPointer", "runDestructors", "newFunc", "craftInvokerFunction", "embind__requireFunction", "finalizationRegistry", "detachFinalizer_deps", "deletionQueue", "delayFunction", "emval_handles", "emval_symbols", "init_emval", "count_emval_handles", "getStringOrSymbol", "Emval", "emval_get_global", "emval_returnValue", "emval_lookupTypes", "emval_methodCallers", "emval_addMethodCaller", "reflectConstruct" ];
 
 unexportedSymbols.forEach(unexportedRuntimeSymbol);
 

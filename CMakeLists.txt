@@ -16,6 +16,7 @@ qt_add_executable(client
                     chat_line.cpp
                 )
 
+                
 target_link_libraries(client PRIVATE 
                                     Qt6::Core 
                                     Qt6::Widgets 
@@ -26,6 +27,8 @@ qt_add_resources(client "client_images"
                     PREFIX "/images"
                     FILES send_icon.png file_icon.webp record_icon.png style.css
                 )
+
+set_target_properties(client PROPERTIES LINK_FLAGS "-lidbfs.js")
 
 set(MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/Info.plist)
 
