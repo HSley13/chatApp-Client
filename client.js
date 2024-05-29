@@ -706,7 +706,13 @@ function dbg(text) {
 }
 
 var ASM_CONSTS = {
- 9363600: () => {
+ 9363712: () => {
+  FS.syncfs(function(err) {
+   assert(!err);
+   console.log("Audio file saved and synced");
+  });
+ },
+ 9363804: () => {
   FS.mkdir("/audio");
   FS.mount(IDBFS, {}, "/audio");
   FS.syncfs(true, function(err) {
@@ -714,23 +720,33 @@ var ASM_CONSTS = {
    console.log("IDBFS mounted and synced");
   });
  },
- 9363746: () => {
+ 9363950: $0 => {
+  var file_path = UTF8ToString($0);
+  var data = FS.readFile(file_path);
+  if (!data) {
+   console.error("Failed to read file:", file_path);
+   return null;
+  }
+  var blob = new Blob([ data ], {
+   type: "audio/*"
+  });
+  var url = URL.createObjectURL(blob);
+  var url_length = lengthBytesUTF8(url) + 1;
+  var stringOnWasmHeap = _malloc(url_length);
+  stringToUTF8(url, stringOnWasmHeap, url_length);
+  return stringOnWasmHeap;
+ },
+ 9364349: () => {
   FS.syncfs(function(err) {
    assert(!err);
    console.log("Audio file saved and synced");
   });
  },
- 9363838: $0 => {
-  var file_path = UTF8ToString($0);
-  var data = FS.readFile(file_path);
-  var blob = new Blob([ data ], {
-   type: "audio/*"
+ 9364441: () => {
+  FS.syncfs(function(err) {
+   assert(!err);
+   console.log("Audio file saved and synced");
   });
-  var url = URL.createObjectURL(blob);
-  var length_Bytes = lengthBytesUTF8(url) + 1;
-  var stringOnWasmHeap = _malloc(length_Bytes);
-  stringToUTF8(url, stringOnWasmHeap, length_Bytes);
-  return stringOnWasmHeap;
  }
 };
 
@@ -15581,9 +15597,9 @@ var ___cxa_can_catch = createExportWrapper("__cxa_can_catch");
 
 var ___cxa_is_pointer_type = createExportWrapper("__cxa_is_pointer_type");
 
-var ___start_em_js = Module["___start_em_js"] = 9364165;
+var ___start_em_js = Module["___start_em_js"] = 9364533;
 
-var ___stop_em_js = Module["___stop_em_js"] = 9365255;
+var ___stop_em_js = Module["___stop_em_js"] = 9365623;
 
 function invoke_viiii(index, a1, a2, a3, a4) {
  var sp = stackSave();

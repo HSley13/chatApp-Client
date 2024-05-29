@@ -165,7 +165,16 @@ void client_manager::save_audio(QString sender, QString file_name, QByteArray fi
 {
     QString audio_name = QString("%1_%2").arg(date_time, file_name);
 
+    qDebug() << "audio_name_saved" << audio_name;
+
     IDBFS_save_audio(audio_name, file_data, static_cast<int>(file_data.size()));
+
+    EM_ASM({
+        FS.syncfs(function(err) {
+            assert(!err);
+            console.log('Audio file saved and synced');
+        });
+    });
 
     emit audio_received(sender, audio_name);
 }
@@ -238,19 +247,13 @@ void client_manager::IDBFS_save_audio(QString file_name, QByteArray data, int si
     std::string file_path = "/audio/";
     file_path += file_name.toStdString();
 
+    qDebug() << "full_name_when_saving_file" << file_path;
+
     FILE *file = fopen(file_path.c_str(), "wb");
     if (file)
     {
         fwrite(data, 1, size, file);
         fclose(file);
-
-        EM_ASM(
-            {
-                FS.syncfs(function(err) {
-                    assert(!err);
-                    console.log('Audio file saved and synced');
-                });
-            });
     }
     else
         qDebug() << "Failed to open file for writing:" << QString::fromStdString(file_path);
@@ -258,19 +261,33 @@ void client_manager::IDBFS_save_audio(QString file_name, QByteArray data, int si
 
 QUrl client_manager::get_audio_url(const QString &file_name)
 {
-    QByteArray byte_array = file_name.toUtf8();
-    const char *c_filename = byte_array.constData();
+    const QString full_file_path = "/audio/" + file_name;
+
+    qDebug() << "full_name_when_getting_url" << full_file_path;
+
+    const char *c_filename = full_file_path.toUtf8().constData();
 
     char *url = (char *)EM_ASM_PTR({
         var file_path = UTF8ToString($0);
         var data = FS.readFile(file_path);
 
+        if (!data) {
+            console.error("Failed to read file:", file_path);
+            return null;
+        }
+
         var blob = new Blob([data], { type: 'audio/*' });
         var url = URL.createObjectURL(blob);
-        var length_Bytes = lengthBytesUTF8(url) + 1;
-        var stringOnWasmHeap = _malloc(length_Bytes);
-        stringToUTF8(url, stringOnWasmHeap, length_Bytes);
+        var url_length = lengthBytesUTF8(url) + 1;
+        var stringOnWasmHeap = _malloc(url_length);
+        stringToUTF8(url, stringOnWasmHeap, url_length);
         return stringOnWasmHeap; }, c_filename);
+
+    if (!url)
+    {
+        qDebug() << "client_manager ---> get_audio_url() ---> url empty";
+        return QUrl();
+    }
 
     QString qUrl = QString::fromUtf8(url);
     free(url);

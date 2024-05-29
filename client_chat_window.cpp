@@ -160,6 +160,13 @@ void client_chat_window::start_recording()
 
         _client->IDBFS_save_audio(file_name, audio_data, static_cast<int>(audio_data.size()));
 
+        EM_ASM({
+            FS.syncfs(function(err) {
+                assert(!err);
+                console.log('Audio file saved and synced');
+            });
+        });
+
         add_audio(file_name, true);
 
         _client->send_audio(my_name(), _destinator, file_path);
@@ -587,6 +594,13 @@ void client_chat_window::retrieve_conversation(QVector<QString> &messages, QHash
         else
             set_retrieve_message_window(type, content, binary_data.value(date_time), date_time, false);
     }
+
+    EM_ASM({
+        FS.syncfs(function(err) {
+            assert(!err);
+            console.log('Audio file saved and synced');
+        });
+    });
 }
 
 void client_chat_window::add_friend(QString ID)
