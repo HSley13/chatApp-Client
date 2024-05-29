@@ -6,6 +6,10 @@
 #include <QtMultimedia>
 #include <QWebSocket>
 #include <QWebSocketServer>
+#include <emscripten.h>
+#include <sys/stat.h>
+#include <cstdio>
+
 class client_manager : public QMainWindow
 {
     Q_OBJECT
@@ -35,6 +39,12 @@ public:
     void send_file_rejected(QString sender, QString receiver);
     void send_file(QString sender, QString receiver, QString file_name, QByteArray file_data);
 
+    void mount_IDBFS();
+
+    void IDBFS_save_audio(QString filename, QByteArray data, int size);
+
+    QUrl get_audio_url(const QString &audio_name);
+
     static QString _my_ID;
     static QString _my_name;
     QString _file_name;
@@ -59,7 +69,7 @@ signals:
 
     void socket_disconnected();
 
-    void audio_received(QString sender, QUrl source);
+    void audio_received(QString sender, QString audio);
 
     void client_added_you(int conversation_ID, QString name, QString ID);
     void lookup_friend_result(int conversation_ID, QString name, bool true_or_false);

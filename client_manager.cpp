@@ -22,6 +22,8 @@ client_manager::client_manager(QWidget *parent)
         connect(_socket, &QWebSocket::binaryMessageReceived, this, &client_manager::on_binary_message_received);
 
         _protocol = new chat_protocol(this);
+
+        mount_IDBFS();
     }
 }
 
@@ -161,22 +163,11 @@ void client_manager::send_save_data(int conversation_ID, QString sender, QString
 
 void client_manager::save_audio(QString sender, QString file_name, QByteArray file_data, QString date_time)
 {
-    QDir dir;
-    if (!sender.isEmpty() && !sender.isNull())
-        dir.mkdir(sender);
+    QString audio_name = QString("%1_%2").arg(date_time, file_name);
 
-    QUrl source = QUrl::fromLocalFile(QCoreApplication::applicationDirPath() + "/" + date_time + file_name);
+    IDBFS_save_audio(audio_name, file_data, static_cast<int>(file_data.size()));
 
-    QFile file(source.toLocalFile());
-    if (file.open(QIODevice::WriteOnly))
-    {
-        file.write(file_data);
-        file.close();
-
-        emit audio_received(sender, source);
-    }
-    else
-        qDebug() << "client_manager ---> save_audio() ---> Couldn't open the file to write to it";
+    emit audio_received(sender, audio_name);
 }
 
 void client_manager::send_audio(QString sender, QString receiver, QString audio_name)
@@ -229,4 +220,60 @@ void client_manager::send_file(QString sender, QString receiver, QString file_na
 {
     _file_name = file_name;
     _socket->sendBinaryMessage(_protocol->set_file_message(sender, receiver, file_name, file_data));
+}
+
+void client_manager::mount_IDBFS()
+{
+    EM_ASM({
+        FS.mkdir('/audio');
+        FS.mount(IDBFS, {}, '/audio');
+        FS.syncfs(true, function(err) {
+            assert(!err);
+            console.log('IDBFS mounted and synced'); });
+    });
+}
+
+void client_manager::IDBFS_save_audio(QString file_name, QByteArray data, int size)
+{
+    std::string file_path = "/audio/";
+    file_path += file_name.toStdString();
+
+    FILE *file = fopen(file_path.c_str(), "wb");
+    if (file)
+    {
+        fwrite(data, 1, size, file);
+        fclose(file);
+
+        EM_ASM(
+            {
+                FS.syncfs(function(err) {
+                    assert(!err);
+                    console.log('Audio file saved and synced');
+                });
+            });
+    }
+    else
+        qDebug() << "Failed to open file for writing:" << QString::fromStdString(file_path);
+}
+
+QUrl client_manager::get_audio_url(const QString &file_name)
+{
+    QByteArray byte_array = file_name.toUtf8();
+    const char *c_filename = byte_array.constData();
+
+    char *url = (char *)EM_ASM_PTR({
+        var file_path = UTF8ToString($0);
+        var data = FS.readFile(file_path);
+
+        var blob = new Blob([data], { type: 'audio/*' });
+        var url = URL.createObjectURL(blob);
+        var length_Bytes = lengthBytesUTF8(url) + 1;
+        var stringOnWasmHeap = _malloc(length_Bytes);
+        stringToUTF8(url, stringOnWasmHeap, length_Bytes);
+        return stringOnWasmHeap; }, c_filename);
+
+    QString qUrl = QString::fromUtf8(url);
+    free(url);
+
+    return QUrl(qUrl);
 }

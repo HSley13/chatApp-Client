@@ -122,13 +122,15 @@ void client_chat_window::ask_microphone_permission()
 
 void client_chat_window::start_recording()
 {
+    QString file_path = _recorder->outputLocation().toLocalFile();
+
     if (!is_recording)
     {
-        if (QFile::exists(_recorder->outputLocation().toLocalFile()))
+        if (QFile::exists(file_path))
         {
-            if (!QFile::remove(_recorder->outputLocation().toLocalFile()))
+            if (!QFile::remove(file_path))
             {
-                qDebug() << "Error: Unable to delete the existing audio file!";
+                qDebug() << "client_chat_window ---> start_recording() ---> Error: Unable to delete the existing audio file!";
                 return;
             }
         }
@@ -144,11 +146,25 @@ void client_chat_window::start_recording()
         _duration_label->hide();
         _duration_label->clear();
 
-        add_audio(_recorder->outputLocation(), true);
+        QFile file(file_path);
+        QByteArray audio_data;
+        if (file.open(QIODevice::ReadOnly))
+        {
+            audio_data = file.readAll();
+            file.close();
+        }
+        else
+            qDebug() << "client_chat_window ---> start_recording() ---> Failed to open file for reading:" << file_path;
 
-        _client->send_audio(my_name(), _destinator, _recorder->outputLocation().toLocalFile());
+        QString file_name = QDateTime::currentDateTime().toString("yyyyMMdd_HHmmss") + "_audio.m4a";
 
-        _client->send_save_data(_conversation_ID, _client->_my_ID, _destinator, _recorder->outputLocation().toLocalFile(), "audio");
+        _client->IDBFS_save_audio(file_name, audio_data, static_cast<int>(audio_data.size()));
+
+        add_audio(file_name, true);
+
+        _client->send_audio(my_name(), _destinator, file_path);
+
+        _client->send_save_data(_conversation_ID, _client->_my_ID, _destinator, file_path, "audio");
 
         emit data_received_sent(_window_name);
     }
@@ -372,8 +388,8 @@ void client_chat_window::set_up_window()
         connect(_client, &client_manager::lookup_friend_result, this, [=](int conversation_ID, QString name, bool true_or_false)
                 { emit lookup_friend_result(conversation_ID, name, true_or_false); });
 
-        connect(_client, &client_manager::audio_received, this, [=](QString sender, QUrl source)
-                { emit audio_received(sender, source); });
+        connect(_client, &client_manager::audio_received, this, [=](QString sender, QString audio_name)
+                { emit audio_received(sender, audio_name); });
 
         connect(_client, &client_manager::file_received, this, [=](QString sender, QString path)
                 { emit file_received(sender, path); });
@@ -475,7 +491,7 @@ void client_chat_window::add_file(QString path, bool is_mine, QString date_time)
     _list->setItemWidget(line, wid);
 }
 
-void client_chat_window::add_audio(const QUrl &source, bool is_mine, QString date_time)
+void client_chat_window::add_audio(QString audio_name, bool is_mine, QString date_time)
 {
     QWidget *wid = new QWidget();
     wid->setStyleSheet("color: black;");
@@ -492,7 +508,7 @@ void client_chat_window::add_audio(const QUrl &source, bool is_mine, QString dat
 
     QPushButton *audio = new QPushButton("▶️", this);
     connect(audio, &QPushButton::clicked, this, [=]()
-            { play_audio(source, audio, slider); });
+            { play_audio(_client->get_audio_url(audio_name), audio, slider); });
 
     QHBoxLayout *hbox_1 = new QHBoxLayout();
     hbox_1->addWidget(audio);
@@ -531,11 +547,12 @@ void client_chat_window::set_retrieve_message_window(QString type, QString conte
         if (!my_name().isEmpty() && !my_name().isNull())
             dir.mkdir(my_name());
 
-        _client->save_audio(my_name(), content, file_data, date_time);
+        QString audio_name = QString("%1_%2").arg(date_time, content);
 
-        QUrl source = QUrl::fromLocalFile(QCoreApplication::applicationDirPath() + "/" + date_time + content);
+        _client->IDBFS_save_audio(audio_name, file_data, static_cast<int>(file_data.size()));
 
-        add_audio(source, true_or_false, date_time);
+        add_audio(audio_name, true_or_false, date_time);
+
         return;
     }
 

@@ -82,7 +82,7 @@ public:
     void retrieve_conversation(QVector<QString> &messages, QHash<QString, QByteArray> &binary_data);
 
     void add_file(QString path, bool is_mine = false, QString date_time = "");
-    void add_audio(const QUrl &source, bool is_mine = false, QString date_time = "");
+    void add_audio(QString audio_name, bool is_mine = false, QString date_time = "");
     void add_friend(QString ID);
 
     static client_manager *_client;
@@ -161,7 +161,7 @@ signals:
     void client_added_you(int conversation_ID, QString name, QString ID);
     void lookup_friend_result(int conversation_ID, QString name, bool true_or_false);
 
-    void audio_received(QString sender, QUrl source);
+    void audio_received(QString sender, QString audio_name);
     void file_received(QString sender, QString path);
 
     void item_deleted(QListWidgetItem *item);
