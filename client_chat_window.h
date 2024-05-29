@@ -162,7 +162,7 @@ signals:
     void lookup_friend_result(int conversation_ID, QString name, bool true_or_false);
 
     void audio_received(QString sender, QString audio_name);
-    void file_received(QString sender, QString path);
+    void file_received(QString sender, QString file_name);
 
     void item_deleted(QListWidgetItem *item);
 

@@ -21,7 +21,7 @@ public:
     void send_is_typing(QString sender, QString receiver);
 
     void save_file(QString sender, QString file_name, QByteArray file_data, QString date_time);
-    void save_audio(QString sender, QString file_name, QByteArray file_data, QString date_time);
+    void save_audio(QString sender, QString audio_name, QByteArray audio_data, QString date_time);
 
     void send_audio(QString sender, QString receiver, QString audio_name);
     void send_lookup_friend(QString ID);
@@ -39,11 +39,14 @@ public:
     void send_file_rejected(QString sender, QString receiver);
     void send_file(QString sender, QString receiver, QString file_name, QByteArray file_data);
 
-    void mount_IDBFS();
+    void mount_audio_IDBFS();
+    void mount_file_IDBFS();
 
-    void IDBFS_save_audio(QString filename, QByteArray data, int size);
-
+    void IDBFS_save_audio(QString audio_name, QByteArray audio_data, int size);
     QUrl get_audio_url(const QString &audio_name);
+
+    void IDBFS_save_file(QString file_name, QByteArray file_data, int size);
+    QUrl get_file_url(const QString &file_name);
 
     static QString _my_ID;
     static QString _my_name;
@@ -61,8 +64,6 @@ signals:
     void text_message_received(QString sender, QString message);
     void is_typing_received(QString sender);
 
-    void file_received(QString sender, QString path);
-
     void client_name_changed(QString old_name, QString client_name);
     void client_connected(QString client_name);
     void client_disconnected(QString client_name);
@@ -70,6 +71,7 @@ signals:
     void socket_disconnected();
 
     void audio_received(QString sender, QString audio);
+    void file_received(QString sender, QString file_name);
 
     void client_added_you(int conversation_ID, QString name, QString ID);
     void lookup_friend_result(int conversation_ID, QString name, bool true_or_false);

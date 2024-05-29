@@ -706,22 +706,30 @@ function dbg(text) {
 }
 
 var ASM_CONSTS = {
- 9363664: () => {
+ 9362064: () => {
   FS.mkdir("/audio");
   FS.mount(IDBFS, {}, "/audio");
   FS.syncfs(true, function(err) {
    assert(!err);
-   console.log("IDBFS mounted and synced");
+   console.log("IDBFS audio mounted and synced");
   });
  },
- 9363810: $0 => {
-  var file_path = UTF8ToString($0);
-  var data = FS.readFile(file_path);
-  if (!data) {
-   console.error("Failed to read file:", file_path);
+ 9362216: () => {
+  FS.mkdir("/file");
+  FS.mount(IDBFS, {}, "/file");
+  FS.syncfs(true, function(err) {
+   assert(!err);
+   console.log("IDBFS file mounted and synced");
+  });
+ },
+ 9362365: $0 => {
+  var audio_path = UTF8ToString($0);
+  var audio_data = FS.readFile(audio_path);
+  if (!audio_data) {
+   console.error("Failed to read file:", audio_path);
    return null;
   }
-  var blob = new Blob([ data ], {
+  var blob = new Blob([ audio_data ], {
    type: "audio/*"
   });
   var url = URL.createObjectURL(blob);
@@ -730,16 +738,32 @@ var ASM_CONSTS = {
   stringToUTF8(url, stringOnWasmHeap, url_length);
   return stringOnWasmHeap;
  },
- 9364209: () => {
+ 9362785: $0 => {
+  var file_path = UTF8ToString($0);
+  var file_data = FS.readFile(file_path);
+  if (!file_data) {
+   console.error("Failed to read file:", file_path);
+   return null;
+  }
+  var blob = new Blob([ file_data ], {
+   type: "application / octet - stream"
+  });
+  var url = URL.createObjectURL(blob);
+  var url_length = lengthBytesUTF8(url) + 1;
+  var stringOnWasmHeap = _malloc(url_length);
+  stringToUTF8(url, stringOnWasmHeap, url_length);
+  return stringOnWasmHeap;
+ },
+ 9363219: () => {
   FS.syncfs(function(err) {
    assert(!err);
    console.log("Audio file saved and synced");
   });
  },
- 9364301: () => {
+ 9363311: () => {
   FS.syncfs(function(err) {
    assert(!err);
-   console.log("Audio file saved and synced");
+   console.log("Audio & File saved and synced");
   });
  }
 };
@@ -15591,9 +15615,9 @@ var ___cxa_can_catch = createExportWrapper("__cxa_can_catch");
 
 var ___cxa_is_pointer_type = createExportWrapper("__cxa_is_pointer_type");
 
-var ___start_em_js = Module["___start_em_js"] = 9364393;
+var ___start_em_js = Module["___start_em_js"] = 9363405;
 
-var ___stop_em_js = Module["___stop_em_js"] = 9365483;
+var ___stop_em_js = Module["___stop_em_js"] = 9364495;
 
 function invoke_viiii(index, a1, a2, a3, a4) {
  var sp = stackSave();

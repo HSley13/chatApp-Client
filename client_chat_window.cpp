@@ -398,8 +398,8 @@ void client_chat_window::set_up_window()
         connect(_client, &client_manager::audio_received, this, [=](QString sender, QString audio_name)
                 { emit audio_received(sender, audio_name); });
 
-        connect(_client, &client_manager::file_received, this, [=](QString sender, QString path)
-                { emit file_received(sender, path); });
+        connect(_client, &client_manager::file_received, this, [=](QString sender, QString file_name)
+                { emit file_received(sender, file_name); });
 
         connect(_client, &client_manager::login_request, this, [=](QString hashed_password, bool true_or_false, QHash<int, QHash<QString, int>> friend_list, QList<QString> online_friends, QHash<int, QVector<QString>> messages, QHash<int, QHash<QString, QByteArray>> binary_data)
                 { emit login_request(hashed_password, true_or_false, friend_list, online_friends, messages, binary_data); });
@@ -457,7 +457,7 @@ void client_chat_window::mouseMoveEvent(QMouseEvent *event)
     }
 }
 
-void client_chat_window::add_file(QString path, bool is_mine, QString date_time)
+void client_chat_window::add_file(QString file_name, bool is_mine, QString date_time)
 {
     QWidget *wid = new QWidget();
     wid->setStyleSheet("color: black;");
@@ -479,7 +479,7 @@ void client_chat_window::add_file(QString path, bool is_mine, QString date_time)
     file->setFixedSize(QSize(30, 30));
     file->setStyleSheet("border: none");
     file->connect(file, &QPushButton::clicked, this, [=]()
-                  { QDesktopServices::openUrl(QUrl::fromLocalFile(path)); });
+                  { QDesktopServices::openUrl(_client->get_file_url(file_name)); });
 
     QHBoxLayout *file_lay = new QHBoxLayout();
     file_lay->addWidget(file);
@@ -537,11 +537,12 @@ void client_chat_window::set_retrieve_message_window(QString type, QString conte
 {
     if (!type.compare("file"))
     {
-        _client->save_file(my_name(), content, file_data, date_time);
-
         QString file_name = QString("%1_%2").arg(date_time, content);
 
+        _client->IDBFS_save_file(file_name, file_data, static_cast<int>(file_data.size()));
+
         add_file(file_name, true_or_false, date_time);
+
         return;
     }
     else if (!type.compare("audio"))
@@ -590,7 +591,7 @@ void client_chat_window::retrieve_conversation(QVector<QString> &messages, QHash
     EM_ASM({
         FS.syncfs(function(err) {
             assert(!err);
-            console.log('Audio file saved and synced');
+            console.log('Audio & File saved and synced');
         });
     });
 }

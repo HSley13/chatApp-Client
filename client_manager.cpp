@@ -23,7 +23,8 @@ client_manager::client_manager(QWidget *parent)
 
         _protocol = new chat_protocol(this);
 
-        mount_IDBFS();
+        mount_audio_IDBFS();
+        mount_file_IDBFS();
     }
 }
 
@@ -133,27 +134,11 @@ void client_manager::send_is_typing(QString sender, QString receiver)
 
 void client_manager::save_file(QString sender, QString file_name, QByteArray file_data, QString date_time)
 {
-#ifdef Q_OS_WASM
-    QFileDialog::saveFileContent(file_data, file_name);
-    emit file_received(sender, "");
-#else
-    QDir dir;
-    if (!sender.isEmpty() && !sender.isNull())
-        dir.mkdir(sender);
+    QString full_file_name = QString("%1_%2").arg(date_time, file_name);
 
-    QString path = QString("%1/%2/%3_%4").arg(dir.canonicalPath(), sender, date_time, file_name);
+    IDBFS_save_file(full_file_name, file_data, static_cast<int>(file_data.size()));
 
-    QFile file(path);
-    if (file.open(QIODevice::WriteOnly))
-    {
-        file.write(file_data);
-        file.close();
-
-        emit file_received(sender, path);
-    }
-    else
-        qDebug() << "client_manager ---> save_file() ---> Couldn't open the file to write to it";
-#endif
+    emit file_received(sender, full_file_name);
 }
 
 void client_manager::send_save_data(int conversation_ID, QString sender, QString receiver, QString data_name, QString type)
@@ -161,13 +146,13 @@ void client_manager::send_save_data(int conversation_ID, QString sender, QString
     _socket->sendBinaryMessage(_protocol->set_save_data_message(conversation_ID, sender, receiver, data_name, type));
 }
 
-void client_manager::save_audio(QString sender, QString file_name, QByteArray file_data, QString date_time)
+void client_manager::save_audio(QString sender, QString audio_name, QByteArray audio_data, QString date_time)
 {
-    QString audio_name = QString("%1_%2").arg(date_time, file_name);
+    QString full_audio_name = QString("%1_%2").arg(date_time, audio_name);
 
-    IDBFS_save_audio(audio_name, file_data, static_cast<int>(file_data.size()));
+    IDBFS_save_audio(full_audio_name, audio_data, static_cast<int>(audio_data.size()));
 
-    emit audio_received(sender, audio_name);
+    emit audio_received(sender, full_audio_name);
 }
 
 void client_manager::send_audio(QString sender, QString receiver, QString audio_name)
@@ -222,59 +207,133 @@ void client_manager::send_file(QString sender, QString receiver, QString file_na
     _socket->sendBinaryMessage(_protocol->set_file_message(sender, receiver, file_name, file_data));
 }
 
-void client_manager::mount_IDBFS()
+void client_manager::mount_audio_IDBFS()
 {
     EM_ASM({
         FS.mkdir('/audio');
         FS.mount(IDBFS, {}, '/audio');
         FS.syncfs(true, function(err) {
             assert(!err);
-            console.log('IDBFS mounted and synced'); });
+            console.log('IDBFS audio mounted and synced'); });
     });
 }
 
-void client_manager::IDBFS_save_audio(QString file_name, QByteArray data, int size)
+void client_manager::mount_file_IDBFS()
 {
-    std::string file_path = "/audio/";
+    EM_ASM({
+        FS.mkdir('/file');
+        FS.mount(IDBFS, {}, '/file');
+        FS.syncfs(true, function(err) {
+            assert(!err);
+            console.log('IDBFS file mounted and synced'); });
+    });
+}
+
+void client_manager::IDBFS_save_audio(QString audio_name, QByteArray audio_data, int size)
+{
+    std::string audio_path = "/audio/";
+    audio_path += audio_name.toStdString();
+
+    FILE *file = fopen(audio_path.c_str(), "wb");
+    if (file)
+    {
+        fwrite(audio_data, 1, size, file);
+        fclose(file);
+    }
+    else
+        qDebug() << "Failed to open audio for writing:" << QString::fromStdString(audio_path);
+}
+
+void client_manager::IDBFS_save_file(QString file_name, QByteArray file_data, int size)
+{
+    std::string file_path = "/file/";
     file_path += file_name.toStdString();
 
     FILE *file = fopen(file_path.c_str(), "wb");
     if (file)
     {
-        fwrite(data, 1, size, file);
+        fwrite(file_data, 1, size, file);
         fclose(file);
     }
     else
         qDebug() << "Failed to open file for writing:" << QString::fromStdString(file_path);
 }
 
-QUrl client_manager::get_audio_url(const QString &file_name)
+QUrl client_manager::get_audio_url(const QString &audio_name)
 {
-    const QString full_file_path = "/audio/" + file_name;
+    const QString full_audio_path = "/audio/" + audio_name;
 
-    qDebug() << "full_name_when_getting_url" << full_file_path;
+    const char *c_audio_name = full_audio_path.toUtf8().constData();
 
-    const char *c_filename = full_file_path.toUtf8().constData();
+    char *url = (char *)EM_ASM_PTR(
+        {
+            var audio_path = UTF8ToString($0);
+            var audio_data = FS.readFile(audio_path);
 
-    char *url = (char *)EM_ASM_PTR({
-        var file_path = UTF8ToString($0);
-        var data = FS.readFile(file_path);
+            if (!audio_data)
+            {
+                console.error("Failed to read file:", audio_path);
+                return null;
+            }
 
-        if (!data) {
-            console.error("Failed to read file:", file_path);
-            return null;
-        }
+            var blob = new Blob([audio_data],
+                                { type: 'audio/*' });
+            var url = URL.createObjectURL(blob);
 
-        var blob = new Blob([data], { type: 'audio/*' });
-        var url = URL.createObjectURL(blob);
-        var url_length = lengthBytesUTF8(url) + 1;
-        var stringOnWasmHeap = _malloc(url_length);
-        stringToUTF8(url, stringOnWasmHeap, url_length);
-        return stringOnWasmHeap; }, c_filename);
+            var url_length = lengthBytesUTF8(url) + 1;
+            var stringOnWasmHeap = _malloc(url_length);
+
+            stringToUTF8(url, stringOnWasmHeap, url_length);
+
+            return stringOnWasmHeap;
+        },
+        c_audio_name);
 
     if (!url)
     {
         qDebug() << "client_manager ---> get_audio_url() ---> url empty";
+        return QUrl();
+    }
+
+    QString qUrl = QString::fromUtf8(url);
+    free(url);
+
+    return QUrl(qUrl);
+}
+
+QUrl client_manager::get_file_url(const QString &file_name)
+{
+    const QString full_file_path = "/file/" + file_name;
+
+    const char *c_filename = full_file_path.toUtf8().constData();
+
+    char *url = (char *)EM_ASM_PTR(
+        {
+            var file_path = UTF8ToString($0);
+            var file_data = FS.readFile(file_path);
+
+            if (!file_data)
+            {
+                console.error("Failed to read file:", file_path);
+                return null;
+            }
+
+            var blob = new Blob([file_data],
+                                { type:'application / octet - stream' });
+            var url = URL.createObjectURL(blob);
+
+            var url_length = lengthBytesUTF8(url) + 1;
+            var stringOnWasmHeap = _malloc(url_length);
+
+            stringToUTF8(url, stringOnWasmHeap, url_length);
+
+            return stringOnWasmHeap;
+        },
+        c_filename);
+
+    if (!url)
+    {
+        qDebug() << "client_manager ---> get_file_url() ---> url empty";
         return QUrl();
     }
 

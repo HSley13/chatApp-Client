@@ -72,7 +72,7 @@ private slots:
     void on_lookup_friend_result(int conversation_ID, QString full_name, bool true_or_false);
 
     void on_audio_received(QString sender, QString audio_name);
-    void on_file_received(QString sender, QString path);
+    void on_file_received(QString sender, QString file_name);
 
     void on_item_deleted(QListWidgetItem *item);
 };

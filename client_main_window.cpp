@@ -632,7 +632,7 @@ void client_main_window::on_audio_received(QString sender, QString audio_name)
     }
 }
 
-void client_main_window::on_file_received(QString sender, QString path)
+void client_main_window::on_file_received(QString sender, QString file_name)
 {
     QWidget *win = _window_map.value(sender);
     if (win)
@@ -640,7 +640,7 @@ void client_main_window::on_file_received(QString sender, QString path)
         client_chat_window *wid = qobject_cast<client_chat_window *>(win);
         if (wid)
         {
-            wid->add_file(path);
+            wid->add_file(file_name);
             add_on_top(sender);
         }
         else
