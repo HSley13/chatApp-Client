@@ -28,8 +28,10 @@ qt_add_resources(client "client_images"
                     FILES send_icon.png file_icon.webp record_icon.png style.css
                 )
 
-set_target_properties(client PROPERTIES LINK_FLAGS "-lidbfs.js")
-
 set(MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/Info.plist)
 
-set_target_properties(client PROPERTIES MACOSX_BUNDLE ON  MACOSX_BUNDLE_INFO_PLIST ${MACOSX_BUNDLE_INFO_PLIST})
+set_target_properties(client PROPERTIES 
+                            MACOSX_BUNDLE ON  
+                            MACOSX_BUNDLE_INFO_PLIST ${MACOSX_BUNDLE_INFO_PLIST}
+                            LINK_FLAGS "-lidbfs.js"
+                    )

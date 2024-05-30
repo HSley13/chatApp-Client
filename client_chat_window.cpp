@@ -303,10 +303,13 @@ void client_chat_window::send_file()
         {
             _client->send_init_send_file(my_name(), _client->_my_ID, _destinator, QFileInfo(file_name).fileName(), QFileInfo(file_name).size());
 
+            QString IDBFS_file_name = QString("%1_%2").arg(QDateTime::currentDateTime().toString("yyyyMMdd_HHmmss"), QFileInfo(file_name).fileName());
+
             connect(_client, &client_manager::file_accepted, this, [=](QString receiver)
-                    { add_file(QFileInfo(file_name).absoluteFilePath(), true);
-                _client->send_file(my_name(), _destinator, QFileInfo(file_name).fileName(), file_data);
-                _client->send_save_data(_conversation_ID, _destinator, _client->_my_ID, QFileInfo(file_name).absoluteFilePath(), "file"); });
+                    { add_file(file_name, true);
+                    _client->send_file(my_name(), _destinator, QFileInfo(file_name).fileName(), file_data);
+                    _client->IDBFS_save_file(file_name, file_data, static_cast<int>(file_data.size()));
+                    _client->send_save_data(_conversation_ID, _destinator, _client->_my_ID, QFileInfo(file_name).absoluteFilePath(), "file"); });
         }
     };
 

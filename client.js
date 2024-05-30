@@ -745,8 +745,187 @@ var ASM_CONSTS = {
    console.error("Failed to read file:", file_path);
    return null;
   }
+  var mime_type = "application/octet-stream";
+  var extension = file_path.split(".").pop().toLowerCase();
+  switch (extension) {
+  case "pdf":
+   mime_type = "application/pdf";
+   break;
+
+  case "jpg":
+  case "jpeg":
+  case "png":
+  case "webp":
+  case "gif":
+  case "bmp":
+  case "svg":
+   mime_type = "image/*";
+   break;
+
+  case "txt":
+   mime_type = "text/plain";
+   break;
+
+  case "html":
+  case "htm":
+   mime_type = "text/html";
+   break;
+
+  case "css":
+   mime_type = "text/css";
+   break;
+
+  case "js":
+   mime_type = "application/javascript";
+   break;
+
+  case "json":
+   mime_type = "application/json";
+   break;
+
+  case "xml":
+   mime_type = "application/xml";
+   break;
+
+  case "csv":
+   mime_type = "text/csv";
+   break;
+
+  case "doc":
+   mime_type = "application/msword";
+   break;
+
+  case "docx":
+   mime_type = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+   break;
+
+  case "xls":
+   mime_type = "application/vnd.ms-excel";
+   break;
+
+  case "xlsx":
+   mime_type = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+   break;
+
+  case "ppt":
+   mime_type = "application/vnd.ms-powerpoint";
+   break;
+
+  case "pptx":
+   mime_type = "application/vnd.openxmlformats-officedocument.presentationml.presentation";
+   break;
+
+  case "mp4":
+   mime_type = "video/mp4";
+   break;
+
+  case "avi":
+   mime_type = "video/x-msvideo";
+   break;
+
+  case "mov":
+   mime_type = "video/quicktime";
+   break;
+
+  case "zip":
+   mime_type = "application/zip";
+   break;
+
+  case "rar":
+   mime_type = "application/vnd.rar";
+   break;
+
+  case "tar":
+   mime_type = "application/x-tar";
+   break;
+
+  case "7z":
+   mime_type = "application/x-7z-compressed";
+   break;
+
+  case "epub":
+   mime_type = "application/epub+zip";
+   break;
+
+  case "mobi":
+   mime_type = "application/x-mobipocket-ebook";
+   break;
+
+  case "azw":
+   mime_type = "application/vnd.amazon.ebook";
+   break;
+
+  case "webm":
+   mime_type = "video/webm";
+   break;
+
+  case "mkv":
+   mime_type = "video/x-matroska";
+   break;
+
+  case "rtf":
+   mime_type = "application/rtf";
+   break;
+
+  case "psd":
+   mime_type = "image/vnd.adobe.photoshop";
+   break;
+
+  case "ai":
+  case "eps":
+  case "ps":
+   mime_type = "application/postscript";
+   break;
+
+  case "tex":
+   mime_type = "application/x-tex";
+   break;
+
+  case "latex":
+   mime_type = "application/x-latex";
+   break;
+
+  case "md":
+   mime_type = "text/markdown";
+   break;
+
+  case "log":
+   mime_type = "text/plain";
+   break;
+
+  case "c":
+  case "cpp":
+  case "h":
+  case "hpp":
+   mime_type = "text/x-c";
+   break;
+
+  case "py":
+   mime_type = "text/x-python";
+   break;
+
+  case "java":
+   mime_type = "text/x-java-source";
+   break;
+
+  case "sh":
+   mime_type = "application/x-sh";
+   break;
+
+  case "bat":
+   mime_type = "application/x-msdos-program";
+   break;
+
+  case "exe":
+   mime_type = "application/x-msdownload";
+   break;
+
+  default:
+   console.warn("Unknown file extension:", extension);
+   break;
+  }
   var blob = new Blob([ file_data ], {
-   type: "application / octet - stream"
+   type: mime_type
   });
   var url = URL.createObjectURL(blob);
   var url_length = lengthBytesUTF8(url) + 1;
@@ -754,13 +933,13 @@ var ASM_CONSTS = {
   stringToUTF8(url, stringOnWasmHeap, url_length);
   return stringOnWasmHeap;
  },
- 9363219: () => {
+ 9365776: () => {
   FS.syncfs(function(err) {
    assert(!err);
    console.log("Audio file saved and synced");
   });
  },
- 9363311: () => {
+ 9365868: () => {
   FS.syncfs(function(err) {
    assert(!err);
    console.log("Audio & File saved and synced");
@@ -15615,9 +15794,9 @@ var ___cxa_can_catch = createExportWrapper("__cxa_can_catch");
 
 var ___cxa_is_pointer_type = createExportWrapper("__cxa_is_pointer_type");
 
-var ___start_em_js = Module["___start_em_js"] = 9363405;
+var ___start_em_js = Module["___start_em_js"] = 9365962;
 
-var ___stop_em_js = Module["___stop_em_js"] = 9364495;
+var ___stop_em_js = Module["___stop_em_js"] = 9367052;
 
 function invoke_viiii(index, a1, a2, a3, a4) {
  var sp = stackSave();
