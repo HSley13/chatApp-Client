@@ -48,7 +48,8 @@ public:
 
     QByteArray set_file_message(QString sender, QString receiver, QString file_name, QByteArray file_data);
     QByteArray set_audio_message(QString sender, QString receiver, QString audio_name);
-    QByteArray set_save_data_message(int conversation_ID, QString sender, QString receiver, QString file_name, QString type);
+    QByteArray set_save_audio_message(int conversation_ID, QString sender, QString receiver, QString file_name, QString type);
+    QByteArray set_save_file_message(int conversation_ID, QString sender, QString receiver, QString file_name, QByteArray file_data, QString type);
 
     QByteArray set_lookup_friend_message(QString ID);
     QByteArray set_create_conversation_message(int conversation_ID, QString participant1, int participant1_ID, QString participant2, int participant2_ID);

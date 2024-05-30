@@ -141,9 +141,14 @@ void client_manager::save_file(QString sender, QString file_name, QByteArray fil
     emit file_received(sender, full_file_name);
 }
 
-void client_manager::send_save_data(int conversation_ID, QString sender, QString receiver, QString data_name, QString type)
+void client_manager::send_save_audio(int conversation_ID, QString sender, QString receiver, QString data_name, QString type)
 {
-    _socket->sendBinaryMessage(_protocol->set_save_data_message(conversation_ID, sender, receiver, data_name, type));
+    _socket->sendBinaryMessage(_protocol->set_save_audio_message(conversation_ID, sender, receiver, data_name, type));
+}
+
+void client_manager::send_save_file(int conversation_ID, QString sender, QString receiver, QString data_name, QByteArray file_data, QString type)
+{
+    _socket->sendBinaryMessage(_protocol->set_save_file_message(conversation_ID, sender, receiver, data_name, file_data, type));
 }
 
 void client_manager::save_audio(QString sender, QString audio_name, QByteArray audio_data, QString date_time)

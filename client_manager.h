@@ -29,7 +29,8 @@ public:
     void send_create_conversation(int conversation_ID, QString participant1, int participant1_ID, QString participant2, int participant2_ID);
     void send_save_conversation(int conversation_ID, QString sender, QString receiver, QString content);
 
-    void send_save_data(int conversation_ID, QString sender, QString receiver, QString data_name, QString type);
+    void send_save_audio(int conversation_ID, QString sender, QString receiver, QString data_name, QString type);
+    void send_save_file(int conversation_ID, QString sender, QString receiver, QString data_name, QByteArray file_data, QString type);
 
     void send_sign_up(QString phone_number, QString first_name, QString last_name, QString password, QString secret_question, QString secret_answer);
     void send_login_request(QString phone_number, QString password);

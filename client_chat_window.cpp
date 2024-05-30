@@ -32,9 +32,6 @@ client_chat_window::client_chat_window(int conversation_ID, QString destinator, 
     _hbox->addWidget(record_button);
     _hbox->addWidget(_duration_label);
 
-    _dir.mkdir(_destinator_name);
-    _dir.setPath("./" + _destinator_name);
-
     _client->send_create_conversation(_conversation_ID, _client->_my_name, _client->_my_ID.toInt(), _destinator_name, _destinator.toInt());
 
     _send_file_button = new QPushButton("...", this);
@@ -122,13 +119,13 @@ void client_chat_window::ask_microphone_permission()
 
 void client_chat_window::start_recording()
 {
-    QString file_path = _recorder->outputLocation().toLocalFile();
+    QString audio_path = _recorder->outputLocation().toLocalFile();
 
     if (!is_recording)
     {
-        if (QFile::exists(file_path))
+        if (QFile::exists(audio_path))
         {
-            if (!QFile::remove(file_path))
+            if (!QFile::remove(audio_path))
             {
                 qDebug() << "client_chat_window ---> start_recording() ---> Error: Unable to delete the existing audio file!";
                 return;
@@ -146,19 +143,19 @@ void client_chat_window::start_recording()
         _duration_label->hide();
         _duration_label->clear();
 
-        QFile file(file_path);
+        QFile audio(audio_path);
         QByteArray audio_data;
-        if (file.open(QIODevice::ReadOnly))
+        if (audio.open(QIODevice::ReadOnly))
         {
-            audio_data = file.readAll();
-            file.close();
+            audio_data = audio.readAll();
+            audio.close();
         }
         else
-            qDebug() << "client_chat_window ---> start_recording() ---> Failed to open file for reading:" << file_path;
+            qDebug() << "client_chat_window ---> start_recording() ---> Failed to open audio for reading:" << audio_path;
 
-        QString file_name = QDateTime::currentDateTime().toString("yyyyMMdd_HHmmss") + "_audio.m4a";
+        QString audio_name = QDateTime::currentDateTime().toString("yyyyMMdd_HHmmss") + "_audio.m4a";
 
-        _client->IDBFS_save_audio(file_name, audio_data, static_cast<int>(audio_data.size()));
+        _client->IDBFS_save_audio(audio_name, audio_data, static_cast<int>(audio_data.size()));
 
         EM_ASM({
             FS.syncfs(function(err) {
@@ -167,11 +164,11 @@ void client_chat_window::start_recording()
             });
         });
 
-        add_audio(file_name, true);
+        add_audio(audio_name, true);
 
-        _client->send_audio(my_name(), _destinator, file_path);
+        _client->send_audio(my_name(), _destinator, audio_path);
 
-        _client->send_save_data(_conversation_ID, _client->_my_ID, _destinator, file_path, "audio");
+        _client->send_save_audio(_conversation_ID, _client->_my_ID, _destinator, audio_path, "audio");
 
         emit data_received_sent(_window_name);
     }
@@ -309,7 +306,7 @@ void client_chat_window::send_file()
                     { add_file(file_name, true);
                     _client->send_file(my_name(), _destinator, QFileInfo(file_name).fileName(), file_data);
                     _client->IDBFS_save_file(file_name, file_data, static_cast<int>(file_data.size()));
-                    _client->send_save_data(_conversation_ID, _destinator, _client->_my_ID, QFileInfo(file_name).absoluteFilePath(), "file"); });
+                    _client->send_save_file(_conversation_ID, _destinator, _client->_my_ID, QFileInfo(file_name).fileName(), file_data, "file"); });
         }
     };
 
@@ -321,7 +318,7 @@ void client_chat_window::folder()
     QString selected_file_path;
 
 #ifdef Q_OS_WASM
-    QDesktopServices::openUrl(QUrl("downloads://"));
+    QDesktopServices::openUrl(QUrl("/"));
 #else
     QString executable_directory = QApplication::applicationDirPath();
     QString full_client_directory = QDir(executable_directory).filePath(_window_name);
@@ -436,8 +433,6 @@ void client_chat_window::window_name(QString name)
     _window_name = name;
 
     emit update_button_file();
-
-    QFile::rename(_dir.canonicalPath(), name);
 }
 
 void client_chat_window::mousePressEvent(QMouseEvent *event)

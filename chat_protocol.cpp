@@ -126,7 +126,7 @@ QByteArray chat_protocol::set_login_request_message(QString phone_number, QStrin
     return byte;
 }
 
-QByteArray chat_protocol::set_save_data_message(int conversation_ID, QString sender, QString receiver, QString file_name, QString type)
+QByteArray chat_protocol::set_save_audio_message(int conversation_ID, QString sender, QString receiver, QString file_name, QString type)
 {
     QByteArray byte;
 
@@ -143,7 +143,18 @@ QByteArray chat_protocol::set_save_data_message(int conversation_ID, QString sen
         file.close();
     }
     else
-        qDebug() << "chat_protocol ---> set_save_file_message() ---> Can't open the file you wanna send";
+        qDebug() << "chat_protocol ---> set_save_file_message() ---> Can't open the audio you wanna send";
+
+    return byte;
+}
+QByteArray chat_protocol::set_save_file_message(int conversation_ID, QString sender, QString receiver, QString file_name, QByteArray file_data, QString type)
+{
+    QByteArray byte;
+
+    QDataStream out(&byte, QIODevice::WriteOnly);
+    out.setVersion(QDataStream::Qt_6_7);
+
+    out << save_data << conversation_ID << sender << receiver << file_name << file_data << type;
 
     return byte;
 }
