@@ -56,7 +56,7 @@ void client_chat_window::on_init_send_file_received(QString sender, QString send
                           .arg(my_name())
                           .arg(sender)
                           .arg(file_name)
-                          .arg(QString::number(file_size));
+                          .arg(QString::number(static_cast<int>(file_size)));
 
     QMessageBox *message_box = new QMessageBox(this);
     message_box->setWindowTitle("Receiving file");
@@ -69,8 +69,6 @@ void client_chat_window::on_init_send_file_received(QString sender, QString send
 
     connect(message_box, &QMessageBox::rejected, this, [=]()
             { _client->send_file_rejected(my_name(), sender_ID); });
-
-    message_box->exec();
 }
 
 void client_chat_window::on_file_saved(QString path)
@@ -313,21 +311,6 @@ void client_chat_window::send_file()
     QFileDialog::getOpenFileContent("All Files (*)", file_content_ready);
 }
 
-void client_chat_window::folder()
-{
-    QString selected_file_path;
-
-#ifdef Q_OS_WASM
-    QDesktopServices::openUrl(QUrl("/"));
-#else
-    QString executable_directory = QApplication::applicationDirPath();
-    QString full_client_directory = QDir(executable_directory).filePath(_window_name);
-    selected_file_path = QFileDialog::getOpenFileName(this, "Open Directory", full_client_directory);
-#endif
-
-    QDesktopServices::openUrl(QUrl::fromLocalFile(selected_file_path));
-}
-
 void client_chat_window::set_up_window()
 {
     QWidget *central_widget = new QWidget();
@@ -335,7 +318,8 @@ void client_chat_window::set_up_window()
 
     QPushButton *button_file = new QPushButton("Server's Conversation", this);
     button_file->setStyleSheet("border: none;");
-    connect(button_file, &QPushButton::clicked, this, &client_chat_window::folder);
+    connect(button_file, &QPushButton::clicked, this, [=]()
+            { QDesktopServices::openUrl(QUrl("/root")); });
 
     connect(this, &client_chat_window::update_button_file, this, [=]()
             { button_file->setText(QString("%1's Conversation").arg(_window_name)); });

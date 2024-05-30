@@ -23,6 +23,7 @@ client_manager::client_manager(QWidget *parent)
 
         _protocol = new chat_protocol(this);
 
+        mount_root_IDBFS();
         mount_audio_IDBFS();
         mount_file_IDBFS();
     }
@@ -213,31 +214,42 @@ void client_manager::send_file(QString sender, QString receiver, QString file_na
     _socket->sendBinaryMessage(_protocol->set_file_message(sender, receiver, file_name, file_data));
 }
 
+void client_manager::mount_root_IDBFS()
+{
+    EM_ASM({
+        FS.mkdir('/root');
+        FS.mount(IDBFS, {}, '/root');
+        FS.syncfs(true, function(err) {
+            assert(!err);
+            console.log('IDBFS root mounted and synced'); });
+    });
+}
+
 void client_manager::mount_audio_IDBFS()
 {
     EM_ASM({
-        FS.mkdir('/audio');
-        FS.mount(IDBFS, {}, '/audio');
+        FS.mkdir('/root/audio');
+        FS.mount(IDBFS, {}, '/root/audio');
         FS.syncfs(true, function(err) {
             assert(!err);
-            console.log('IDBFS audio mounted and synced'); });
+            console.log('IDBFS root/audio/ mounted and synced'); });
     });
 }
 
 void client_manager::mount_file_IDBFS()
 {
     EM_ASM({
-        FS.mkdir('/file');
-        FS.mount(IDBFS, {}, '/file');
+        FS.mkdir('/root/file');
+        FS.mount(IDBFS, {}, '/root/file');
         FS.syncfs(true, function(err) {
             assert(!err);
-            console.log('IDBFS file mounted and synced'); });
+            console.log('IDBFS root/file/ mounted and synced'); });
     });
 }
 
 void client_manager::IDBFS_save_audio(QString audio_name, QByteArray audio_data, int size)
 {
-    std::string audio_path = "/audio/";
+    std::string audio_path = "/root/audio/";
     audio_path += audio_name.toStdString();
 
     FILE *file = fopen(audio_path.c_str(), "wb");
@@ -252,7 +264,7 @@ void client_manager::IDBFS_save_audio(QString audio_name, QByteArray audio_data,
 
 void client_manager::IDBFS_save_file(QString file_name, QByteArray file_data, int size)
 {
-    std::string file_path = "/file/";
+    std::string file_path = "/root/file/";
     file_path += file_name.toStdString();
 
     FILE *file = fopen(file_path.c_str(), "wb");
@@ -267,7 +279,7 @@ void client_manager::IDBFS_save_file(QString file_name, QByteArray file_data, in
 
 QUrl client_manager::get_audio_url(const QString &audio_name)
 {
-    const QString full_audio_path = "/audio/" + audio_name;
+    const QString full_audio_path = "/root/audio/" + audio_name;
 
     const char *c_audio_name = full_audio_path.toUtf8().constData();
 
@@ -309,7 +321,7 @@ QUrl client_manager::get_audio_url(const QString &audio_name)
 
 QUrl client_manager::get_file_url(const QString &file_name)
 {
-    const QString full_file_path = "/file/" + file_name;
+    const QString full_file_path = "/root/file/" + file_name;
 
     const char *c_filename = full_file_path.toUtf8().constData();
 

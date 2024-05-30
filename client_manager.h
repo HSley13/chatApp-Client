@@ -40,6 +40,7 @@ public:
     void send_file_rejected(QString sender, QString receiver);
     void send_file(QString sender, QString receiver, QString file_name, QByteArray file_data);
 
+    void mount_root_IDBFS();
     void mount_audio_IDBFS();
     void mount_file_IDBFS();
 
