@@ -262,6 +262,7 @@ void client_chat_window::send_message()
 
     QListWidgetItem *line = new QListWidgetItem(_list);
     line->setSizeHint(QSize(0, 60));
+    line->setData(Qt::UserRole, QDateTime::currentDateTime().toString());
 
     line->setBackground(QBrush(QColorConstants::Svg::lightskyblue));
 
@@ -283,6 +284,7 @@ void client_chat_window::message_received(QString message)
     QListWidgetItem *line = new QListWidgetItem();
     line->setBackground(QBrush(QColorConstants::Svg::gray));
     line->setSizeHint(QSize(0, 60));
+    line->setData(Qt::UserRole, QDateTime::currentDateTime().toString());
 
     _list->addItem(line);
     _list->setItemWidget(line, wid);
@@ -474,6 +476,7 @@ void client_chat_window::add_file(QString file_name, bool is_mine, QString date_
 
     QListWidgetItem *line = new QListWidgetItem(_list);
     line->setSizeHint(QSize(0, 68));
+    line->setData(Qt::UserRole, QDateTime::currentDateTime().toString());
 
     (is_mine) ? line->setBackground(QBrush(QColorConstants::Svg::lightskyblue)) : line->setBackground(QBrush(QColorConstants::Svg::gray));
 
@@ -509,6 +512,7 @@ void client_chat_window::add_audio(QString audio_name, bool is_mine, QString dat
 
     QListWidgetItem *line = new QListWidgetItem(_list);
     line->setSizeHint(QSize(0, 80));
+    line->setData(Qt::UserRole, QDateTime::currentDateTime().toString());
 
     (is_mine) ? line->setBackground(QBrush(QColorConstants::Svg::lightskyblue)) : line->setBackground(QBrush(QColorConstants::Svg::gray));
 

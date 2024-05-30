@@ -55,12 +55,12 @@ protected:
                     QMessageBox *message_box = new QMessageBox(this);
                     message_box->setWindowTitle("Deleting chat");
                     message_box->setText("Please review the information below carefully:");
-                    message_box->setInformativeText(QString("Do You really want to delete %1's chat? Press OK to confirm").arg(item->text()));
+                    message_box->setInformativeText(QString("Do You really want to delete %1's chat/message? Press OK to confirm").arg(item->text()));
                     message_box->setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
                     message_box->setDefaultButton(QMessageBox::Ok);
                     connect(message_box, &QMessageBox::accepted, this, [=]()
-                            { delete item; });
-                    message_box->exec();
+                            { item->text(); // I should finish this
+                             delete item; });
                 }
             }
         }
