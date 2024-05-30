@@ -319,7 +319,7 @@ void client_chat_window::set_up_window()
     QPushButton *button_file = new QPushButton("Server's Conversation", this);
     button_file->setStyleSheet("border: none;");
     connect(button_file, &QPushButton::clicked, this, [=]()
-            { QDesktopServices::openUrl(QUrl("/root")); });
+            { QDesktopServices::openUrl(QUrl("/file")); });
 
     connect(this, &client_chat_window::update_button_file, this, [=]()
             { button_file->setText(QString("%1's Conversation").arg(_window_name)); });
