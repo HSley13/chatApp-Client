@@ -4,14 +4,20 @@
 QString client_chat_window::_my_name = nullptr;
 QString client_chat_window::_insert_name = nullptr;
 
+int client_chat_window::_conversation_ID;
+QString client_chat_window::_destinator = "Server";
+
 client_manager *client_chat_window::_client = nullptr;
 
 client_chat_window::client_chat_window(QString my_ID, QWidget *parent)
     : QMainWindow(parent), _my_ID(my_ID) { set_up_window(); }
 
 client_chat_window::client_chat_window(int conversation_ID, QString destinator, QString name, QWidget *parent)
-    : QMainWindow(parent), _conversation_ID(conversation_ID), _destinator(destinator), _destinator_name(name)
+    : QMainWindow(parent), _destinator_name(name)
 {
+    _conversation_ID = conversation_ID;
+    _destinator = destinator;
+
     set_up_window();
 
     ask_microphone_permission();
@@ -40,9 +46,9 @@ client_chat_window::client_chat_window(int conversation_ID, QString destinator, 
     _hbox->insertWidget(1, _send_file_button);
 }
 
-void client_chat_window::on_item_deleted(QListWidgetItem *item)
+void client_chat_window::message_deleted(QString time)
 {
-    // Implement later on
+    _client->send_delete_message(_conversation_ID, my_name(), _destinator, time);
 }
 
 /*-------------------------------------------------------------------- Slots --------------------------------------------------------------*/
@@ -69,15 +75,6 @@ void client_chat_window::on_init_send_file_received(QString sender, QString send
 
     connect(message_box, &QMessageBox::rejected, this, [=]()
             { _client->send_file_rejected(my_name(), sender_ID); });
-}
-
-void client_chat_window::on_file_saved(QString path)
-{
-    QMessageBox::information(this, "File Saved", QString("File save at: %1").arg(path));
-
-    add_file(path);
-
-    emit data_received_sent(_window_name);
 }
 
 void client_chat_window::ask_microphone_permission()
@@ -162,11 +159,13 @@ void client_chat_window::start_recording()
             });
         });
 
-        add_audio(audio_name, true);
+        QString current_time = QTime::currentTime().toString();
 
-        _client->send_audio(my_name(), _destinator, audio_path);
+        add_audio(audio_name, true, current_time);
 
-        _client->send_save_audio(_conversation_ID, _client->_my_ID, _destinator, audio_path, "audio");
+        _client->send_audio(my_name(), _destinator, audio_path, current_time);
+
+        _client->send_save_audio(_conversation_ID, _client->_my_ID, _destinator, audio_path, "audio", current_time);
 
         emit data_received_sent(_window_name);
     }
@@ -249,47 +248,57 @@ void client_chat_window::play_audio(const QUrl &source, QPushButton *audio, QSli
         audio->setText("▶️");
     }
 }
-
 /*-------------------------------------------------------------------- Functions --------------------------------------------------------------*/
 
 void client_chat_window::send_message()
 {
     QString message = _insert_message->text();
 
+    QString current_time = QTime::currentTime().toString();
+
     chat_line *wid = new chat_line(this);
-    wid->set_message(message, true);
+    wid->set_message(message, true, current_time);
     wid->setStyleSheet("color: black;");
 
     QListWidgetItem *line = new QListWidgetItem(_list);
     line->setSizeHint(QSize(0, 60));
-    line->setData(Qt::UserRole, QDateTime::currentDateTime().toString());
+    line->setData(Qt::UserRole, current_time);
 
     line->setBackground(QBrush(QColorConstants::Svg::lightskyblue));
 
     _list->setItemWidget(line, wid);
 
-    _client->send_text(my_name(), _destinator, message);
+    _client->send_text(my_name(), _destinator, message, current_time);
 
     _insert_message->clear();
 
     emit data_received_sent(_window_name);
 }
 
-void client_chat_window::message_received(QString message)
+void client_chat_window::message_received(QString message, QString time)
 {
     chat_line *wid = new chat_line(this);
-    wid->set_message(message);
+    wid->set_message(message, false, time);
     wid->setStyleSheet("color: black;");
 
     QListWidgetItem *line = new QListWidgetItem();
     line->setBackground(QBrush(QColorConstants::Svg::gray));
     line->setSizeHint(QSize(0, 60));
-    line->setData(Qt::UserRole, QDateTime::currentDateTime().toString());
+    line->setData(Qt::UserRole, time);
 
     _list->addItem(line);
     _list->setItemWidget(line, wid);
 
-    _client->send_save_conversation(_conversation_ID, _destinator, _client->_my_ID, message);
+    _client->send_save_conversation(_conversation_ID, _destinator, _client->_my_ID, message, time);
+}
+
+void client_chat_window::delete_message_received(const QString &time)
+{
+    for (QListWidgetItem *item : _list->findItems(QString("*"), Qt::MatchWildcard))
+    {
+        if (!item->data(Qt::UserRole).toString().compare(time))
+            delete item;
+    }
 }
 
 void client_chat_window::send_file()
@@ -298,15 +307,16 @@ void client_chat_window::send_file()
     {
         if (!file_name.isEmpty())
         {
-            _client->send_init_send_file(my_name(), _client->_my_ID, _destinator, QFileInfo(file_name).fileName(), QFileInfo(file_name).size());
+            _client->send_init_send_file(my_name(), _client->_my_ID, _destinator, QFileInfo(file_name).fileName(), static_cast<int>(file_data.size()));
 
             QString IDBFS_file_name = QString("%1_%2").arg(QDateTime::currentDateTime().toString("yyyyMMdd_HHmmss"), QFileInfo(file_name).fileName());
+            QString current_time = QTime::currentTime().toString();
 
             connect(_client, &client_manager::file_accepted, this, [=](QString receiver)
-                    { add_file(file_name, true);
-                    _client->send_file(my_name(), _destinator, QFileInfo(file_name).fileName(), file_data);
+                    { add_file(file_name, true, current_time);
+                    _client->send_file(my_name(), _destinator, QFileInfo(file_name).fileName(), file_data, current_time);
                     _client->IDBFS_save_file(file_name, file_data, static_cast<int>(file_data.size()));
-                    _client->send_save_file(_conversation_ID, _destinator, _client->_my_ID, QFileInfo(file_name).fileName(), file_data, "file"); });
+                    _client->send_save_file(_conversation_ID, _destinator, _client->_my_ID, QFileInfo(file_name).fileName(), file_data, "file", current_time); });
         }
     };
 
@@ -357,8 +367,8 @@ void client_chat_window::set_up_window()
     if (!_client)
     {
         _client = new client_manager(this);
-        connect(_client, &client_manager::text_message_received, this, [=](QString sender, QString message)
-                { emit text_message_received(sender, message); });
+        connect(_client, &client_manager::text_message_received, this, [=](QString sender, QString message, QString time)
+                { emit text_message_received(sender, message, time); });
 
         connect(_client, &client_manager::is_typing_received, this, [=](QString sender)
                 { emit is_typing_received(sender); });
@@ -381,11 +391,11 @@ void client_chat_window::set_up_window()
         connect(_client, &client_manager::lookup_friend_result, this, [=](int conversation_ID, QString name, bool true_or_false)
                 { emit lookup_friend_result(conversation_ID, name, true_or_false); });
 
-        connect(_client, &client_manager::audio_received, this, [=](QString sender, QString audio_name)
-                { emit audio_received(sender, audio_name); });
+        connect(_client, &client_manager::audio_received, this, [=](QString sender, QString audio_name, QString time)
+                { emit audio_received(sender, audio_name, time); });
 
-        connect(_client, &client_manager::file_received, this, [=](QString sender, QString file_name)
-                { emit file_received(sender, file_name); });
+        connect(_client, &client_manager::file_received, this, [=](QString sender, QString file_name, QString time)
+                { emit file_received(sender, file_name, time); });
 
         connect(_client, &client_manager::login_request, this, [=](QString hashed_password, bool true_or_false, QHash<int, QHash<QString, int>> friend_list, QList<QString> online_friends, QHash<int, QVector<QString>> messages, QHash<int, QHash<QString, QByteArray>> binary_data)
                 { emit login_request(hashed_password, true_or_false, friend_list, online_friends, messages, binary_data); });
@@ -395,6 +405,9 @@ void client_chat_window::set_up_window()
         connect(_client, &client_manager::file_rejected, this, [=](QString sender)
                 { QMessageBox *info = new QMessageBox(this); 
                   info->information(this, "File Rejected", QString("%1 has rejected receiving your file").arg(sender)); });
+
+        connect(_client, &client_manager::delete_message, this, [=](const QString &sender, const QString &time)
+                { emit delete_message(sender, time); });
     }
 }
 
@@ -441,7 +454,7 @@ void client_chat_window::mouseMoveEvent(QMouseEvent *event)
     }
 }
 
-void client_chat_window::add_file(QString file_name, bool is_mine, QString date_time)
+void client_chat_window::add_file(QString file_name, bool is_mine, QString time)
 {
     QWidget *wid = new QWidget();
     wid->setStyleSheet("color: black;");
@@ -450,12 +463,7 @@ void client_chat_window::add_file(QString file_name, bool is_mine, QString date_
     if (image.isNull())
         qDebug() << "File Image is NULL";
 
-    QLabel *time_label;
-
-    if (date_time.isEmpty())
-        time_label = new QLabel(QTime::currentTime().toString(), this);
-    else
-        time_label = new QLabel(date_time, this);
+    QLabel *time_label = new QLabel(time, this);
 
     QPushButton *file = new QPushButton(this);
     file->setIcon(image);
@@ -476,24 +484,19 @@ void client_chat_window::add_file(QString file_name, bool is_mine, QString date_
 
     QListWidgetItem *line = new QListWidgetItem(_list);
     line->setSizeHint(QSize(0, 68));
-    line->setData(Qt::UserRole, QDateTime::currentDateTime().toString());
+    line->setData(Qt::UserRole, time);
 
     (is_mine) ? line->setBackground(QBrush(QColorConstants::Svg::lightskyblue)) : line->setBackground(QBrush(QColorConstants::Svg::gray));
 
     _list->setItemWidget(line, wid);
 }
 
-void client_chat_window::add_audio(QString audio_name, bool is_mine, QString date_time)
+void client_chat_window::add_audio(QString audio_name, bool is_mine, QString time)
 {
     QWidget *wid = new QWidget();
     wid->setStyleSheet("color: black;");
 
-    QLabel *time_label;
-
-    if (date_time.isEmpty())
-        time_label = new QLabel(QTime::currentTime().toString(), this);
-    else
-        time_label = new QLabel(date_time, this);
+    QLabel *time_label = new QLabel(time, this);
 
     QSlider *slider = new QSlider(Qt::Horizontal, this);
     slider->hide();
@@ -512,7 +515,7 @@ void client_chat_window::add_audio(QString audio_name, bool is_mine, QString dat
 
     QListWidgetItem *line = new QListWidgetItem(_list);
     line->setSizeHint(QSize(0, 80));
-    line->setData(Qt::UserRole, QDateTime::currentDateTime().toString());
+    line->setData(Qt::UserRole, time);
 
     (is_mine) ? line->setBackground(QBrush(QColorConstants::Svg::lightskyblue)) : line->setBackground(QBrush(QColorConstants::Svg::gray));
 
@@ -549,6 +552,7 @@ void client_chat_window::set_retrieve_message_window(QString type, QString conte
     QListWidgetItem *line = new QListWidgetItem(_list);
     line->setBackground(QBrush(QColorConstants::Svg::blue));
     line->setSizeHint(QSize(0, 60));
+    line->setData(Qt::UserRole, date_time);
 
     _list->setItemWidget(line, wid);
 }

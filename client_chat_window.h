@@ -24,50 +24,7 @@ public:
     }
 };
 
-class Swipeable_list_widget : public QListWidget
-{
-
-private:
-    QPoint drag_start_position;
-
-public:
-    Swipeable_list_widget(QWidget *parent = nullptr) : QListWidget(parent) {}
-
-protected:
-    void mousePressEvent(QMouseEvent *event) override
-    {
-        if (event->button() == Qt::LeftButton)
-            drag_start_position = event->pos();
-
-        QListWidget::mousePressEvent(event);
-    }
-
-    void mouseReleaseEvent(QMouseEvent *event) override
-    {
-        if (event->button() == Qt::LeftButton)
-        {
-            int distance = event->pos().x() - drag_start_position.x();
-            if (distance < -50)
-            {
-                QListWidgetItem *item = itemAt(drag_start_position);
-                if (item)
-                {
-                    QMessageBox *message_box = new QMessageBox(this);
-                    message_box->setWindowTitle("Deleting chat");
-                    message_box->setText("Please review the information below carefully:");
-                    message_box->setInformativeText(QString("Do You really want to delete %1's chat/message? Press OK to confirm").arg(item->text()));
-                    message_box->setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
-                    message_box->setDefaultButton(QMessageBox::Ok);
-                    connect(message_box, &QMessageBox::accepted, this, [=]()
-                            { item->text(); // I should finish this
-                             delete item; });
-                }
-            }
-        }
-        QListWidget::mouseReleaseEvent(event);
-    }
-};
-
+class Swipeable_list_widget;
 class client_chat_window : public QMainWindow
 {
     Q_OBJECT
@@ -78,23 +35,27 @@ public:
     void set_name(QString insert_name);
 
     void window_name(QString name);
-    void message_received(QString message);
+    void message_received(QString message, QString time);
     void retrieve_conversation(QVector<QString> &messages, QHash<QString, QByteArray> &binary_data);
 
-    void add_file(QString path, bool is_mine = false, QString date_time = "");
-    void add_audio(QString audio_name, bool is_mine = false, QString date_time = "");
+    void add_file(QString path, bool is_mine, QString time);
+    void add_audio(QString audio_name, bool is_mine, QString time);
     void add_friend(QString ID);
 
+    void delete_message_received(const QString &time);
+
     static client_manager *_client;
+
+    static void message_deleted(QString time);
 
 private:
     QStatusBar *_status_bar;
 
     QString _destinator_name;
-    QString _destinator = "Server";
+    static QString _destinator;
     QString _window_name = "Server";
 
-    int _conversation_ID;
+    static int _conversation_ID;
 
     QString _my_ID;
 
@@ -135,7 +96,7 @@ private:
     void mousePressEvent(QMouseEvent *event) override;
     void mouseMoveEvent(QMouseEvent *event) override;
 
-    QString my_name();
+    static QString my_name();
 
     void set_up_window();
 
@@ -149,7 +110,7 @@ signals:
     void client_connected(QString client_name);
     void client_disconnected(QString client_name);
 
-    void text_message_received(QString sender, QString message);
+    void text_message_received(QString sender, QString message, QString time);
     void is_typing_received(QString sender);
 
     void socket_disconnected();
@@ -161,25 +122,68 @@ signals:
     void client_added_you(int conversation_ID, QString name, QString ID);
     void lookup_friend_result(int conversation_ID, QString name, bool true_or_false);
 
-    void audio_received(QString sender, QString audio_name);
-    void file_received(QString sender, QString file_name);
+    void audio_received(QString sender, QString audio_name, QString time);
+    void file_received(QString sender, QString file_name, QString time);
 
     void item_deleted(QListWidgetItem *item);
 
     void login_request(QString hashed_password, bool true_or_false, QHash<int, QHash<QString, int>> friend_list, QList<QString> online_friends, QHash<int, QVector<QString>> messages, QHash<int, QHash<QString, QByteArray>> binary_data);
+
+    void delete_message(const QString &sender, const QString &time);
 
 private slots:
     void send_message();
 
     void send_file();
 
-    void on_file_saved(QString path);
-
     void on_init_send_file_received(QString sender, QString sender_ID, QString file_name, qint64 file_size);
 
     void start_recording();
     void on_duration_changed(qint64 duration);
     void play_audio(const QUrl &source, QPushButton *audio, QSlider *slider);
+};
 
-    void on_item_deleted(QListWidgetItem *item);
+class Swipeable_list_widget : public QListWidget
+{
+
+private:
+    QPoint drag_start_position;
+    QString window;
+
+public:
+    Swipeable_list_widget(QWidget *parent = nullptr) : QListWidget(parent) {}
+
+protected:
+    void mousePressEvent(QMouseEvent *event) override
+    {
+        if (event->button() == Qt::LeftButton)
+            drag_start_position = event->pos();
+
+        QListWidget::mousePressEvent(event);
+    }
+
+    void mouseReleaseEvent(QMouseEvent *event) override
+    {
+        if (event->button() == Qt::LeftButton)
+        {
+            int distance = event->pos().x() - drag_start_position.x();
+            if (distance < -50)
+            {
+                QListWidgetItem *item = itemAt(drag_start_position);
+                if (item)
+                {
+                    QMessageBox *message_box = new QMessageBox(this);
+                    message_box->setWindowTitle("Deleting Message");
+                    message_box->setText("Please review the information below carefully:");
+                    message_box->setInformativeText(QString("Do You really want to delete this Message ? Press OK to confirm"));
+                    message_box->setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
+                    message_box->setDefaultButton(QMessageBox::Ok);
+                    connect(message_box, &QMessageBox::accepted, this, [=]()
+                            { client_chat_window::message_deleted(item->data(Qt::UserRole).toString());
+                             delete item; });
+                }
+            }
+        }
+        QListWidget::mouseReleaseEvent(event);
+    }
 };

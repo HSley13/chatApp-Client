@@ -35,10 +35,12 @@ public:
         save_data,
 
         sign_up,
-        login_request
+        login_request,
+
+        delete_message
     };
 
-    QByteArray set_text_message(QString sender, QString receiver, QString message);
+    QByteArray set_text_message(QString sender, QString receiver, QString message, QString time);
     QByteArray set_is_typing_message(QString sender, QString receiver);
     QByteArray set_name_message(QString my_name, QString name);
 
@@ -46,17 +48,19 @@ public:
     QByteArray set_file_accepted_message(QString sender, QString receiver);
     QByteArray set_file_rejected_message(QString sender, QString receiver);
 
-    QByteArray set_file_message(QString sender, QString receiver, QString file_name, QByteArray file_data);
-    QByteArray set_audio_message(QString sender, QString receiver, QString audio_name);
-    QByteArray set_save_audio_message(int conversation_ID, QString sender, QString receiver, QString file_name, QString type);
-    QByteArray set_save_file_message(int conversation_ID, QString sender, QString receiver, QString file_name, QByteArray file_data, QString type);
+    QByteArray set_file_message(QString sender, QString receiver, QString file_name, QByteArray file_data, QString time);
+    QByteArray set_audio_message(QString sender, QString receiver, QString audio_name, QString time);
+    QByteArray set_save_audio_message(int conversation_ID, QString sender, QString receiver, QString file_name, QString type, QString time);
+    QByteArray set_save_file_message(int conversation_ID, QString sender, QString receiver, QString file_name, QByteArray file_data, QString type, QString time);
 
     QByteArray set_lookup_friend_message(QString ID);
     QByteArray set_create_conversation_message(int conversation_ID, QString participant1, int participant1_ID, QString participant2, int participant2_ID);
-    QByteArray set_save_message_message(int conversation_ID, QString sender, QString receiver, QString content);
+    QByteArray set_save_message_message(int conversation_ID, QString sender, QString receiver, QString content, QString time);
 
     QByteArray set_sign_up_message(QString phone_number, QString first_name, QString last_name, QString password, QString secret_question, QString secret_answer);
     QByteArray set_login_request_message(QString phone_number, QString password);
+
+    QByteArray set_delete_message(const int conversation_ID, QString sender, QString receiver, QString time);
 
     void load_data(QByteArray data);
 
@@ -92,6 +96,8 @@ public:
     const QString &hashed_password() const;
     const bool &true_or_false() const;
 
+    const QString &time() const;
+
 private:
     QByteArray get_data(message_type type, QString data);
 
@@ -126,4 +132,6 @@ private:
 
     QString _hashed_password;
     bool _true_or_false;
+
+    QString _time;
 };

@@ -37,7 +37,7 @@ void client_manager::on_binary_message_received(const QByteArray &message)
     switch (_protocol->type())
     {
     case chat_protocol::text:
-        emit text_message_received(_protocol->sender(), _protocol->message());
+        emit text_message_received(_protocol->sender(), _protocol->message(), _protocol->time());
 
         break;
 
@@ -72,7 +72,7 @@ void client_manager::on_binary_message_received(const QByteArray &message)
         break;
 
     case chat_protocol::audio:
-        save_audio(_protocol->audio_sender(), _protocol->audio_name(), _protocol->audio_data(), QDateTime::currentDateTime().toString("yyyyMMdd_HHmmss"));
+        save_audio(_protocol->audio_sender(), _protocol->audio_name(), _protocol->audio_data(), _protocol->time());
 
         break;
 
@@ -101,7 +101,12 @@ void client_manager::on_binary_message_received(const QByteArray &message)
         break;
 
     case chat_protocol::file:
-        save_file(_protocol->file_sender(), _protocol->file_name(), _protocol->file_data(), QDateTime::currentDateTime().toString("yyyyMMdd_HHmmss"));
+        save_file(_protocol->file_sender(), _protocol->file_name(), _protocol->file_data(), _protocol->time());
+
+        break;
+
+    case chat_protocol::delete_message:
+        delete_message(_protocol->sender(), _protocol->time());
 
         break;
 
@@ -117,9 +122,9 @@ void client_manager::on_disconnected()
 
 /*-------------------------------------------------------------------- Functions --------------------------------------------------------------*/
 
-void client_manager::send_text(QString sender, QString receiver, QString text)
+void client_manager::send_text(QString sender, QString receiver, QString text, QString time)
 {
-    _socket->sendBinaryMessage(_protocol->set_text_message(sender, receiver, text));
+    _socket->sendBinaryMessage(_protocol->set_text_message(sender, receiver, text, time));
 }
 
 void client_manager::send_name(QString name)
@@ -132,37 +137,37 @@ void client_manager::send_is_typing(QString sender, QString receiver)
     _socket->sendBinaryMessage(_protocol->set_is_typing_message(sender, receiver));
 }
 
-void client_manager::save_file(QString sender, QString file_name, QByteArray file_data, QString date_time)
+void client_manager::save_file(QString sender, QString file_name, QByteArray file_data, QString time)
 {
-    QString full_file_name = QString("%1_%2").arg(date_time, file_name);
+    QString full_file_name = QString("%1_%2").arg(QDateTime::currentDateTime().toString("yyyyMMdd_HHmmss"), file_name);
 
     IDBFS_save_file(full_file_name, file_data, static_cast<int>(file_data.size()));
 
-    emit file_received(sender, full_file_name);
+    emit file_received(sender, full_file_name, time);
 }
 
-void client_manager::send_save_audio(int conversation_ID, QString sender, QString receiver, QString data_name, QString type)
+void client_manager::send_save_audio(int conversation_ID, QString sender, QString receiver, QString data_name, QString type, QString time)
 {
-    _socket->sendBinaryMessage(_protocol->set_save_audio_message(conversation_ID, sender, receiver, data_name, type));
+    _socket->sendBinaryMessage(_protocol->set_save_audio_message(conversation_ID, sender, receiver, data_name, type, time));
 }
 
-void client_manager::send_save_file(int conversation_ID, QString sender, QString receiver, QString data_name, QByteArray file_data, QString type)
+void client_manager::send_save_file(int conversation_ID, QString sender, QString receiver, QString data_name, QByteArray file_data, QString type, QString time)
 {
-    _socket->sendBinaryMessage(_protocol->set_save_file_message(conversation_ID, sender, receiver, data_name, file_data, type));
+    _socket->sendBinaryMessage(_protocol->set_save_file_message(conversation_ID, sender, receiver, data_name, file_data, type, time));
 }
 
-void client_manager::save_audio(QString sender, QString audio_name, QByteArray audio_data, QString date_time)
+void client_manager::save_audio(QString sender, QString audio_name, QByteArray audio_data, QString time)
 {
-    QString full_audio_name = QString("%1_%2").arg(date_time, audio_name);
+    QString full_audio_name = QString("%1_%2").arg(QDateTime::currentDateTime().toString("yyyyMMdd_HHmmss"), audio_name);
 
     IDBFS_save_audio(full_audio_name, audio_data, static_cast<int>(audio_data.size()));
 
-    emit audio_received(sender, full_audio_name);
+    emit audio_received(sender, full_audio_name, time);
 }
 
-void client_manager::send_audio(QString sender, QString receiver, QString audio_name)
+void client_manager::send_audio(QString sender, QString receiver, QString audio_name, QString time)
 {
-    _socket->sendBinaryMessage(_protocol->set_audio_message(sender, receiver, audio_name));
+    _socket->sendBinaryMessage(_protocol->set_audio_message(sender, receiver, audio_name, time));
 }
 
 void client_manager::send_lookup_friend(QString ID)
@@ -175,9 +180,9 @@ void client_manager::send_create_conversation(int conversation_ID, QString parti
     _socket->sendBinaryMessage(_protocol->set_create_conversation_message(conversation_ID, participant1, participant1_ID, participant2, participant2_ID));
 }
 
-void client_manager::send_save_conversation(int conversation_ID, QString sender, QString receiver, QString content)
+void client_manager::send_save_conversation(int conversation_ID, QString sender, QString receiver, QString content, QString time)
 {
-    _socket->sendBinaryMessage(_protocol->set_save_message_message(conversation_ID, sender, receiver, content));
+    _socket->sendBinaryMessage(_protocol->set_save_message_message(conversation_ID, sender, receiver, content, time));
 }
 
 void client_manager::send_sign_up(QString phone_number, QString first_name, QString last_name, QString password, QString secret_question, QString secret_answer)
@@ -206,11 +211,16 @@ void client_manager::send_file_rejected(QString sender, QString receiver)
     _socket->sendBinaryMessage(_protocol->set_file_rejected_message(sender, receiver));
 }
 
-void client_manager::send_file(QString sender, QString receiver, QString file_name, QByteArray file_data)
+void client_manager::send_file(QString sender, QString receiver, QString file_name, QByteArray file_data, QString time)
 {
     _file_name = file_name;
 
-    _socket->sendBinaryMessage(_protocol->set_file_message(sender, receiver, file_name, file_data));
+    _socket->sendBinaryMessage(_protocol->set_file_message(sender, receiver, file_name, file_data, time));
+}
+
+void client_manager::send_delete_message(int conversation_ID, QString sender, QString receiver, QString time)
+{
+    _socket->sendBinaryMessage(_protocol->set_delete_message(conversation_ID, sender, receiver, time));
 }
 
 void client_manager::mount_audio_IDBFS()

@@ -170,7 +170,7 @@ client_main_window::client_main_window(QWidget *parent)
     hbox_2->addWidget(name);
     hbox_2->addWidget(_name);
 
-    _list = new Swipeable_list_widget(chat_widget);
+    _list = new QListWidget(chat_widget);
     _list->setSelectionMode(QAbstractItemView::SingleSelection);
     _list->setMinimumWidth(200);
     _list->setFont(QFont("Arial", 20));
@@ -330,6 +330,7 @@ void client_main_window::on_login_request(QString hashed_password, bool true_or_
         connect(_server_wid, &client_chat_window::client_connected, this, &client_main_window::on_client_connected);
         connect(_server_wid, &client_chat_window::audio_received, this, &client_main_window::on_audio_received);
         connect(_server_wid, &client_chat_window::file_received, this, &client_main_window::on_file_received);
+        connect(_server_wid, &client_chat_window::delete_message, this, &client_main_window::on_delete_message);
 
         connect(_server_wid, &client_chat_window::is_typing_received, this, [=](QString sender)
                 { _status_bar->showMessage(QString("%1 is typing...").arg(sender), 1000); });
@@ -469,7 +470,7 @@ void client_main_window::on_client_connected(QString client_name)
     }
 }
 
-void client_main_window::on_text_message_received(QString sender, QString review)
+void client_main_window::on_text_message_received(QString sender, QString text, QString time)
 {
     QWidget *win = _window_map.value(sender);
     if (win)
@@ -484,7 +485,7 @@ void client_main_window::on_text_message_received(QString sender, QString review
         client_chat_window *wid = qobject_cast<client_chat_window *>(win);
         if (wid)
         {
-            wid->message_received(review);
+            wid->message_received(text, time);
 
             add_on_top(sender);
         }
@@ -616,7 +617,7 @@ void client_main_window::on_client_added_you(int conversation_ID, QString name, 
     }
 }
 
-void client_main_window::on_audio_received(QString sender, QString audio_name)
+void client_main_window::on_audio_received(QString sender, QString audio_name, QString time)
 {
     QWidget *win = _window_map.value(sender);
     if (win)
@@ -624,7 +625,7 @@ void client_main_window::on_audio_received(QString sender, QString audio_name)
         client_chat_window *wid = qobject_cast<client_chat_window *>(win);
         if (wid)
         {
-            wid->add_audio(audio_name);
+            wid->add_audio(audio_name, false, time);
             add_on_top(sender);
         }
         else
@@ -632,7 +633,7 @@ void client_main_window::on_audio_received(QString sender, QString audio_name)
     }
 }
 
-void client_main_window::on_file_received(QString sender, QString file_name)
+void client_main_window::on_file_received(QString sender, QString file_name, QString time)
 {
     QWidget *win = _window_map.value(sender);
     if (win)
@@ -640,7 +641,7 @@ void client_main_window::on_file_received(QString sender, QString file_name)
         client_chat_window *wid = qobject_cast<client_chat_window *>(win);
         if (wid)
         {
-            wid->add_file(file_name);
+            wid->add_file(file_name, false, time);
             add_on_top(sender);
         }
         else
@@ -648,8 +649,17 @@ void client_main_window::on_file_received(QString sender, QString file_name)
     }
 }
 
-void client_main_window::on_item_deleted(QListWidgetItem *item)
+void client_main_window::on_delete_message(const QString &sender, const QString &time)
 {
+    QWidget *win = _window_map.value(sender);
+    if (win)
+    {
+        client_chat_window *wid = qobject_cast<client_chat_window *>(win);
+        if (wid)
+            wid->delete_message_received(time);
+        else
+            qDebug() << "client_main_window ---> on_delete_message() --> ERROR CASTING THE WIDGET:";
+    }
 }
 /*-------------------------------------------------------------------- Functions --------------------------------------------------------------*/
 

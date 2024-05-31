@@ -38,7 +38,7 @@ private:
     QLineEdit *_insert_secret_question;
     QLineEdit *_insert_secret_answer;
 
-    Swipeable_list_widget *_list;
+    QListWidget *_list;
 
     QComboBox *_friend_list;
 
@@ -62,7 +62,7 @@ private slots:
 
     void on_client_connected(QString client_name);
 
-    void on_text_message_received(QString sender, QString message);
+    void on_text_message_received(QString sender, QString message, QString time);
     void on_name_changed();
 
     void on_item_clicked(QListWidgetItem *item);
@@ -71,8 +71,8 @@ private slots:
     void on_client_added_you(int conversation_ID, QString name, QString ID);
     void on_lookup_friend_result(int conversation_ID, QString full_name, bool true_or_false);
 
-    void on_audio_received(QString sender, QString audio_name);
-    void on_file_received(QString sender, QString file_name);
+    void on_audio_received(QString sender, QString audio_name, QString time);
+    void on_file_received(QString sender, QString file_name, QString time);
 
-    void on_item_deleted(QListWidgetItem *item);
+    void on_delete_message(const QString &sender, const QString &time);
 };

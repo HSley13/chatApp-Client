@@ -16,21 +16,21 @@ class client_manager : public QMainWindow
 public:
     client_manager(QWidget *parent = nullptr);
 
-    void send_text(QString sender, QString receiver, QString text);
+    void send_text(QString sender, QString receiver, QString text, QString time);
     void send_name(QString name);
     void send_is_typing(QString sender, QString receiver);
 
-    void save_file(QString sender, QString file_name, QByteArray file_data, QString date_time);
-    void save_audio(QString sender, QString audio_name, QByteArray audio_data, QString date_time);
+    void save_file(QString sender, QString file_name, QByteArray file_data, QString time);
+    void save_audio(QString sender, QString audio_name, QByteArray audio_data, QString time);
 
-    void send_audio(QString sender, QString receiver, QString audio_name);
+    void send_audio(QString sender, QString receiver, QString audio_name, QString time);
     void send_lookup_friend(QString ID);
 
     void send_create_conversation(int conversation_ID, QString participant1, int participant1_ID, QString participant2, int participant2_ID);
-    void send_save_conversation(int conversation_ID, QString sender, QString receiver, QString content);
+    void send_save_conversation(int conversation_ID, QString sender, QString receiver, QString content, QString time);
 
-    void send_save_audio(int conversation_ID, QString sender, QString receiver, QString data_name, QString type);
-    void send_save_file(int conversation_ID, QString sender, QString receiver, QString data_name, QByteArray file_data, QString type);
+    void send_save_audio(int conversation_ID, QString sender, QString receiver, QString data_name, QString type, QString time);
+    void send_save_file(int conversation_ID, QString sender, QString receiver, QString data_name, QByteArray file_data, QString type, QString time);
 
     void send_sign_up(QString phone_number, QString first_name, QString last_name, QString password, QString secret_question, QString secret_answer);
     void send_login_request(QString phone_number, QString password);
@@ -38,7 +38,9 @@ public:
     void send_init_send_file(QString sender, QString my_ID, QString receiver, QString file_name, qint64 file_size);
     void send_file_accepted(QString sender, QString receiver);
     void send_file_rejected(QString sender, QString receiver);
-    void send_file(QString sender, QString receiver, QString file_name, QByteArray file_data);
+    void send_file(QString sender, QString receiver, QString file_name, QByteArray file_data, QString time);
+
+    void send_delete_message(const int conversation_ID, QString sender, QString receiver, QString time);
 
     void mount_audio_IDBFS();
     void mount_file_IDBFS();
@@ -62,7 +64,7 @@ private:
     QWebSocket *_file_socket;
 
 signals:
-    void text_message_received(QString sender, QString message);
+    void text_message_received(QString sender, QString message, QString time);
     void is_typing_received(QString sender);
 
     void client_name_changed(QString old_name, QString client_name);
@@ -71,8 +73,8 @@ signals:
 
     void socket_disconnected();
 
-    void audio_received(QString sender, QString audio);
-    void file_received(QString sender, QString file_name);
+    void audio_received(QString sender, QString audio, QString time);
+    void file_received(QString sender, QString file_name, QString time);
 
     void client_added_you(int conversation_ID, QString name, QString ID);
     void lookup_friend_result(int conversation_ID, QString name, bool true_or_false);
@@ -82,6 +84,8 @@ signals:
     void init_send_file_received(QString sender, QString sender_ID, QString file_name, qint64 file_size);
     void file_accepted(QString sender);
     void file_rejected(QString sender);
+
+    void delete_message(const QString &sender, const QString &time);
 
 private slots:
     void on_disconnected();
