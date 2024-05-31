@@ -29,7 +29,7 @@ class client_chat_window : public QMainWindow
 {
     Q_OBJECT
 public:
-    client_chat_window(QString my_ID = nullptr, QWidget *parent = nullptr);
+    client_chat_window(QString my_ID, QWidget *parent = nullptr);
     client_chat_window(int conversation_ID, QString destinator, QString name, QWidget *parent = nullptr);
 
     void set_name(QString insert_name);
@@ -52,7 +52,7 @@ private:
     QStatusBar *_status_bar;
 
     QString _destinator_name;
-    QString _destinator;
+    QString _destinator = "Server";
     QString _window_name = "Server";
 
     int _conversation_ID;
@@ -96,7 +96,7 @@ private:
     void mousePressEvent(QMouseEvent *event) override;
     void mouseMoveEvent(QMouseEvent *event) override;
 
-    static QString my_name();
+    QString my_name();
 
     void set_up_window();
 

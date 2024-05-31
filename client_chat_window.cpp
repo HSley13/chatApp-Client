@@ -330,7 +330,7 @@ void client_chat_window::set_up_window()
     connect(this, &client_chat_window::update_button_file, this, [=]()
             { button_file->setText(QString("%1's Conversation").arg(_window_name)); });
 
-    _list = new Swipeable_list_widget(this, this);
+    _list = new Swipeable_list_widget(this);
     _list->setItemDelegate(new separator_delegate(_list));
 
     _insert_message = new QLineEdit(this);
