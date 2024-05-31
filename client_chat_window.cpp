@@ -69,6 +69,8 @@ void client_chat_window::on_init_send_file_received(QString sender, QString send
 
     connect(message_box, &QMessageBox::rejected, this, [=]()
             { _client->send_file_rejected(my_name(), sender_ID); });
+
+    message_box->exec();
 }
 
 void client_chat_window::on_file_saved(QString path)
