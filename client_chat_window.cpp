@@ -4,20 +4,14 @@
 QString client_chat_window::_my_name = nullptr;
 QString client_chat_window::_insert_name = nullptr;
 
-int client_chat_window::_conversation_ID;
-QString client_chat_window::_destinator = "Server";
-
 client_manager *client_chat_window::_client = nullptr;
 
 client_chat_window::client_chat_window(QString my_ID, QWidget *parent)
     : QMainWindow(parent), _my_ID(my_ID) { set_up_window(); }
 
 client_chat_window::client_chat_window(int conversation_ID, QString destinator, QString name, QWidget *parent)
-    : QMainWindow(parent), _destinator_name(name)
+    : QMainWindow(parent), _conversation_ID(conversation_ID), _destinator(destinator), _destinator_name(name)
 {
-    _conversation_ID = conversation_ID;
-    _destinator = destinator;
-
     set_up_window();
 
     ask_microphone_permission();
@@ -336,7 +330,7 @@ void client_chat_window::set_up_window()
     connect(this, &client_chat_window::update_button_file, this, [=]()
             { button_file->setText(QString("%1's Conversation").arg(_window_name)); });
 
-    _list = new Swipeable_list_widget(this);
+    _list = new Swipeable_list_widget(this, this);
     _list->setItemDelegate(new separator_delegate(_list));
 
     _insert_message = new QLineEdit(this);

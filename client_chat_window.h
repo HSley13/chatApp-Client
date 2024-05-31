@@ -29,7 +29,7 @@ class client_chat_window : public QMainWindow
 {
     Q_OBJECT
 public:
-    client_chat_window(QString my_ID, QWidget *parent = nullptr);
+    client_chat_window(QString my_ID = nullptr, QWidget *parent = nullptr);
     client_chat_window(int conversation_ID, QString destinator, QString name, QWidget *parent = nullptr);
 
     void set_name(QString insert_name);
@@ -46,16 +46,16 @@ public:
 
     static client_manager *_client;
 
-    static void message_deleted(QString time);
+    void message_deleted(QString time);
 
 private:
     QStatusBar *_status_bar;
 
     QString _destinator_name;
-    static QString _destinator;
+    QString _destinator;
     QString _window_name = "Server";
 
-    static int _conversation_ID;
+    int _conversation_ID;
 
     QString _my_ID;
 
@@ -148,10 +148,10 @@ class Swipeable_list_widget : public QListWidget
 
 private:
     QPoint drag_start_position;
-    QString window;
+    client_chat_window *_window;
 
 public:
-    Swipeable_list_widget(QWidget *parent = nullptr) : QListWidget(parent) {}
+    Swipeable_list_widget(client_chat_window *window, QWidget *parent = nullptr) : QListWidget(parent), _window(window) {}
 
 protected:
     void mousePressEvent(QMouseEvent *event) override
@@ -179,7 +179,7 @@ protected:
                     message_box->setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
                     message_box->setDefaultButton(QMessageBox::Ok);
                     connect(message_box, &QMessageBox::accepted, this, [=]()
-                            { client_chat_window::message_deleted(item->data(Qt::UserRole).toString());
+                            { _window->message_deleted(item->data(Qt::UserRole).toString());
                              delete item; });
                 }
             }

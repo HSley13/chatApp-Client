@@ -53,7 +53,7 @@ client_main_window::client_main_window(QWidget *parent)
                    if (!_server_wid)
                 _server_wid = new client_chat_window(_user_phone_number->text(), this);
                 connect(_server_wid, &client_chat_window::login_request, this, &client_main_window::on_login_request);
-                _status_bar->showMessage("<font color='red'>LOADING YOUR DATA, WAIT!!!!!! ...</font>", 10000);
+                _status_bar->showMessage("LOADING YOUR DATA, WAIT!!!!!! ...", 10000);
                 QTimer::singleShot(2000, this, [=]() { _server_wid->_client->send_login_request(_user_phone_number->text(), _user_password->text());});
                 QTimer::singleShot(10000, this, [=](){log_in->setEnabled(true); }); });
 
