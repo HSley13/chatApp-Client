@@ -136,6 +136,8 @@ private slots:
 
     void send_file();
 
+    void on_file_saved(QString path);
+
     void on_init_send_file_received(QString sender, QString sender_ID, QString file_name, qint64 file_size);
 
     void start_recording();

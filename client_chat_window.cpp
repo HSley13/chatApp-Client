@@ -71,6 +71,15 @@ void client_chat_window::on_init_send_file_received(QString sender, QString send
             { _client->send_file_rejected(my_name(), sender_ID); });
 }
 
+void client_chat_window::on_file_saved(QString path)
+{
+    QMessageBox::information(this, "File Saved", QString("File save at: %1").arg(path));
+
+    add_file(path, false, QTime::currentTime().toString());
+
+    emit data_received_sent(_window_name);
+}
+
 void client_chat_window::ask_microphone_permission()
 {
     QMicrophonePermission microphonePermission;
@@ -544,9 +553,10 @@ void client_chat_window::set_retrieve_message_window(QString type, QString conte
     wid->setStyleSheet("color: black;");
 
     QListWidgetItem *line = new QListWidgetItem(_list);
-    line->setBackground(QBrush(QColorConstants::Svg::blue));
     line->setSizeHint(QSize(0, 60));
     line->setData(Qt::UserRole, date_time);
+
+    (true_or_false) ? line->setBackground(QBrush(QColorConstants::Svg::lightskyblue)) : line->setBackground(QBrush(QColorConstants::Svg::gray));
 
     _list->setItemWidget(line, wid);
 }
