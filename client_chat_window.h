@@ -183,6 +183,7 @@ protected:
                     connect(message_box, &QMessageBox::accepted, this, [=]()
                             { _window->message_deleted(item->data(Qt::UserRole).toString());
                              delete item; });
+                    message_box->exec();
                 }
             }
         }
