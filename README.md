@@ -21,7 +21,6 @@
     ------
 
     TO DO
-    --- Message Deletion for both user.
     --- Make the GUI more appealing.
     --- Upload Preview here once Finished.
 

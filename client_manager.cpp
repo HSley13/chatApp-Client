@@ -122,22 +122,22 @@ void client_manager::on_disconnected()
 
 /*-------------------------------------------------------------------- Functions --------------------------------------------------------------*/
 
-void client_manager::send_text(QString sender, QString receiver, QString text, QString time)
+void client_manager::send_text(const QString &sender, const QString &receiver, const QString &text, const QString &time)
 {
     _socket->sendBinaryMessage(_protocol->set_text_message(sender, receiver, text, time));
 }
 
-void client_manager::send_name(QString name)
+void client_manager::send_name(const QString &name)
 {
     _socket->sendBinaryMessage(_protocol->set_name_message(_my_ID, name));
 }
 
-void client_manager::send_is_typing(QString sender, QString receiver)
+void client_manager::send_is_typing(const QString &sender, const QString &receiver)
 {
     _socket->sendBinaryMessage(_protocol->set_is_typing_message(sender, receiver));
 }
 
-void client_manager::save_file(QString sender, QString file_name, QByteArray file_data, QString time)
+void client_manager::save_file(const QString &sender, const QString &file_name, const QByteArray &file_data, const QString &time)
 {
     QString full_file_name = QString("%1_%2").arg(QDateTime::currentDateTime().toString("yyyyMMdd_HHmmss"), file_name);
 
@@ -146,17 +146,17 @@ void client_manager::save_file(QString sender, QString file_name, QByteArray fil
     emit file_received(sender, full_file_name, time);
 }
 
-void client_manager::send_save_audio(int conversation_ID, QString sender, QString receiver, QString data_name, QString type, QString time)
+void client_manager::send_save_audio(const int &conversation_ID, const QString &sender, const QString &receiver, const QString &data_name, const QString &type, const QString &time)
 {
     _socket->sendBinaryMessage(_protocol->set_save_audio_message(conversation_ID, sender, receiver, data_name, type, time));
 }
 
-void client_manager::send_save_file(int conversation_ID, QString sender, QString receiver, QString data_name, QByteArray file_data, QString type, QString time)
+void client_manager::send_save_file(const int &conversation_ID, const QString &sender, const QString &receiver, const QString &data_name, const QByteArray &file_data, const QString &type, const QString &time)
 {
     _socket->sendBinaryMessage(_protocol->set_save_file_message(conversation_ID, sender, receiver, data_name, file_data, type, time));
 }
 
-void client_manager::save_audio(QString sender, QString audio_name, QByteArray audio_data, QString time)
+void client_manager::save_audio(const QString &sender, const QString &audio_name, const QByteArray &audio_data, const QString &time)
 {
     QString full_audio_name = QString("%1_%2").arg(QDateTime::currentDateTime().toString("yyyyMMdd_HHmmss"), audio_name);
 
@@ -165,60 +165,60 @@ void client_manager::save_audio(QString sender, QString audio_name, QByteArray a
     emit audio_received(sender, full_audio_name, time);
 }
 
-void client_manager::send_audio(QString sender, QString receiver, QString audio_name, QString time)
+void client_manager::send_audio(const QString &sender, const QString &receiver, const QString &audio_name, const QString &time)
 {
     _socket->sendBinaryMessage(_protocol->set_audio_message(sender, receiver, audio_name, time));
 }
 
-void client_manager::send_lookup_friend(QString ID)
+void client_manager::send_lookup_friend(const QString &ID)
 {
     _socket->sendBinaryMessage(_protocol->set_lookup_friend_message(ID));
 }
 
-void client_manager::send_create_conversation(int conversation_ID, QString participant1, int participant1_ID, QString participant2, int participant2_ID)
+void client_manager::send_create_conversation(const int &conversation_ID, const QString &participant1, const int &participant1_ID, const QString &participant2, const int &participant2_ID)
 {
     _socket->sendBinaryMessage(_protocol->set_create_conversation_message(conversation_ID, participant1, participant1_ID, participant2, participant2_ID));
 }
 
-void client_manager::send_save_conversation(int conversation_ID, QString sender, QString receiver, QString content, QString time)
+void client_manager::send_save_conversation(const int &conversation_ID, const QString &sender, const QString &receiver, const QString &content, const QString &time)
 {
     _socket->sendBinaryMessage(_protocol->set_save_message_message(conversation_ID, sender, receiver, content, time));
 }
 
-void client_manager::send_sign_up(QString phone_number, QString first_name, QString last_name, QString password, QString secret_question, QString secret_answer)
+void client_manager::send_sign_up(const QString &phone_number, const QString &first_name, const QString &last_name, const QString &password, const QString &secret_question, const QString &secret_answer)
 {
     _socket->sendBinaryMessage(_protocol->set_sign_up_message(phone_number, first_name, last_name, password, secret_question, secret_answer));
 }
 
-void client_manager::send_login_request(QString phone_number, QString password)
+void client_manager::send_login_request(const QString &phone_number, const QString &password)
 {
     _my_ID = phone_number;
     _socket->sendBinaryMessage(_protocol->set_login_request_message(phone_number, password));
 }
 
-void client_manager::send_init_send_file(QString sender, QString my_ID, QString receiver, QString file_name, qint64 file_size)
+void client_manager::send_init_send_file(const QString &sender, const QString &my_ID, const QString &receiver, const QString &file_name, const qint64 &file_size)
 {
     _socket->sendBinaryMessage(_protocol->set_init_send_file_message(sender, my_ID, receiver, file_name, file_size));
 }
 
-void client_manager::send_file_accepted(QString sender, QString receiver)
+void client_manager::send_file_accepted(const QString &sender, const QString &receiver)
 {
     _socket->sendBinaryMessage(_protocol->set_file_accepted_message(sender, receiver));
 }
 
-void client_manager::send_file_rejected(QString sender, QString receiver)
+void client_manager::send_file_rejected(const QString &sender, const QString &receiver)
 {
     _socket->sendBinaryMessage(_protocol->set_file_rejected_message(sender, receiver));
 }
 
-void client_manager::send_file(QString sender, QString receiver, QString file_name, QByteArray file_data, QString time)
+void client_manager::send_file(const QString &sender, const QString &receiver, const QString &file_name, const QByteArray &file_data, const QString &time)
 {
     _file_name = file_name;
 
     _socket->sendBinaryMessage(_protocol->set_file_message(sender, receiver, file_name, file_data, time));
 }
 
-void client_manager::send_delete_message(int conversation_ID, QString sender, QString receiver, QString time)
+void client_manager::send_delete_message(const int &conversation_ID, const QString &sender, const QString &receiver, const QString &time)
 {
     _socket->sendBinaryMessage(_protocol->set_delete_message(conversation_ID, sender, receiver, time));
 }
@@ -245,7 +245,7 @@ void client_manager::mount_file_IDBFS()
     });
 }
 
-void client_manager::IDBFS_save_audio(QString audio_name, QByteArray audio_data, int size)
+void client_manager::IDBFS_save_audio(const QString &audio_name, const QByteArray &audio_data, const int &size)
 {
     std::string audio_path = "/audio/";
     audio_path += audio_name.toStdString();
@@ -260,7 +260,7 @@ void client_manager::IDBFS_save_audio(QString audio_name, QByteArray audio_data,
         qDebug() << "Failed to open audio for writing:" << QString::fromStdString(audio_path);
 }
 
-void client_manager::IDBFS_save_file(QString file_name, QByteArray file_data, int size)
+void client_manager::IDBFS_save_file(const QString &file_name, const QByteArray &file_data, const int &size)
 {
     std::string file_path = "/file/";
     file_path += file_name.toStdString();

@@ -6,10 +6,10 @@ QString client_chat_window::_insert_name = nullptr;
 
 client_manager *client_chat_window::_client = nullptr;
 
-client_chat_window::client_chat_window(QString my_ID, QWidget *parent)
+client_chat_window::client_chat_window(const QString &my_ID, QWidget *parent)
     : QMainWindow(parent), _my_ID(my_ID) { set_up_window(); }
 
-client_chat_window::client_chat_window(int conversation_ID, QString destinator, QString name, QWidget *parent)
+client_chat_window::client_chat_window(const int &conversation_ID, const QString &destinator, const QString &name, QWidget *parent)
     : QMainWindow(parent), _conversation_ID(conversation_ID), _destinator(destinator), _destinator_name(name)
 {
     set_up_window();
@@ -40,14 +40,14 @@ client_chat_window::client_chat_window(int conversation_ID, QString destinator, 
     _hbox->insertWidget(1, _send_file_button);
 }
 
-void client_chat_window::message_deleted(QString time)
+void client_chat_window::message_deleted(const QString &time)
 {
     _client->send_delete_message(_conversation_ID, my_name(), _destinator, time);
 }
 
 /*-------------------------------------------------------------------- Slots --------------------------------------------------------------*/
 
-void client_chat_window::on_init_send_file_received(QString sender, QString sender_ID, QString file_name, qint64 file_size)
+void client_chat_window::on_init_send_file_received(const QString &sender, const QString &sender_ID, const QString &file_name, const qint64 &file_size)
 {
     QString message = QString("-------- %1 --------\n"
                               "%2 wants to send a file. Willing to accept it or not?\n"
@@ -73,7 +73,7 @@ void client_chat_window::on_init_send_file_received(QString sender, QString send
     message_box->exec();
 }
 
-void client_chat_window::on_file_saved(QString path)
+void client_chat_window::on_file_saved(const QString &path)
 {
     QMessageBox::information(this, "File Saved", QString("File save at: %1").arg(path));
 
@@ -176,7 +176,7 @@ void client_chat_window::start_recording()
     }
 }
 
-void client_chat_window::on_duration_changed(qint64 duration)
+void client_chat_window::on_duration_changed(const qint64 &duration)
 {
     if (_recorder->error() != QMediaRecorder::NoError || duration < 1000)
         return;
@@ -213,7 +213,7 @@ void client_chat_window::play_audio(const QUrl &source, QPushButton *audio, QSli
 
             connect(slider, &QSlider::valueChanged, _player, &QMediaPlayer::setPosition);
 
-            connect(_player, &QMediaPlayer::durationChanged, this, [=](qint64 duration)
+            connect(_player, &QMediaPlayer::durationChanged, this, [=](const qint64 &duration)
                     {
                         slider->setRange(0, duration);
                         slider->setValue(_player->position()); });
@@ -280,7 +280,7 @@ void client_chat_window::send_message()
     emit data_received_sent(_window_name);
 }
 
-void client_chat_window::message_received(QString message, QString time)
+void client_chat_window::message_received(const QString &message, const QString &time)
 {
     chat_line *wid = new chat_line(this);
     wid->set_message(message, false, time);
@@ -294,7 +294,8 @@ void client_chat_window::message_received(QString message, QString time)
     _list->addItem(line);
     _list->setItemWidget(line, wid);
 
-    _client->send_save_conversation(_conversation_ID, _destinator, _client->_my_ID, message, time);
+    if (!_destinator.compare("Server"))
+        _client->send_save_conversation(_conversation_ID, _destinator, _client->_my_ID, message, time);
 }
 
 void client_chat_window::delete_message_received(const QString &time)
@@ -317,7 +318,7 @@ void client_chat_window::send_file()
             QString IDBFS_file_name = QString("%1_%2").arg(QDateTime::currentDateTime().toString("yyyyMMdd_HHmmss"), QFileInfo(file_name).fileName());
             QString current_time = QTime::currentTime().toString();
 
-            connect(_client, &client_manager::file_accepted, this, [=](QString receiver)
+            connect(_client, &client_manager::file_accepted, this, [=](const QString &receiver)
                     { add_file(file_name, true, current_time);
                     _client->send_file(my_name(), _destinator, QFileInfo(file_name).fileName(), file_data, current_time);
                     _client->IDBFS_save_file(file_name, file_data, static_cast<int>(file_data.size()));
@@ -372,44 +373,44 @@ void client_chat_window::set_up_window()
     if (!_client)
     {
         _client = new client_manager(this);
-        connect(_client, &client_manager::text_message_received, this, [=](QString sender, QString message, QString time)
+        connect(_client, &client_manager::text_message_received, this, [=](const QString &sender, const QString &message, const QString &time)
                 { emit text_message_received(sender, message, time); });
 
-        connect(_client, &client_manager::is_typing_received, this, [=](QString sender)
+        connect(_client, &client_manager::is_typing_received, this, [=](const QString &sender)
                 { emit is_typing_received(sender); });
 
-        connect(_client, &client_manager::client_disconnected, this, [=](QString client_name)
+        connect(_client, &client_manager::client_disconnected, this, [=](const QString &client_name)
                 { emit client_disconnected(client_name); });
 
-        connect(_client, &client_manager::client_connected, this, [=](QString client_name)
+        connect(_client, &client_manager::client_connected, this, [=](const QString &client_name)
                 { emit client_connected(client_name); });
 
-        connect(_client, &client_manager::client_name_changed, this, [=](QString old_name, QString client_name)
+        connect(_client, &client_manager::client_name_changed, this, [=](const QString &old_name, const QString &client_name)
                 { emit client_name_changed(old_name, client_name); });
 
         connect(_client, &client_manager::socket_disconnected, this, [=]()
                 { emit socket_disconnected(); });
 
-        connect(_client, &client_manager::client_added_you, this, [=](int conversation_ID, QString name, QString ID)
+        connect(_client, &client_manager::client_added_you, this, [=](const int &conversation_ID, const QString &name, const QString &ID)
                 { emit client_added_you(conversation_ID, name, ID); });
 
-        connect(_client, &client_manager::lookup_friend_result, this, [=](int conversation_ID, QString name, bool true_or_false)
+        connect(_client, &client_manager::lookup_friend_result, this, [=](const int &conversation_ID, const QString &name, bool true_or_false)
                 { emit lookup_friend_result(conversation_ID, name, true_or_false); });
 
-        connect(_client, &client_manager::audio_received, this, [=](QString sender, QString audio_name, QString time)
+        connect(_client, &client_manager::audio_received, this, [=](const QString &sender, const QString &audio_name, const QString &time)
                 { emit audio_received(sender, audio_name, time); });
 
-        connect(_client, &client_manager::file_received, this, [=](QString sender, QString file_name, QString time)
+        connect(_client, &client_manager::file_received, this, [=](const QString &sender, const QString &file_name, const QString &time)
                 { emit file_received(sender, file_name, time); });
 
-        connect(_client, &client_manager::login_request, this, [=](QString hashed_password, bool true_or_false, QHash<int, QHash<QString, int>> friend_list, QList<QString> online_friends, QHash<int, QVector<QString>> messages, QHash<int, QHash<QString, QByteArray>> binary_data)
+        connect(_client, &client_manager::login_request, this, [=](const QString &hashed_password, bool true_or_false, const QHash<int, QHash<QString, int>> &friend_list, const QList<QString> &online_friends, const QHash<int, QVector<QString>> &messages, const QHash<int, QHash<QString, QByteArray>> &binary_data)
                 { emit login_request(hashed_password, true_or_false, friend_list, online_friends, messages, binary_data); });
 
         connect(_client, &client_manager::init_send_file_received, this, &client_chat_window::on_init_send_file_received);
 
-        connect(_client, &client_manager::file_rejected, this, [=](QString sender)
+        connect(_client, &client_manager::file_rejected, this, [=](const QString &sender)
                 { QMessageBox *info = new QMessageBox(this); 
-                  info->information(this, "File Rejected", QString("%1 has rejected receiving your file").arg(sender)); });
+                  info->information(this, "File Rejected",  QString ("%1 has rejected receiving your file").arg(sender)); });
 
         connect(_client, &client_manager::delete_message, this, [=](const QString &sender, const QString &time)
                 { emit delete_message(sender, time); });
@@ -423,7 +424,7 @@ QString client_chat_window::my_name()
     return name;
 }
 
-void client_chat_window::set_name(QString insert_name)
+void client_chat_window::set_name(const QString &insert_name)
 {
     _insert_name = insert_name;
 
@@ -432,7 +433,7 @@ void client_chat_window::set_name(QString insert_name)
     _client->send_name(insert_name);
 }
 
-void client_chat_window::window_name(QString name)
+void client_chat_window::window_name(const QString &name)
 {
     _window_name = name;
 
@@ -459,7 +460,7 @@ void client_chat_window::mouseMoveEvent(QMouseEvent *event)
     }
 }
 
-void client_chat_window::add_file(QString file_name, bool is_mine, QString time)
+void client_chat_window::add_file(const QString &file_name, bool is_mine, const QString &time)
 {
     QWidget *wid = new QWidget();
     wid->setStyleSheet("color: black;");
@@ -496,7 +497,7 @@ void client_chat_window::add_file(QString file_name, bool is_mine, QString time)
     _list->setItemWidget(line, wid);
 }
 
-void client_chat_window::add_audio(QString audio_name, bool is_mine, QString time)
+void client_chat_window::add_audio(const QString &audio_name, bool is_mine, const QString &time)
 {
     QWidget *wid = new QWidget();
     wid->setStyleSheet("color: black;");
@@ -527,7 +528,7 @@ void client_chat_window::add_audio(QString audio_name, bool is_mine, QString tim
     _list->setItemWidget(line, wid);
 }
 
-void client_chat_window::set_retrieve_message_window(QString type, QString content, QByteArray file_data, QString date_time, bool true_or_false)
+void client_chat_window::set_retrieve_message_window(const QString &type, const QString &content, const QByteArray &file_data, const QString &date_time, bool true_or_false)
 {
     if (!type.compare("file"))
     {
@@ -568,7 +569,7 @@ void client_chat_window::retrieve_conversation(QVector<QString> &messages, QHash
     if (messages.isEmpty())
         return;
 
-    for (const QString &message : messages)
+    for (QString message : messages)
     {
         QStringList parts = message.split("/");
 
@@ -592,7 +593,7 @@ void client_chat_window::retrieve_conversation(QVector<QString> &messages, QHash
     });
 }
 
-void client_chat_window::add_friend(QString ID)
+void client_chat_window::add_friend(const QString &ID)
 {
     if (!_client->_my_ID.compare(ID))
         return;

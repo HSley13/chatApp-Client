@@ -55,24 +55,24 @@ private slots:
     void on_swipe_right();
 
     void on_sign_up();
-    void on_login_request(QString hashed_password, bool true_or_false, QHash<int, QHash<QString, int>> friend_list, QList<QString> online_friends, QHash<int, QVector<QString>> messages, QHash<int, QHash<QString, QByteArray>> binary_data);
+    void on_login_request(const QString &hashed_password, bool true_or_false, const QHash<int, QHash<QString, int>> &friend_list, const QList<QString> &online_friends, const QHash<int, QVector<QString>> &messages, const QHash<int, QHash<QString, QByteArray>> &binary_data);
 
-    void on_client_name_changed(QString old_name, QString client_name);
-    void on_client_disconnected(QString client_name);
+    void on_client_name_changed(const QString &old_name, const QString &client_name);
+    void on_client_disconnected(const QString &client_name);
 
-    void on_client_connected(QString client_name);
+    void on_client_connected(const QString &client_name);
 
-    void on_text_message_received(QString sender, QString message, QString time);
+    void on_text_message_received(const QString &sender, const QString &message, const QString &time);
     void on_name_changed();
 
     void on_item_clicked(QListWidgetItem *item);
     void new_conversation(const QString &name);
 
-    void on_client_added_you(int conversation_ID, QString name, QString ID);
-    void on_lookup_friend_result(int conversation_ID, QString full_name, bool true_or_false);
+    void on_client_added_you(const int &conversation_ID, const QString &name, const QString &ID);
+    void on_lookup_friend_result(const int &conversation_ID, const QString &full_name, bool true_or_false);
 
-    void on_audio_received(QString sender, QString audio_name, QString time);
-    void on_file_received(QString sender, QString file_name, QString time);
+    void on_audio_received(const QString &sender, const QString &audio_name, const QString &time);
+    void on_file_received(const QString &sender, const QString &file_name, const QString &time);
 
     void on_delete_message(const QString &sender, const QString &time);
 };

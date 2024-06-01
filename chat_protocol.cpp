@@ -3,9 +3,13 @@
 chat_protocol::chat_protocol(QWidget *parent)
     : QMainWindow(parent) {}
 
-void chat_protocol::load_data(QByteArray data)
+void chat_protocol::load_data(const QByteArray &data)
 {
-    QDataStream in(&data, QIODevice::ReadOnly);
+    QBuffer buffer;
+    buffer.setData(data);
+    buffer.open(QIODevice::ReadOnly);
+
+    QDataStream in(&buffer);
     in.setVersion(QDataStream::Qt_6_7);
 
     in >> _type;
@@ -87,7 +91,7 @@ void chat_protocol::load_data(QByteArray data)
     }
 }
 
-QByteArray chat_protocol::get_data(message_type type, QString data)
+QByteArray chat_protocol::get_data(message_type type, const QString &data)
 {
     QByteArray byte;
 
@@ -99,7 +103,7 @@ QByteArray chat_protocol::get_data(message_type type, QString data)
     return byte;
 }
 
-QByteArray chat_protocol::set_text_message(QString sender, QString receiver, QString message, QString time)
+QByteArray chat_protocol::set_text_message(const QString &sender, const QString &receiver, const QString &message, const QString &time)
 {
     QByteArray byte;
 
@@ -111,7 +115,7 @@ QByteArray chat_protocol::set_text_message(QString sender, QString receiver, QSt
     return byte;
 }
 
-QByteArray chat_protocol::set_is_typing_message(QString sender, QString receiver)
+QByteArray chat_protocol::set_is_typing_message(const QString &sender, const QString &receiver)
 {
     QByteArray byte;
 
@@ -123,7 +127,7 @@ QByteArray chat_protocol::set_is_typing_message(QString sender, QString receiver
     return byte;
 }
 
-QByteArray chat_protocol::set_name_message(QString my_name, QString name)
+QByteArray chat_protocol::set_name_message(const QString &my_name, const QString &name)
 {
     QByteArray byte;
 
@@ -135,12 +139,12 @@ QByteArray chat_protocol::set_name_message(QString my_name, QString name)
     return byte;
 }
 
-QByteArray chat_protocol::set_lookup_friend_message(QString ID)
+QByteArray chat_protocol::set_lookup_friend_message(const QString &ID)
 {
     return get_data(lookup_friend, ID);
 }
 
-QByteArray chat_protocol::set_create_conversation_message(int conversation_ID, QString participant1, int participant1_ID, QString participant2, int participant2_ID)
+QByteArray chat_protocol::set_create_conversation_message(const int &conversation_ID, const QString &participant1, const int &participant1_ID, const QString &participant2, const int &participant2_ID)
 {
     QByteArray byte;
 
@@ -152,7 +156,7 @@ QByteArray chat_protocol::set_create_conversation_message(int conversation_ID, Q
     return byte;
 }
 
-QByteArray chat_protocol::set_audio_message(QString sender, QString receiver, QString audio_name, QString time)
+QByteArray chat_protocol::set_audio_message(const QString &sender, const QString &receiver, const QString &audio_name, const QString &time)
 {
     QByteArray byte;
 
@@ -174,7 +178,7 @@ QByteArray chat_protocol::set_audio_message(QString sender, QString receiver, QS
     return byte;
 }
 
-QByteArray chat_protocol::set_save_message_message(int conversation_ID, QString sender, QString receiver, QString content, QString time)
+QByteArray chat_protocol::set_save_message_message(const int &conversation_ID, const QString &sender, const QString &receiver, const QString &content, const QString &time)
 {
     QByteArray byte;
 
@@ -186,7 +190,7 @@ QByteArray chat_protocol::set_save_message_message(int conversation_ID, QString 
     return byte;
 }
 
-QByteArray chat_protocol::set_sign_up_message(QString phone_number, QString first_name, QString last_name, QString password, QString secret_question, QString secret_answer)
+QByteArray chat_protocol::set_sign_up_message(const QString &phone_number, const QString &first_name, const QString &last_name, const QString &password, const QString &secret_question, const QString &secret_answer)
 {
     QByteArray byte;
 
@@ -198,7 +202,7 @@ QByteArray chat_protocol::set_sign_up_message(QString phone_number, QString firs
     return byte;
 }
 
-QByteArray chat_protocol::set_login_request_message(QString phone_number, QString password)
+QByteArray chat_protocol::set_login_request_message(const QString &phone_number, const QString &password)
 {
     QByteArray byte;
 
@@ -210,7 +214,7 @@ QByteArray chat_protocol::set_login_request_message(QString phone_number, QStrin
     return byte;
 }
 
-QByteArray chat_protocol::set_save_audio_message(int conversation_ID, QString sender, QString receiver, QString file_name, QString type, QString time)
+QByteArray chat_protocol::set_save_audio_message(const int &conversation_ID, const QString &sender, const QString &receiver, const QString &file_name, const QString &type, const QString &time)
 {
     QByteArray byte;
 
@@ -231,7 +235,7 @@ QByteArray chat_protocol::set_save_audio_message(int conversation_ID, QString se
 
     return byte;
 }
-QByteArray chat_protocol::set_save_file_message(int conversation_ID, QString sender, QString receiver, QString file_name, QByteArray file_data, QString type, QString time)
+QByteArray chat_protocol::set_save_file_message(const int &conversation_ID, const QString &sender, const QString &receiver, const QString &file_name, const QByteArray &file_data, const QString &type, const QString &time)
 {
     QByteArray byte;
 
@@ -243,7 +247,7 @@ QByteArray chat_protocol::set_save_file_message(int conversation_ID, QString sen
     return byte;
 }
 
-QByteArray chat_protocol::set_init_send_file_message(QString sender, QString my_ID, QString receiver, QString file_name, qint64 file_size)
+QByteArray chat_protocol::set_init_send_file_message(const QString &sender, const QString &my_ID, const QString &receiver, const QString &file_name, const qint64 &file_size)
 {
     QByteArray byte;
 
@@ -255,7 +259,7 @@ QByteArray chat_protocol::set_init_send_file_message(QString sender, QString my_
     return byte;
 }
 
-QByteArray chat_protocol::set_file_accepted_message(QString sender, QString receiver)
+QByteArray chat_protocol::set_file_accepted_message(const QString &sender, const QString &receiver)
 {
     QByteArray byte;
 
@@ -267,7 +271,7 @@ QByteArray chat_protocol::set_file_accepted_message(QString sender, QString rece
     return byte;
 }
 
-QByteArray chat_protocol::set_file_rejected_message(QString sender, QString receiver)
+QByteArray chat_protocol::set_file_rejected_message(const QString &sender, const QString &receiver)
 {
     QByteArray byte;
 
@@ -279,7 +283,7 @@ QByteArray chat_protocol::set_file_rejected_message(QString sender, QString rece
     return byte;
 }
 
-QByteArray chat_protocol::set_file_message(QString sender, QString receiver, QString file_name, QByteArray file_data, QString time)
+QByteArray chat_protocol::set_file_message(const QString &sender, const QString &receiver, const QString &file_name, const QByteArray &file_data, const QString &time)
 {
     QByteArray byte;
 
@@ -291,7 +295,7 @@ QByteArray chat_protocol::set_file_message(QString sender, QString receiver, QSt
     return byte;
 }
 
-QByteArray chat_protocol::set_delete_message(int conversation_ID, QString sender, QString receiver, QString time)
+QByteArray chat_protocol::set_delete_message(const int &conversation_ID, const QString &sender, const QString &receiver, const QString &time)
 {
     QByteArray byte;
 

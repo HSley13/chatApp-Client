@@ -40,29 +40,29 @@ public:
         delete_message
     };
 
-    QByteArray set_text_message(QString sender, QString receiver, QString message, QString time);
-    QByteArray set_is_typing_message(QString sender, QString receiver);
-    QByteArray set_name_message(QString my_name, QString name);
+    QByteArray set_text_message(const QString &sender, const QString &receiver, const QString &message, const QString &time);
+    QByteArray set_is_typing_message(const QString &sender, const QString &receiver);
+    QByteArray set_name_message(const QString &my_name, const QString &name);
 
-    QByteArray set_init_send_file_message(QString sender, QString my_ID, QString receiver, QString filename, qint64 file_size);
-    QByteArray set_file_accepted_message(QString sender, QString receiver);
-    QByteArray set_file_rejected_message(QString sender, QString receiver);
+    QByteArray set_init_send_file_message(const QString &sender, const QString &my_ID, const QString &receiver, const QString &filename, const qint64 &file_size);
+    QByteArray set_file_accepted_message(const QString &sender, const QString &receiver);
+    QByteArray set_file_rejected_message(const QString &sender, const QString &receiver);
 
-    QByteArray set_file_message(QString sender, QString receiver, QString file_name, QByteArray file_data, QString time);
-    QByteArray set_audio_message(QString sender, QString receiver, QString audio_name, QString time);
-    QByteArray set_save_audio_message(int conversation_ID, QString sender, QString receiver, QString file_name, QString type, QString time);
-    QByteArray set_save_file_message(int conversation_ID, QString sender, QString receiver, QString file_name, QByteArray file_data, QString type, QString time);
+    QByteArray set_file_message(const QString &sender, const QString &receiver, const QString &file_name, const QByteArray &file_data, const QString &time);
+    QByteArray set_audio_message(const QString &sender, const QString &receiver, const QString &audio_name, const QString &time);
+    QByteArray set_save_audio_message(const int &conversation_ID, const QString &sender, const QString &receiver, const QString &file_name, const QString &type, const QString &time);
+    QByteArray set_save_file_message(const int &conversation_ID, const QString &sender, const QString &receiver, const QString &file_name, const QByteArray &file_data, const QString &type, const QString &time);
 
-    QByteArray set_lookup_friend_message(QString ID);
-    QByteArray set_create_conversation_message(int conversation_ID, QString participant1, int participant1_ID, QString participant2, int participant2_ID);
-    QByteArray set_save_message_message(int conversation_ID, QString sender, QString receiver, QString content, QString time);
+    QByteArray set_lookup_friend_message(const QString &ID);
+    QByteArray set_create_conversation_message(const int &conversation_ID, const QString &participant1, const int &participant1_ID, const QString &participant2, const int &participant2_ID);
+    QByteArray set_save_message_message(const int &conversation_ID, const QString &sender, const QString &receiver, const QString &content, const QString &time);
 
-    QByteArray set_sign_up_message(QString phone_number, QString first_name, QString last_name, QString password, QString secret_question, QString secret_answer);
-    QByteArray set_login_request_message(QString phone_number, QString password);
+    QByteArray set_sign_up_message(const QString &phone_number, const QString &first_name, const QString &last_name, const QString &password, const QString &secret_question, const QString &secret_answer);
+    QByteArray set_login_request_message(const QString &phone_number, const QString &password);
 
-    QByteArray set_delete_message(const int conversation_ID, QString sender, QString receiver, QString time);
+    QByteArray set_delete_message(const int &conversation_ID, const QString &sender, const QString &receiver, const QString &time);
 
-    void load_data(QByteArray data);
+    void load_data(const QByteArray &data);
 
     message_type type() const;
     const QString &name() const;
@@ -99,7 +99,7 @@ public:
     const QString &time() const;
 
 private:
-    QByteArray get_data(message_type type, QString data);
+    QByteArray get_data(message_type type, const QString &data);
 
     QString _my_name;
     QString _my_ID;

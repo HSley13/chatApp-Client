@@ -295,7 +295,7 @@ void client_main_window::on_sign_up()
     input_dialog->open();
 }
 
-void client_main_window::on_login_request(QString hashed_password, bool true_or_false, QHash<int, QHash<QString, int>> list_g, QList<QString> online_friends, QHash<int, QVector<QString>> messages, QHash<int, QHash<QString, QByteArray>> binary_datas)
+void client_main_window::on_login_request(const QString &hashed_password, bool true_or_false, const QHash<int, QHash<QString, int>> &list_g, const QList<QString> &online_friends, const QHash<int, QVector<QString>> &messages, const QHash<int, QHash<QString, QByteArray>> &binary_datas)
 {
     if (hashed_password.isEmpty())
     {
@@ -332,13 +332,13 @@ void client_main_window::on_login_request(QString hashed_password, bool true_or_
         connect(_server_wid, &client_chat_window::file_received, this, &client_main_window::on_file_received);
         connect(_server_wid, &client_chat_window::delete_message, this, &client_main_window::on_delete_message);
 
-        connect(_server_wid, &client_chat_window::is_typing_received, this, [=](QString sender)
+        connect(_server_wid, &client_chat_window::is_typing_received, this, [=](const QString &sender)
                 { _status_bar->showMessage(QString("%1 is typing...").arg(sender), 1000); });
 
         connect(_server_wid, &client_chat_window::socket_disconnected, this, [=]()
                 { _stack->setDisabled(true); _status_bar->showMessage("SERVER DISCONNECTED YOU", 999999); });
 
-        connect(_server_wid, &client_chat_window::data_received_sent, this, [=](QString client_name)
+        connect(_server_wid, &client_chat_window::data_received_sent, this, [=](const QString &client_name)
                 { add_on_top(client_name); });
 
         if (list_g.isEmpty())
@@ -347,7 +347,7 @@ void client_main_window::on_login_request(QString hashed_password, bool true_or_
         QIcon offline_icon = create_dot_icon(Qt::red, 10);
         QIcon online_icon = create_dot_icon(Qt::green, 10);
 
-        for (int conversation_ID : list_g.keys())
+        for (const int &conversation_ID : list_g.keys())
         {
             const QHash<QString, int> &list = list_g.value(conversation_ID);
 
@@ -432,7 +432,7 @@ QIcon client_main_window::create_dot_icon(const QColor &color, int size)
     return QIcon(pixmap);
 }
 
-void client_main_window::on_client_disconnected(QString client_name)
+void client_main_window::on_client_disconnected(const QString &client_name)
 {
     QWidget *win = _window_map.value(client_name);
     if (win)
@@ -451,7 +451,7 @@ void client_main_window::on_client_disconnected(QString client_name)
     }
 }
 
-void client_main_window::on_client_connected(QString client_name)
+void client_main_window::on_client_connected(const QString &client_name)
 {
     QWidget *win = _window_map.value(client_name);
     if (win)
@@ -470,7 +470,7 @@ void client_main_window::on_client_connected(QString client_name)
     }
 }
 
-void client_main_window::on_text_message_received(QString sender, QString text, QString time)
+void client_main_window::on_text_message_received(const QString &sender, const QString &text, const QString &time)
 {
     QWidget *win = _window_map.value(sender);
     if (win)
@@ -503,7 +503,7 @@ void client_main_window::on_item_clicked(QListWidgetItem *item)
         qDebug() << "client_main_window--> on_item_clicked()--> Widget not found in _window_map for name:" << item->text();
 }
 
-void client_main_window::on_client_name_changed(QString old_name, QString client_name)
+void client_main_window::on_client_name_changed(const QString &old_name, const QString &client_name)
 {
     QWidget *win = _window_map.value(old_name);
     if (win)
@@ -541,7 +541,7 @@ void client_main_window::on_swipe_right()
         _stack->setCurrentIndex(0);
 }
 
-void client_main_window::on_lookup_friend_result(int conversation_ID, QString name, bool true_or_false)
+void client_main_window::on_lookup_friend_result(const int &conversation_ID, const QString &name, bool true_or_false)
 {
     if (name.isEmpty())
         return;
@@ -559,7 +559,7 @@ void client_main_window::on_lookup_friend_result(int conversation_ID, QString na
 
         client_chat_window *wid = new client_chat_window(conversation_ID, _search_phone_number->text(), name, this);
         connect(wid, &client_chat_window::swipe_right, this, &client_main_window::on_swipe_right);
-        connect(wid, &client_chat_window::data_received_sent, this, [=](QString first_name)
+        connect(wid, &client_chat_window::data_received_sent, this, [=](const QString &first_name)
                 { add_on_top(first_name); });
 
         wid->window_name(name);
@@ -587,7 +587,7 @@ void client_main_window::new_conversation(const QString &name)
         qDebug() << "client_main_window--> new_conversation()--> Widget not found in _window_map for name:" << name;
 }
 
-void client_main_window::on_client_added_you(int conversation_ID, QString name, QString ID)
+void client_main_window::on_client_added_you(const int &conversation_ID, const QString &name, const QString &ID)
 {
     if (_friend_list->findText(name, Qt::MatchExactly) == -1)
     {
@@ -603,7 +603,7 @@ void client_main_window::on_client_added_you(int conversation_ID, QString name, 
         }
 
         connect(wid, &client_chat_window::swipe_right, this, &client_main_window::on_swipe_right);
-        connect(wid, &client_chat_window::data_received_sent, this, [=](QString first_name)
+        connect(wid, &client_chat_window::data_received_sent, this, [=](const QString &first_name)
                 { add_on_top(first_name); });
 
         wid->window_name(name);
@@ -617,7 +617,7 @@ void client_main_window::on_client_added_you(int conversation_ID, QString name, 
     }
 }
 
-void client_main_window::on_audio_received(QString sender, QString audio_name, QString time)
+void client_main_window::on_audio_received(const QString &sender, const QString &audio_name, const QString &time)
 {
     QWidget *win = _window_map.value(sender);
     if (win)
@@ -633,7 +633,7 @@ void client_main_window::on_audio_received(QString sender, QString audio_name, Q
     }
 }
 
-void client_main_window::on_file_received(QString sender, QString file_name, QString time)
+void client_main_window::on_file_received(const QString &sender, const QString &file_name, const QString &time)
 {
     QWidget *win = _window_map.value(sender);
     if (win)

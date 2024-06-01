@@ -29,24 +29,24 @@ class client_chat_window : public QMainWindow
 {
     Q_OBJECT
 public:
-    client_chat_window(QString my_ID, QWidget *parent = nullptr);
-    client_chat_window(int conversation_ID, QString destinator, QString name, QWidget *parent = nullptr);
+    client_chat_window(const QString &my_ID, QWidget *parent = nullptr);
+    client_chat_window(const int &conversation_ID, const QString &destinator, const QString &name, QWidget *parent = nullptr);
 
-    void set_name(QString insert_name);
+    void set_name(const QString &insert_name);
 
-    void window_name(QString name);
-    void message_received(QString message, QString time);
+    void window_name(const QString &name);
+    void message_received(const QString &message, const QString &time);
     void retrieve_conversation(QVector<QString> &messages, QHash<QString, QByteArray> &binary_data);
 
-    void add_file(QString path, bool is_mine, QString time);
-    void add_audio(QString audio_name, bool is_mine, QString time);
-    void add_friend(QString ID);
+    void add_file(const QString &path, bool is_mine, const QString &time);
+    void add_audio(const QString &audio_name, bool is_mine, const QString &time);
+    void add_friend(const QString &ID);
 
     void delete_message_received(const QString &time);
 
     static client_manager *_client;
 
-    void message_deleted(QString time);
+    void message_deleted(const QString &time);
 
 private:
     QStatusBar *_status_bar;
@@ -100,34 +100,32 @@ private:
 
     void set_up_window();
 
-    void set_retrieve_message_window(QString type, QString content, QByteArray file_data, QString date_time, bool true_or_false);
+    void set_retrieve_message_window(const QString &type, const QString &content, const QByteArray &file_data, const QString &date_time, bool true_or_false);
 
 signals:
     void swipe_right();
 
-    void client_name_changed(QString old_name, QString client_name);
+    void client_name_changed(const QString &old_name, const QString &client_name);
 
-    void client_connected(QString client_name);
-    void client_disconnected(QString client_name);
+    void client_connected(const QString &client_name);
+    void client_disconnected(const QString &client_name);
 
-    void text_message_received(QString sender, QString message, QString time);
-    void is_typing_received(QString sender);
+    void text_message_received(const QString &sender, const QString &message, const QString &time);
+    void is_typing_received(const QString &sender);
 
     void socket_disconnected();
 
     void update_button_file();
 
-    void data_received_sent(QString client_name);
+    void data_received_sent(const QString &client_name);
 
-    void client_added_you(int conversation_ID, QString name, QString ID);
-    void lookup_friend_result(int conversation_ID, QString name, bool true_or_false);
+    void client_added_you(const int &conversation_ID, const QString &name, const QString &ID);
+    void lookup_friend_result(const int &conversation_ID, const QString &name, bool true_or_false);
 
-    void audio_received(QString sender, QString audio_name, QString time);
-    void file_received(QString sender, QString file_name, QString time);
+    void audio_received(const QString &sender, const QString &audio_name, const QString &time);
+    void file_received(const QString &sender, const QString &file_name, const QString &time);
 
-    void item_deleted(QListWidgetItem *item);
-
-    void login_request(QString hashed_password, bool true_or_false, QHash<int, QHash<QString, int>> friend_list, QList<QString> online_friends, QHash<int, QVector<QString>> messages, QHash<int, QHash<QString, QByteArray>> binary_data);
+    void login_request(const QString &hashed_password, bool true_or_false, const QHash<int, QHash<QString, int>> &friend_list, const QList<QString> &online_friends, const QHash<int, QVector<QString>> &messages, const QHash<int, QHash<QString, QByteArray>> &binary_data);
 
     void delete_message(const QString &sender, const QString &time);
 
@@ -136,12 +134,12 @@ private slots:
 
     void send_file();
 
-    void on_file_saved(QString path);
+    void on_file_saved(const QString &path);
 
-    void on_init_send_file_received(QString sender, QString sender_ID, QString file_name, qint64 file_size);
+    void on_init_send_file_received(const QString &sender, const QString &sender_ID, const QString &file_name, const qint64 &file_size);
 
     void start_recording();
-    void on_duration_changed(qint64 duration);
+    void on_duration_changed(const qint64 &duration);
     void play_audio(const QUrl &source, QPushButton *audio, QSlider *slider);
 };
 
@@ -177,7 +175,7 @@ protected:
                     QMessageBox *message_box = new QMessageBox(this);
                     message_box->setWindowTitle("Deleting Message");
                     message_box->setText("Please review the information below carefully:");
-                    message_box->setInformativeText(QString("Do You really want to delete this Message ? Press OK to confirm"));
+                    message_box->setInformativeText(QString("Do You really want to delete this Message: %1 ? Press OK to confirm").arg(item->text()));
                     message_box->setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
                     message_box->setDefaultButton(QMessageBox::Ok);
                     connect(message_box, &QMessageBox::accepted, this, [=]()
