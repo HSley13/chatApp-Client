@@ -219,8 +219,6 @@ void client_main_window::on_sign_up()
     if (_insert_phone_number->text().toInt() == 0)
     {
         _insert_phone_number->setStyleSheet("border: 1px solid red;");
-        QMessageBox::warning(this, "Incorrect", "Enter a Valid Phone Number");
-
         return;
     }
 
@@ -228,8 +226,6 @@ void client_main_window::on_sign_up()
     if (_insert_password->text().isEmpty())
     {
         _insert_password->setStyleSheet("border: 1px solid red;");
-        QMessageBox::warning(this, "Incorrect", "Password left Empty!!!!");
-
         return;
     }
 
@@ -238,8 +234,6 @@ void client_main_window::on_sign_up()
     if (_insert_password->text().compare(_insert_password_confirmation->text()))
     {
         _insert_password_confirmation->setStyleSheet("border: 1px solid red;");
-        QMessageBox::warning(this, "Incorrect", "Password Confirmation Incorrect");
-
         return;
     }
 
@@ -248,8 +242,6 @@ void client_main_window::on_sign_up()
     if (_insert_secret_question->text().isEmpty())
     {
         _insert_secret_question->setStyleSheet("border: 1px solid red;");
-        QMessageBox::warning(this, "void!!!", "Secret Question left empty!!!");
-
         return;
     }
 
@@ -258,8 +250,6 @@ void client_main_window::on_sign_up()
     if (_insert_secret_answer->text().isEmpty())
     {
         _insert_secret_question->setStyleSheet("border: 1px solid red;");
-        QMessageBox::warning(this, "void!!!", "Answer left empty!!!");
-
         return;
     }
 
@@ -288,7 +278,7 @@ void client_main_window::on_sign_up()
                         QTimer::singleShot(2000, this, [=]()
                                            { _server_wid->_client->send_sign_up(_insert_phone_number->text(), _insert_first_name->text(), _insert_last_name->text(), _insert_password->text(), _insert_secret_question->text(), _insert_secret_answer->text()); });
                     }
-                    _status_bar->showMessage(QString("Account Created Successfully"), 5000);
+                    _status_bar->showMessage(QString("Account Created Successfully"), 10000);
                     _stack->setCurrentIndex(1);
                 }
 
@@ -320,7 +310,7 @@ void client_main_window::on_login_request(const QString &hashed_password, bool t
 
             _window_map.insert("Server", _server_wid);
 
-            _status_bar->showMessage("Connected to the Server", 3000);
+            _status_bar->showMessage("Connected to the Server", 5000);
         }
 
         connect(_server_wid, &client_chat_window::client_name_changed, this, &client_main_window::on_client_name_changed);
@@ -397,7 +387,7 @@ void client_main_window::on_login_request(const QString &hashed_password, bool t
     {
         _user_password->setStyleSheet("border: 1px solid red");
 
-        _status_bar->showMessage(QString("The entered password is incorrect, Verify it and try again"), 3000);
+        _status_bar->showMessage(QString("The entered password is incorrect, Verify it and try again"), 5000);
 
         return;
     }
@@ -449,7 +439,7 @@ void client_main_window::on_client_disconnected(const QString &client_name)
         if (!items.isEmpty())
             items.first()->setIcon(offline_icon);
 
-        _status_bar->showMessage(QString("%1 is Disconnected").arg(client_name), 3000);
+        _status_bar->showMessage(QString("%1 is Disconnected").arg(client_name), 5000);
     }
 }
 
@@ -468,7 +458,7 @@ void client_main_window::on_client_connected(const QString &client_name)
         if (!items.isEmpty())
             items.first()->setIcon(online_icon);
 
-        _status_bar->showMessage(QString("%1 is Connected").arg(client_name), 3000);
+        _status_bar->showMessage(QString("%1 is Connected").arg(client_name), 5000);
     }
 }
 

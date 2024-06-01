@@ -199,15 +199,12 @@ void client_chat_window::play_audio(const QUrl &source, QPushButton *audio, QSli
 {
     if (!is_playing)
     {
-        slider->show();
-
         if (paused_position)
         {
             _player->setPosition(paused_position);
             _player->play();
 
             is_playing = true;
-
             audio->setText("⏸️");
         }
         else
@@ -218,35 +215,19 @@ void client_chat_window::play_audio(const QUrl &source, QPushButton *audio, QSli
             _player->setSource(source);
             _audio_output->setVolume(50);
 
-            connect(slider, &QSlider::valueChanged, _player, &QMediaPlayer::setPosition);
+            connect(_player, &QMediaPlayer::durationChanged, this, [=](qint64 duration)
+                    { slider->setRange(0, static_cast<int>(duration)); });
 
-            connect(_player, &QMediaPlayer::durationChanged, this, [=](const qint64 &duration)
+            connect(_player, &QMediaPlayer::positionChanged, this, [=](qint64 position)
                     {
-                        slider->setRange(0, duration);
-                        slider->setValue(_player->position()); });
+                        if (!slider->isSliderDown())
+                        slider->setValue(static_cast<int>(position)); });
 
-            connect(_player, &QMediaPlayer::playbackStateChanged, this, [=](QMediaPlayer::PlaybackState state)
-                    {
-                        if (state == QMediaPlayer::StoppedState)
-                        {
-                            paused_position = 0;
-
-                            slider->hide();
-
-                            is_playing = false;
-
-                            audio->setText("▶️");
-                        } });
-
-            QTimer *timer = new QTimer(this);
-            connect(timer, &QTimer::timeout, [=]()
-                    { slider->setValue(_player->position()); });
-            timer->start(100);
+            connect(slider, &QSlider::sliderMoved, this, [=](int position)
+                    { _player->setPosition(position); });
 
             _player->play();
-
             is_playing = true;
-
             audio->setText("⏸️");
         }
     }
@@ -254,12 +235,11 @@ void client_chat_window::play_audio(const QUrl &source, QPushButton *audio, QSli
     {
         paused_position = _player->position();
         _player->pause();
-
         is_playing = false;
-
         audio->setText("▶️");
     }
 }
+
 /*-------------------------------------------------------------------- Functions --------------------------------------------------------------*/
 
 void client_chat_window::send_message()
