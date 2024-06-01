@@ -48,6 +48,8 @@ public:
 
     void message_deleted(const QString &time);
 
+    Swipeable_list_widget *_list;
+
 private:
     QStatusBar *_status_bar;
 
@@ -72,8 +74,6 @@ private:
     bool _dragging = false;
 
     std::vector<int> _conversation_list;
-
-    Swipeable_list_widget *_list;
 
     QHBoxLayout *_hbox;
     QDir _dir;
@@ -180,7 +180,7 @@ protected:
                     message_box->setDefaultButton(QMessageBox::Ok);
                     connect(message_box, &QMessageBox::accepted, this, [=]()
                             { _window->message_deleted(item->data(Qt::UserRole).toString());
-                             delete item; });
+                        delete _window->_list->takeItem(_window->_list->row(item)); });
                     message_box->exec();
                 }
             }
