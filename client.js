@@ -706,7 +706,7 @@ function dbg(text) {
 }
 
 var ASM_CONSTS = {
- 9362240: () => {
+ 9362192: () => {
   FS.mkdir("/audio");
   FS.mount(IDBFS, {}, "/audio");
   FS.syncfs(true, function(err) {
@@ -714,7 +714,7 @@ var ASM_CONSTS = {
    console.log("IDBFS audio mounted and synced");
   });
  },
- 9362392: () => {
+ 9362344: () => {
   FS.mkdir("/file");
   FS.mount(IDBFS, {}, "/file");
   FS.syncfs(true, function(err) {
@@ -722,7 +722,7 @@ var ASM_CONSTS = {
    console.log("IDBFS file mounted and synced");
   });
  },
- 9362541: $0 => {
+ 9362493: $0 => {
   var audio_path = UTF8ToString($0);
   var audio_data = FS.readFile(audio_path);
   if (!audio_data) {
@@ -738,7 +738,7 @@ var ASM_CONSTS = {
   stringToUTF8(url, stringOnWasmHeap, url_length);
   return stringOnWasmHeap;
  },
- 9362961: $0 => {
+ 9362913: $0 => {
   var file_path = UTF8ToString($0);
   var file_data = FS.readFile(file_path);
   if (!file_data) {
@@ -933,13 +933,39 @@ var ASM_CONSTS = {
   stringToUTF8(url, stringOnWasmHeap, url_length);
   return stringOnWasmHeap;
  },
- 9365952: () => {
+ 9365904: $0 => {
+  var filePath = Pointer_stringify($0);
+  try {
+   FS.unlink(audio_path);
+   console.log("Audio removed from virtual file system");
+  } catch (e) {
+   console.error("Failed to delete audio:", e);
+  }
+  FS.syncfs(false, function(err) {
+   assert(!err);
+   console.log("Audio system synced with IndexedDB");
+  });
+ },
+ 9366193: $0 => {
+  var filePath = Pointer_stringify($0);
+  try {
+   FS.unlink(filePath);
+   console.log("File removed from virtual file system");
+  } catch (e) {
+   console.error("Failed to delete file:", e);
+  }
+  FS.syncfs(false, function(err) {
+   assert(!err);
+   console.log("File system synced with IndexedDB");
+  });
+ },
+ 9366477: () => {
   FS.syncfs(function(err) {
    assert(!err);
    console.log("Audio file saved and synced");
   });
  },
- 9366044: () => {
+ 9366569: () => {
   FS.syncfs(function(err) {
    assert(!err);
    console.log("Audio & File saved and synced");
@@ -15794,9 +15820,9 @@ var ___cxa_can_catch = createExportWrapper("__cxa_can_catch");
 
 var ___cxa_is_pointer_type = createExportWrapper("__cxa_is_pointer_type");
 
-var ___start_em_js = Module["___start_em_js"] = 9366138;
+var ___start_em_js = Module["___start_em_js"] = 9366663;
 
-var ___stop_em_js = Module["___stop_em_js"] = 9367228;
+var ___stop_em_js = Module["___stop_em_js"] = 9367753;
 
 function invoke_viiii(index, a1, a2, a3, a4) {
  var sp = stackSave();

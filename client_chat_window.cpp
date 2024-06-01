@@ -43,6 +43,10 @@ client_chat_window::client_chat_window(const int &conversation_ID, const QString
 void client_chat_window::message_deleted(const QString &time)
 {
     _client->send_delete_message(_conversation_ID, my_name(), _destinator, time);
+
+    // _client->delete_audio_IDBFS();
+    // OR
+    // _client->delete_file_IDBFS();
 }
 
 /*-------------------------------------------------------------------- Slots --------------------------------------------------------------*/
@@ -58,19 +62,21 @@ void client_chat_window::on_init_send_file_received(const QString &sender, const
                           .arg(file_name)
                           .arg(QString::number(static_cast<int>(file_size)));
 
-    QMessageBox *message_box = new QMessageBox(this);
-    message_box->setWindowTitle("Receiving file");
-    message_box->setText("Please review the information below carefully:");
-    message_box->setInformativeText(message);
-    message_box->setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
-    message_box->setDefaultButton(QMessageBox::Ok);
-    connect(message_box, &QMessageBox::accepted, this, [=]()
-            { _client->send_file_accepted(my_name(), sender_ID); });
+    QInputDialog *input_dialog = new QInputDialog(this);
+    input_dialog->setWindowTitle("Receiving File");
+    input_dialog->setLabelText("Please Review the Information below carefully:");
+    input_dialog->setTextValue(message);
 
-    connect(message_box, &QMessageBox::rejected, this, [=]()
-            { _client->send_file_rejected(my_name(), sender_ID); });
+    connect(input_dialog, &QInputDialog::finished, this, [=](int result)
+            {   
+                if(result == QDialog::Accepted)
+                _client->send_file_accepted(my_name(), sender_ID);
+                else
+                    _client->send_file_rejected(my_name(), sender_ID);
 
-    message_box->exec();
+                input_dialog->deleteLater(); });
+
+    input_dialog->open();
 }
 
 void client_chat_window::on_file_saved(const QString &path)

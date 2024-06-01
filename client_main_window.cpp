@@ -290,6 +290,7 @@ void client_main_window::on_sign_up()
                     _status_bar->showMessage(QString("Account Created Successfully"), 5000);
                     _stack->setCurrentIndex(1);
                 }
+                
                 input_dialog->deleteLater(); });
 
     input_dialog->open();

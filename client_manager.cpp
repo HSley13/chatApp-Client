@@ -500,3 +500,53 @@ QUrl client_manager::get_file_url(const QString &file_name)
 
     return QUrl(qUrl);
 }
+
+void client_manager::delete_audio_IDBFS(const QString &audio_name)
+{
+    std::string audio_path = "/audio/";
+    audio_path += audio_name.toStdString();
+
+    EM_ASM(
+        {
+            var filePath = Pointer_stringify($0);
+            try
+            {
+                FS.unlink(audio_path);
+                console.log('Audio removed from virtual file system');
+            }
+            catch (e)
+            {
+                console.error("Failed to delete audio:", e);
+            }
+
+            FS.syncfs(false, function(err) {
+            assert(!err);
+            console.log('Audio system synced with IndexedDB'); });
+        },
+        audio_path.c_str());
+}
+
+void client_manager::delete_file_IDBFS(const QString &file_name)
+{
+    std::string file_path = "/file/";
+    file_path += file_name.toStdString();
+
+    EM_ASM(
+        {
+            var filePath = Pointer_stringify($0);
+            try
+            {
+                FS.unlink(filePath);
+                console.log('File removed from virtual file system');
+            }
+            catch (e)
+            {
+                console.error("Failed to delete file:", e);
+            }
+
+            FS.syncfs(false, function(err) {
+            assert(!err);
+            console.log('File system synced with IndexedDB'); });
+        },
+        file_path.c_str());
+}

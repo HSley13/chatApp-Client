@@ -47,9 +47,11 @@ public:
 
     void IDBFS_save_audio(const QString &audio_name, const QByteArray &audio_data, const int &size);
     QUrl get_audio_url(const QString &audio_name);
+    void delete_audio_IDBFS(const QString &audio_name);
 
     void IDBFS_save_file(const QString &file_name, const QByteArray &file_data, const int &size);
     QUrl get_file_url(const QString &file_name);
+    void delete_file_IDBFS(const QString &file_name);
 
     static QString _my_ID;
     static QString _my_name;

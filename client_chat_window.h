@@ -172,16 +172,24 @@ protected:
                 QListWidgetItem *item = itemAt(drag_start_position);
                 if (item)
                 {
-                    QMessageBox *message_box = new QMessageBox(this);
-                    message_box->setWindowTitle("Deleting Message");
-                    message_box->setText("Please review the information below carefully:");
-                    message_box->setInformativeText(QString("Do You really want to delete this Message: %1 ? Press OK to confirm").arg(item->text()));
-                    message_box->setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
-                    message_box->setDefaultButton(QMessageBox::Ok);
-                    connect(message_box, &QMessageBox::accepted, this, [=]()
-                            { _window->message_deleted(item->data(Qt::UserRole).toString());
-                        delete _window->_list->takeItem(_window->_list->row(item)); });
-                    message_box->exec();
+                    QString message = QString("Do you really want to delete this Message: %1? Press OK to confirm").arg(item->text());
+
+                    QInputDialog *input_dialog = new QInputDialog(this);
+                    input_dialog->setWindowTitle("Deleting Message");
+                    input_dialog->setLabelText("Please Review the Information below carefully:");
+                    input_dialog->setTextValue(message);
+
+                    connect(input_dialog, &QInputDialog::finished, this, [=](int result)
+                            {   
+                                if(result == QDialog::Accepted)
+                                { 
+                                    _window->message_deleted(item->data(Qt::UserRole).toString());
+                                    delete _window->_list->takeItem(_window->_list->row(item));
+                                }
+
+                                input_dialog->deleteLater(); });
+
+                    input_dialog->open();
                 }
             }
         }
