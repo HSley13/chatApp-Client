@@ -172,11 +172,12 @@ protected:
                 QListWidgetItem *item = itemAt(drag_start_position);
                 if (item)
                 {
-                    QString message = QString("Do you really want to delete this Message: %1? Press OK to confirm").arg(item->text());
+                    QString message = QString("Do you really want to delete this Message: %1? Press OK to confirm\n").arg(item->text());
 
                     QInputDialog *input_dialog = new QInputDialog(this);
                     input_dialog->setWindowTitle("Deleting Message");
                     input_dialog->setLabelText("Please Review the Information below carefully:");
+                    input_dialog->setOptions(QInputDialog::UsePlainTextEditForTextInput);
                     input_dialog->setTextValue(message);
 
                     connect(input_dialog, &QInputDialog::finished, this, [=](int result)

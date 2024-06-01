@@ -275,6 +275,7 @@ void client_main_window::on_sign_up()
     QInputDialog *input_dialog = new QInputDialog(this);
     input_dialog->setWindowTitle("Information Review");
     input_dialog->setLabelText("Please Review the Information below carefully:");
+    input_dialog->setOptions(QInputDialog::UsePlainTextEditForTextInput);
     input_dialog->setTextValue(info);
 
     connect(input_dialog, &QInputDialog::finished, this, [=](int result)
@@ -290,7 +291,7 @@ void client_main_window::on_sign_up()
                     _status_bar->showMessage(QString("Account Created Successfully"), 5000);
                     _stack->setCurrentIndex(1);
                 }
-                
+
                 input_dialog->deleteLater(); });
 
     input_dialog->open();

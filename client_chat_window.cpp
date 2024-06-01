@@ -65,6 +65,7 @@ void client_chat_window::on_init_send_file_received(const QString &sender, const
     QInputDialog *input_dialog = new QInputDialog(this);
     input_dialog->setWindowTitle("Receiving File");
     input_dialog->setLabelText("Please Review the Information below carefully:");
+    input_dialog->setOptions(QInputDialog::UsePlainTextEditForTextInput);
     input_dialog->setTextValue(message);
 
     connect(input_dialog, &QInputDialog::finished, this, [=](int result)
@@ -300,7 +301,7 @@ void client_chat_window::message_received(const QString &message, const QString 
     _list->addItem(line);
     _list->setItemWidget(line, wid);
 
-    if (!_destinator.compare("Server"))
+    if (_destinator.compare("Server"))
         _client->send_save_conversation(_conversation_ID, _destinator, _client->_my_ID, message, time);
 }
 
