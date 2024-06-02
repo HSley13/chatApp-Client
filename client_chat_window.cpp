@@ -228,16 +228,16 @@ void client_chat_window::play_audio(const QUrl &source, QPushButton *audio, QSli
                         if (!slider->isSliderDown())
                         slider->setValue(static_cast<int>(position)); });
 
-            connect(slider, &QSlider::sliderMoved, _player, [=](int position)
-                    { _player->setPosition(static_cast<qint64>(position)); });
-
             connect(_player, &QMediaPlayer::playbackStateChanged, this, [=](QMediaPlayer::PlaybackState state)
                     {
                         if (state == QMediaPlayer::StoppedState)
                         {
                             paused_position = 0;
+
                             slider->hide();
+
                             is_playing = false;
+
                             audio->setText("▶️");
                         } });
 
@@ -250,8 +250,11 @@ void client_chat_window::play_audio(const QUrl &source, QPushButton *audio, QSli
             QTimer::singleShot(50, this, [=]()
                                {
                                 _player->play();
+                        
                                 slider->show();
+
                                 is_playing = true;
+                                
                                 audio->setText("⏸️"); });
         }
     }
@@ -259,7 +262,9 @@ void client_chat_window::play_audio(const QUrl &source, QPushButton *audio, QSli
     {
         paused_position = _player->position();
         _player->pause();
+
         is_playing = false;
+
         audio->setText("▶️");
     }
 }
