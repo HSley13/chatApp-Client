@@ -199,6 +199,8 @@ void client_chat_window::play_audio(const QUrl &source, QPushButton *audio, QSli
 {
     if (!is_playing)
     {
+        slider->show();
+
         if (paused_position)
         {
             _player->setPosition(paused_position);
@@ -218,17 +220,39 @@ void client_chat_window::play_audio(const QUrl &source, QPushButton *audio, QSli
             connect(_player, &QMediaPlayer::durationChanged, this, [=](qint64 duration)
                     { slider->setRange(0, static_cast<int>(duration)); });
 
+            connect(slider, &QSlider::valueChanged, _player, [=](int position)
+                    { _player->setPosition(static_cast<qint64>(position)); });
+
             connect(_player, &QMediaPlayer::positionChanged, this, [=](qint64 position)
                     {
                         if (!slider->isSliderDown())
                         slider->setValue(static_cast<int>(position)); });
 
-            connect(slider, &QSlider::sliderMoved, this, [=](int position)
-                    { _player->setPosition(position); });
+            connect(slider, &QSlider::sliderMoved, _player, [=](int position)
+                    { _player->setPosition(static_cast<qint64>(position)); });
 
-            _player->play();
-            is_playing = true;
-            audio->setText("⏸️");
+            connect(_player, &QMediaPlayer::playbackStateChanged, this, [=](QMediaPlayer::PlaybackState state)
+                    {
+                        if (state == QMediaPlayer::StoppedState)
+                        {
+                            paused_position = 0;
+                            slider->hide();
+                            is_playing = false;
+                            audio->setText("▶️");
+                        } });
+
+            QTimer *timer = new QTimer(this);
+            connect(timer, &QTimer::timeout, [=]()
+                    { slider->setValue(_player->position()); });
+
+            timer->start(100);
+
+            QTimer::singleShot(50, this, [=]()
+                               {
+                                _player->play();
+                                slider->show();
+                                is_playing = true;
+                                audio->setText("⏸️"); });
         }
     }
     else
