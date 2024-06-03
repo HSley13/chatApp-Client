@@ -670,7 +670,7 @@ void client_main_window::create_group()
 
     connect(input_dialog, &QInputDialog::finished, this, [=](int result)
             {
-                if (result == QInputDialog::Accepted)
+                if (result == QDialog::Accepted)
                 {
                     QString group_name = input_dialog->textValue();
                     if (!group_name.isEmpty())
