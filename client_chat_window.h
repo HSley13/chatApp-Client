@@ -52,6 +52,8 @@ public:
 
     QString my_name();
 
+    void create_new_group(QStringList group_members, QString group_name);
+
 private:
     QStatusBar *_status_bar;
 

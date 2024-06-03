@@ -700,7 +700,7 @@ void client_main_window::create_group()
                         connect(group_members, &QDialog::accepted, this, [=]()
                                 {
                                      _group_members = group_members->name_selected();
-                                     _server_wid->_client->send_create_new_group(_server_wid->my_name(), _group_members, _group_name);
+                                     _server_wid->create_new_group(_group_members, _group_name);
                                 });
 
 

@@ -617,3 +617,8 @@ void client_chat_window::add_friend(const QString &ID)
         return;
     _client->send_lookup_friend(ID);
 }
+
+void client_chat_window::create_new_group(QStringList group_members, QString group_name)
+{
+    _client->send_create_new_group(my_name(), group_members, group_name);
+}
