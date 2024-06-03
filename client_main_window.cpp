@@ -703,7 +703,6 @@ void client_main_window::create_group()
                                      _server_wid->create_new_group(_group_members, _group_name);
                                 });
 
-
                         group_members->open();
                     }
                 } });

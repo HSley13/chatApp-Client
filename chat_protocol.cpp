@@ -321,6 +321,8 @@ QByteArray chat_protocol::set_new_group_message(const QString &adm, const QStrin
 
     out << new_group << adm << members << group_name;
 
+    qDebug() << "group message sent";
+
     return byte;
 }
 
