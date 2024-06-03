@@ -665,29 +665,40 @@ void client_main_window::on_delete_message(const QString &sender, const QString 
 void client_main_window::create_group()
 {
     QInputDialog *input_dialog = new QInputDialog(this);
-    // input_dialog->setWindowTitle("Group Name");
-    bool OK;
-    QString group_name = input_dialog->getText(this, "Group Name", "Enter Group Name", QLineEdit::Normal, QString(), &OK);
+    input_dialog->setWindowTitle("Group Name");
+    input_dialog->setLabelText("Enter Group Name");
+
+    connect(input_dialog, &QInputDialog::finished, this, [=](int result)
+            {
+                if (result == QDialog::Accepted)
+                {
+                    QString group_name = input_dialog->textValue();
+                    if (!group_name.isEmpty())
+                    {
+                        QStringList friends_name;
+                        for (int i = 0; i < _friend_list->count(); i++)
+                            friends_name << _friend_list->itemText(i);
+
+                        select_group_member *group_members = new select_group_member(friends_name, this);
+                        connect(group_members, &QDialog::accepted, this, [=](){
+                            QStringList names = group_members->name_selected();
+
+                            client_chat_window *wid = new client_chat_window(0, "", group_name, this);
+                            connect(wid, &client_chat_window::swipe_right, this, &client_main_window::on_swipe_right);
+                            wid->window_name(group_name);
+
+                            _window_map.insert(group_name, wid);
+
+                            _stack->addWidget(wid);
+                        });
+
+                        group_members->open();
+                    }
+                } });
+
     input_dialog->open();
-    if (OK && !group_name.isEmpty())
-    {
-        QStringList friends_name;
-        for (int i = 0; i < _friend_list->count(); i++)
-            friends_name << _friend_list->itemText(i);
-
-        select_group_member *group_members = new select_group_member(friends_name, this);
-        group_members->open();
-        QStringList names = group_members->name_selected();
-
-        client_chat_window *wid = new client_chat_window(0, "", group_name, this);
-        connect(wid, &client_chat_window::swipe_right, this, &client_main_window::on_swipe_right);
-        wid->window_name(group_name);
-
-        _window_map.insert(group_name, wid);
-
-        _stack->addWidget(wid);
-    }
 }
+
 /*-------------------------------------------------------------------- Functions --------------------------------------------------------------*/
 
 void client_main_window::add_on_top(const QString &client_name)
