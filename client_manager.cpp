@@ -139,6 +139,8 @@ void client_manager::send_is_typing(const QString &sender, const QString &receiv
 
 void client_manager::save_file(const QString &sender, const QString &file_name, const QByteArray &file_data, const QString &time)
 {
+    emit saving_file(QString("Saving file: %1").arg(file_name));
+
     QString full_file_name = QString("%1_%2").arg(QDateTime::currentDateTime().toString("yyyyMMdd_HHmmss"), file_name);
 
     IDBFS_save_file(full_file_name, file_data, static_cast<int>(file_data.size()));

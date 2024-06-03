@@ -129,6 +129,8 @@ signals:
 
     void delete_message(const QString &sender, const QString &time);
 
+    void saving_file(const QString &message);
+
 private slots:
     void send_message();
 

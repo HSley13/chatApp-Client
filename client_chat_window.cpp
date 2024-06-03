@@ -423,6 +423,9 @@ void client_chat_window::set_up_window()
 
         connect(_client, &client_manager::delete_message, this, [=](const QString &sender, const QString &time)
                 { emit delete_message(sender, time); });
+
+        connect(_client, &client_manager::saving_file, this, [=](const QString &message)
+                { emit saving_file(message); });
     }
 }
 
@@ -504,6 +507,8 @@ void client_chat_window::add_file(const QString &file_name, bool is_mine, const 
     (is_mine) ? line->setBackground(QBrush(QColorConstants::Svg::lightskyblue)) : line->setBackground(QBrush(QColorConstants::Svg::gray));
 
     _list->setItemWidget(line, wid);
+
+    emit saving_file("file saved");
 }
 
 void client_chat_window::add_audio(const QString &audio_name, bool is_mine, const QString &time)

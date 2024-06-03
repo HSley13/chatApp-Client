@@ -75,4 +75,52 @@ private slots:
     void on_file_received(const QString &sender, const QString &file_name, const QString &time);
 
     void on_delete_message(const QString &sender, const QString &time);
+
+    void create_group();
+};
+class select_group_member : public QDialog
+{
+    Q_OBJECT
+
+private:
+    QListWidget *name_list;
+
+public:
+    explicit select_group_member(const QStringList &names, QWidget *parent = nullptr)
+        : QDialog(parent)
+    {
+        setWindowTitle("Select Group Members");
+
+        QVBoxLayout *mainLayout = new QVBoxLayout(this);
+
+        name_list = new QListWidget(this);
+        name_list->addItems(names);
+        name_list->setSelectionMode(QAbstractItemView::MultiSelection);
+
+        QHBoxLayout *layout = new QHBoxLayout();
+        QPushButton *OK = new QPushButton("OK", this);
+        QPushButton *CANCEL = new QPushButton("Cancel", this);
+
+        connect(OK, &QPushButton::clicked, this, &QDialog::accept);
+        connect(CANCEL, &QPushButton::clicked, this, &QDialog::reject);
+
+        layout->addStretch();
+        layout->addWidget(OK);
+        layout->addWidget(CANCEL);
+
+        mainLayout->addWidget(name_list);
+        mainLayout->addLayout(layout);
+
+        setLayout(mainLayout);
+    }
+
+    QStringList name_selected() const
+    {
+        QStringList selected;
+
+        for (QListWidgetItem *item : name_list->selectedItems())
+            selected << item->text();
+
+        return selected;
+    }
 };
