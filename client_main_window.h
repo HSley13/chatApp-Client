@@ -84,7 +84,7 @@ private slots:
 #include <QDialogButtonBox>
 #include <QPushButton>
 
-class select_group_member : public QInputDialog
+class select_group_member : public QDialog
 {
     Q_OBJECT
 
@@ -94,7 +94,7 @@ private:
 
 public:
     explicit select_group_member(const QStringList &names, QWidget *parent = nullptr)
-        : QInputDialog(parent)
+        : QDialog(parent)
     {
         setWindowTitle("Select Group Members");
 
