@@ -680,6 +680,7 @@ void client_main_window::create_group()
                             friends_name << _friend_list->itemText(i);
 
                         select_group_member *group_members = new select_group_member(friends_name, this);
+                        group_members->setFixedSize(100, 100);
                         connect(group_members, &QInputDialog::finished, this, [=](int result)
                                 {
                                     if(result == QDialog::Accepted)

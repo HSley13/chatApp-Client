@@ -78,12 +78,19 @@ private slots:
 
     void create_group();
 };
+#include <QInputDialog>
+#include <QListWidget>
+#include <QVBoxLayout>
+#include <QDialogButtonBox>
+#include <QPushButton>
+
 class select_group_member : public QInputDialog
 {
     Q_OBJECT
 
 private:
     QListWidget *name_list;
+    QDialogButtonBox *button_box;
 
 public:
     explicit select_group_member(const QStringList &names, QWidget *parent = nullptr)
@@ -97,7 +104,12 @@ public:
         name_list->addItems(names);
         name_list->setSelectionMode(QAbstractItemView::MultiSelection);
 
+        button_box = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
+        connect(button_box, &QDialogButtonBox::accepted, this, &QDialog::accept);
+        connect(button_box, &QDialogButtonBox::rejected, this, &QDialog::reject);
+
         layout->addWidget(name_list);
+        layout->addWidget(button_box);
 
         setLayout(layout);
     }
