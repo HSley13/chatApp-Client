@@ -680,21 +680,21 @@ void client_main_window::create_group()
                             friends_name << _friend_list->itemText(i);
 
                         select_group_member *group_members = new select_group_member(friends_name, this);
-                        group_members->setFixedSize(100, 100);
-                        connect(group_members, &QInputDialog::finished, this, [=](int result)
+                        group_members->setFixedSize(300, 400);
+
+                        connect(group_members, &QDialog::accepted, this, [=]()
                                 {
-                                    if(result == QDialog::Accepted)
-                                    {
-                                        QStringList names = group_members->name_selected();
+                                    QStringList names = group_members->name_selected();
 
-                                        client_chat_window *wid = new client_chat_window(0, "", group_name, this);
-                                        connect(wid, &client_chat_window::swipe_right, this, &client_main_window::on_swipe_right);
-                                        wid->window_name(group_name);
+                                    client_chat_window *wid = new client_chat_window(0, "", group_name, this);
+                                    connect(wid, &client_chat_window::swipe_right, this, &client_main_window::on_swipe_right);
+                                    wid->window_name(group_name);
 
-                                        _window_map.insert(group_name, wid);
+                                    _window_map.insert(group_name, wid);
 
-                                        _stack->addWidget(wid);
-                                    } });
+                                    _stack->addWidget(wid); 
+                                    
+                                    _friend_list->addItem(group_name); });
 
                         group_members->open();
                     }
