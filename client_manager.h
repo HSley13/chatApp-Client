@@ -42,6 +42,8 @@ public:
 
     void send_delete_message(const int &conversation_ID, const QString &sender, const QString &receiver, const QString &time);
 
+    void send_create_new_group(const QString &adm, const QStringList &members, const QString &group_name);
+
     void mount_audio_IDBFS();
     void mount_file_IDBFS();
 
@@ -91,6 +93,8 @@ signals:
     void delete_message(const QString &sender, const QString &time);
 
     void saving_file(const QString &message);
+
+    void new_group_ID(const int &conversation_ID);
 
 private slots:
     void on_disconnected();

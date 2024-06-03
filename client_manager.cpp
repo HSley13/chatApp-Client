@@ -110,6 +110,11 @@ void client_manager::on_binary_message_received(const QByteArray &message)
 
         break;
 
+    case chat_protocol::new_group:
+        emit new_group_ID(_protocol->conversation_ID());
+
+        break;
+
     default:
         break;
     }
@@ -223,6 +228,11 @@ void client_manager::send_file(const QString &sender, const QString &receiver, c
 void client_manager::send_delete_message(const int &conversation_ID, const QString &sender, const QString &receiver, const QString &time)
 {
     _socket->sendBinaryMessage(_protocol->set_delete_message(conversation_ID, sender, receiver, time));
+}
+
+void client_manager::send_create_new_group(const QString &adm, const QStringList &members, const QString &group_name)
+{
+    _socket->sendBinaryMessage(_protocol->set_new_group_message(adm, members, group_name));
 }
 
 void client_manager::mount_audio_IDBFS()

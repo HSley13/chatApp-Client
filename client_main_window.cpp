@@ -174,7 +174,7 @@ client_main_window::client_main_window(QWidget *parent)
     connect(create_group, &QPushButton::clicked, this, &client_main_window::create_group);
 
     _list = new QListWidget(chat_widget);
-    _list->setSelectionMode(QAbstractItemView::SingleSelection);
+    _list->setSelectionMode(QAbstractItemView::NoSelection);
     _list->setMinimumWidth(200);
     _list->setFont(QFont("Arial", 20));
     _list->setItemDelegate(new separator_delegate(_list));
@@ -685,16 +685,19 @@ void client_main_window::create_group()
                         connect(group_members, &QDialog::accepted, this, [=]()
                                 {
                                     QStringList names = group_members->name_selected();
+                                    _server_wid->_client->send_create_new_group(_server_wid->my_name(), names, group_name);
+                                    connect(_server_wid, &client_chat_window::new_group_ID, this, [=](const int &conversation_ID)
+                                            {   client_chat_window *wid = new client_chat_window(conversation_ID, group_name, group_name, this);
+                                                connect(wid, &client_chat_window::swipe_right, this, &client_main_window::on_swipe_right);
+                                                wid->window_name(group_name);
 
-                                    client_chat_window *wid = new client_chat_window(0, "", group_name, this);
-                                    connect(wid, &client_chat_window::swipe_right, this, &client_main_window::on_swipe_right);
-                                    wid->window_name(group_name);
+                                                _window_map.insert(group_name, wid);
 
-                                    _window_map.insert(group_name, wid);
+                                                _stack->addWidget(wid); 
 
-                                    _stack->addWidget(wid); 
-                                    
-                                    _friend_list->addItem(group_name); });
+                                                _friend_list->addItem(group_name); });
+                                    });
+
 
                         group_members->open();
                     }

@@ -78,6 +78,7 @@ private slots:
 
     void create_group();
 };
+
 #include <QInputDialog>
 #include <QListWidget>
 #include <QVBoxLayout>

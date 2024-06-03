@@ -353,6 +353,7 @@ void client_chat_window::set_up_window()
 
     _list = new Swipeable_list_widget(this, this);
     _list->setItemDelegate(new separator_delegate(_list));
+    _list->setSelectionMode(QAbstractItemView::NoSelection);
 
     _insert_message = new QLineEdit(this);
     _insert_message->setPlaceholderText("Insert New Message");
@@ -426,6 +427,9 @@ void client_chat_window::set_up_window()
 
         connect(_client, &client_manager::saving_file, this, [=](const QString &message)
                 { emit saving_file(message); });
+
+        connect(_client, &client_manager::new_group_ID, this, [=](const int &conversation_ID)
+                { emit new_group_ID(conversation_ID); });
     }
 }
 

@@ -50,6 +50,8 @@ public:
 
     Swipeable_list_widget *_list;
 
+    QString my_name();
+
 private:
     QStatusBar *_status_bar;
 
@@ -96,8 +98,6 @@ private:
     void mousePressEvent(QMouseEvent *event) override;
     void mouseMoveEvent(QMouseEvent *event) override;
 
-    QString my_name();
-
     void set_up_window();
 
     void set_retrieve_message_window(const QString &type, const QString &content, const QByteArray &file_data, const QString &date_time, bool true_or_false);
@@ -130,6 +130,8 @@ signals:
     void delete_message(const QString &sender, const QString &time);
 
     void saving_file(const QString &message);
+
+    void new_group_ID(const int &conversation_ID);
 
 private slots:
     void send_message();

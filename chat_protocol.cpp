@@ -86,6 +86,11 @@ void chat_protocol::load_data(const QByteArray &data)
 
         break;
 
+    case new_group:
+        in >> _conversation_ID;
+
+        break;
+
     default:
         break;
     }
@@ -303,6 +308,18 @@ QByteArray chat_protocol::set_delete_message(const int &conversation_ID, const Q
     out.setVersion(QDataStream::Qt_6_7);
 
     out << delete_message << conversation_ID << sender << receiver << time;
+
+    return byte;
+}
+
+QByteArray chat_protocol::set_new_group_message(const QString &adm, const QStringList &members, const QString &group_name)
+{
+    QByteArray byte;
+
+    QDataStream out(&byte, QIODevice::WriteOnly);
+    out.setVersion(QDataStream::Qt_6_7);
+
+    out << new_group << adm << members << group_name;
 
     return byte;
 }
