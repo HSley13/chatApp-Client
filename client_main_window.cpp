@@ -670,7 +670,7 @@ void client_main_window::create_group()
 
     connect(input_dialog, &QInputDialog::finished, this, [=](int result)
             {
-                if (result == QDialog::Accepted)
+                if (result == QInputDialog::Accepted)
                 {
                     QString group_name = input_dialog->textValue();
                     if (!group_name.isEmpty())
@@ -679,10 +679,10 @@ void client_main_window::create_group()
                         for (int i = 0; i < _friend_list->count(); i++)
                             friends_name << _friend_list->itemText(i);
 
-                        group_member *group_members = new group_member(friends_name, this);
+                        select_group_member *group_members = new select_group_member(friends_name, this);
                         connect(group_members, &QInputDialog::finished, this, [=](int result)
                                 {
-                                    if(result == QDialog::Accepted) 
+                                    if(result == QDialog::Accepted)
                                     {
                                         QStringList names = group_members->name_selected();
 
@@ -694,7 +694,7 @@ void client_main_window::create_group()
 
                                         _stack->addWidget(wid);
                                     } });
- 
+
                         group_members->open();
                     }
                 } });
