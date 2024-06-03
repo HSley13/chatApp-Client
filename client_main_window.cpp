@@ -665,9 +665,10 @@ void client_main_window::on_delete_message(const QString &sender, const QString 
 void client_main_window::create_group()
 {
     QInputDialog *input_dialog = new QInputDialog(this);
-    input_dialog->setWindowTitle("Group Name");
+    // input_dialog->setWindowTitle("Group Name");
     bool OK;
     QString group_name = input_dialog->getText(this, "Group Name", "Enter Group Name", QLineEdit::Normal, QString(), &OK);
+    input_dialog->open();
     if (OK && !group_name.isEmpty())
     {
         QStringList friends_name;
@@ -675,8 +676,8 @@ void client_main_window::create_group()
             friends_name << _friend_list->itemText(i);
 
         select_group_member *group_members = new select_group_member(friends_name, this);
-        QStringList names = group_members->name_selected();
         group_members->open();
+        QStringList names = group_members->name_selected();
 
         client_chat_window *wid = new client_chat_window(0, "", group_name, this);
         connect(wid, &client_chat_window::swipe_right, this, &client_main_window::on_swipe_right);
@@ -686,7 +687,6 @@ void client_main_window::create_group()
 
         _stack->addWidget(wid);
     }
-    input_dialog->open();
 }
 /*-------------------------------------------------------------------- Functions --------------------------------------------------------------*/
 
