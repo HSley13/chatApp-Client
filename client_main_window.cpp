@@ -326,6 +326,7 @@ void client_main_window::on_login_request(const QString &hashed_password, bool t
         connect(_server_wid, &client_chat_window::audio_received, this, &client_main_window::on_audio_received);
         connect(_server_wid, &client_chat_window::file_received, this, &client_main_window::on_file_received);
         connect(_server_wid, &client_chat_window::delete_message, this, &client_main_window::on_delete_message);
+        connect(_server_wid, &client_chat_window::new_group_ID, this, &client_main_window::on_new_group);
 
         connect(_server_wid, &client_chat_window::is_typing_received, this, [=](const QString &sender)
                 { _status_bar->showMessage(QString("%1 is typing...").arg(sender), 3000); });
@@ -662,6 +663,20 @@ void client_main_window::on_delete_message(const QString &sender, const QString 
     }
 }
 
+void client_main_window::on_new_group(const int &conversation_ID)
+{
+    client_chat_window *wid = new client_chat_window(conversation_ID, _group_name, _group_name, this);
+    connect(wid, &client_chat_window::swipe_right, this, &client_main_window::on_swipe_right);
+
+    wid->window_name(_group_name);
+
+    _window_map.insert(_group_name, wid);
+
+    _stack->addWidget(wid);
+
+    _friend_list->addItem(_group_name);
+}
+
 void client_main_window::create_group()
 {
     QInputDialog *input_dialog = new QInputDialog(this);
@@ -672,8 +687,8 @@ void client_main_window::create_group()
             {
                 if (result == QDialog::Accepted)
                 {
-                    QString group_name = input_dialog->textValue();
-                    if (!group_name.isEmpty())
+                    _group_name = input_dialog->textValue();
+                    if (!_group_name.isEmpty())
                     {
                         QStringList friends_name;
                         for (int i = 0; i < _friend_list->count(); i++)
@@ -684,19 +699,9 @@ void client_main_window::create_group()
 
                         connect(group_members, &QDialog::accepted, this, [=]()
                                 {
-                                    QStringList names = group_members->name_selected();
-                                    _server_wid->_client->send_create_new_group(_server_wid->my_name(), names, group_name);
-                                    connect(_server_wid, &client_chat_window::new_group_ID, this, [=](const int &conversation_ID)
-                                            {   client_chat_window *wid = new client_chat_window(conversation_ID, group_name, group_name, this);
-                                                connect(wid, &client_chat_window::swipe_right, this, &client_main_window::on_swipe_right);
-                                                wid->window_name(group_name);
-
-                                                _window_map.insert(group_name, wid);
-
-                                                _stack->addWidget(wid); 
-
-                                                _friend_list->addItem(group_name); });
-                                    });
+                                     _group_members = group_members->name_selected();
+                                     _server_wid->_client->send_create_new_group(_server_wid->my_name(), _group_members, _group_name);
+                                });
 
 
                         group_members->open();

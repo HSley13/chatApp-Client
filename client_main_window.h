@@ -38,6 +38,9 @@ private:
     QLineEdit *_insert_secret_question;
     QLineEdit *_insert_secret_answer;
 
+    QStringList _group_members;
+    QString _group_name;
+
     QListWidget *_list;
 
     QComboBox *_friend_list;
@@ -77,6 +80,8 @@ private slots:
     void on_delete_message(const QString &sender, const QString &time);
 
     void create_group();
+
+    void on_new_group(const int &conversation_ID);
 };
 
 #include <QInputDialog>
