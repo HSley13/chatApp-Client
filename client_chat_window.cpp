@@ -217,16 +217,12 @@ void client_chat_window::play_audio(const QUrl &source, QPushButton *audio, QSli
             _player->setSource(source);
             _audio_output->setVolume(50);
 
-            connect(_player, &QMediaPlayer::durationChanged, this, [=](qint64 duration)
-                    { slider->setRange(0, static_cast<int>(duration)); });
-
             connect(slider, &QSlider::valueChanged, _player, [=](int position)
                     { _player->setPosition(static_cast<qint64>(position)); });
 
-            connect(_player, &QMediaPlayer::positionChanged, this, [=](qint64 position)
-                    {
-                        if (!slider->isSliderDown())
-                        slider->setValue(static_cast<int>(position)); });
+            connect(_player, &QMediaPlayer::durationChanged, this, [=](qint64 duration)
+                    {   slider->setRange(0, static_cast<int>(duration));
+                        slider->setValue(static_cast<int>(duration)); });
 
             connect(_player, &QMediaPlayer::playbackStateChanged, this, [=](QMediaPlayer::PlaybackState state)
                     {
@@ -241,21 +237,18 @@ void client_chat_window::play_audio(const QUrl &source, QPushButton *audio, QSli
                             audio->setText("▶️");
                         } });
 
+            _player->play();
+
+            slider->show();
+
+            is_playing = true;
+
+            audio->setText("⏸️");
+
             QTimer *timer = new QTimer(this);
-            connect(timer, &QTimer::timeout, [=]()
-                    { slider->setValue(_player->position()); });
-
+            connect(timer, &QTimer::timeout, this, [=]()
+                    { slider->setValue(static_cast<int>(_player->position())); });
             timer->start(100);
-
-            QTimer::singleShot(50, this, [=]()
-                               {
-                                _player->play();
-                        
-                                slider->show();
-
-                                is_playing = true;
-                                
-                                audio->setText("⏸️"); });
         }
     }
     else
