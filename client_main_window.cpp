@@ -189,6 +189,7 @@ client_main_window::client_main_window(QWidget *parent)
     QHBoxLayout *hbox_3 = new QHBoxLayout();
     hbox_3->addWidget(fr_list);
     hbox_3->addWidget(_friend_list);
+    hbox_3->addWidget(create_group);
 
     _search_phone_number = new QLineEdit(this);
     _search_phone_number->setPlaceholderText("ADD PEOPLE VIA PHONE NUMBER, THEN PRESS ENTER");
@@ -675,6 +676,7 @@ void client_main_window::create_group()
 
         select_group_member *group_members = new select_group_member(friends_name, this);
         QStringList names = group_members->name_selected();
+        group_members->open();
 
         client_chat_window *wid = new client_chat_window(0, "", group_name, this);
         connect(wid, &client_chat_window::swipe_right, this, &client_main_window::on_swipe_right);
@@ -684,6 +686,7 @@ void client_main_window::create_group()
 
         _stack->addWidget(wid);
     }
+    input_dialog->open();
 }
 /*-------------------------------------------------------------------- Functions --------------------------------------------------------------*/
 
