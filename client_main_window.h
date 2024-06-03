@@ -78,7 +78,7 @@ private slots:
 
     void create_group();
 };
-class select_group_member : public QDialog
+class select_group_member : public QInputDialog
 {
     Q_OBJECT
 
@@ -87,31 +87,19 @@ private:
 
 public:
     explicit select_group_member(const QStringList &names, QWidget *parent = nullptr)
-        : QDialog(parent)
+        : QInputDialog(parent)
     {
         setWindowTitle("Select Group Members");
 
-        QVBoxLayout *mainLayout = new QVBoxLayout(this);
+        QVBoxLayout *layout = new QVBoxLayout(this);
 
         name_list = new QListWidget(this);
         name_list->addItems(names);
         name_list->setSelectionMode(QAbstractItemView::MultiSelection);
 
-        QHBoxLayout *layout = new QHBoxLayout();
-        QPushButton *OK = new QPushButton("OK", this);
-        QPushButton *CANCEL = new QPushButton("Cancel", this);
+        layout->addWidget(name_list);
 
-        connect(OK, &QPushButton::clicked, this, &QDialog::accept);
-        connect(CANCEL, &QPushButton::clicked, this, &QDialog::reject);
-
-        layout->addStretch();
-        layout->addWidget(OK);
-        layout->addWidget(CANCEL);
-
-        mainLayout->addWidget(name_list);
-        mainLayout->addLayout(layout);
-
-        setLayout(mainLayout);
+        setLayout(layout);
     }
 
     QStringList name_selected() const
