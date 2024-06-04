@@ -94,6 +94,8 @@ void chat_protocol::load_data(const QByteArray &data)
     case added_to_group:
         in >> _group_ID >> _adm >> _group_members << _group_name;
 
+        qDebug() << "Added to group message received";
+
         break;
 
     default:
