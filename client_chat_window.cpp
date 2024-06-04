@@ -32,7 +32,8 @@ client_chat_window::client_chat_window(const int &conversation_ID, const QString
     _hbox->addWidget(record_button);
     _hbox->addWidget(_duration_label);
 
-    _client->send_create_conversation(_conversation_ID, _client->_my_name, _client->_my_ID.toInt(), _destinator_name, _destinator.toInt());
+    if (_group_members.isEmpty())
+        _client->send_create_conversation(_conversation_ID, _client->_my_name, _client->_my_ID.toInt(), _destinator_name, _destinator.toInt());
 
     _send_file_button = new QPushButton("...", this);
     connect(_send_file_button, &QPushButton::clicked, this, &client_chat_window::send_file);
@@ -346,17 +347,20 @@ void client_chat_window::set_up_window()
     QPushButton *button_file = new QPushButton("Server's Conversation", this);
     button_file->setStyleSheet("border: none;");
     connect(button_file, &QPushButton::clicked, this, [=]()
-            {   if (_group_members.count() < 1)
+            {
+                if (_group_members.isEmpty())
                     return;
                 else
                 {
                     group_member *members = new group_member(_group_members, this);
-                    QStringList names =  members->name_selected();
-                    
-                    qDebug() << "Clicked name is :" << names.first();
 
-                    emit item_clicked(names.first());
+                    connect(members, &QInputDialog::finished, this, [=](int result)
+                            {   
+                                if(result == QDialog::Accepted)
+                                    emit item_clicked(members->name_selected().first());
 
+                                    members->deleteLater(); });
+                                    
                     members->open();
                 } });
 
