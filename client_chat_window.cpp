@@ -355,11 +355,11 @@ void client_chat_window::set_up_window()
                     group_member *members = new group_member(_group_members, this);
                     connect(members, &QInputDialog::finished, this, [=](int result)
                             {   
-                                QString name = members->name_selected().first();
-
                                 if(result == QDialog::Accepted)
+                                {
+                                    QString name = members->name_selected().first();
                                     emit item_clicked(name);
-
+                                }
                                     members->deleteLater(); });
 
                     members->open();
