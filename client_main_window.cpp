@@ -690,6 +690,9 @@ void client_main_window::on_added_to_group(const int &group_ID, const int &adm, 
     QStringList names;
     for (QString ID : group_members)
     {
+        if (!ID.compare(wid->_client->_my_ID))
+            continue;
+
         bool found = false;
         for (int i = 0; i < _friend_list->count(); i++)
         {

@@ -346,7 +346,7 @@ void client_chat_window::set_up_window()
     QPushButton *button_file = new QPushButton("Server's Conversation", this);
     button_file->setStyleSheet("border: none;");
     connect(button_file, &QPushButton::clicked, this, [=]()
-            {   if (_group_members.isEmpty())
+            {   if (_group_members.count() < 1)
                 return;
                 else
                 {
