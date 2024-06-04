@@ -30,7 +30,7 @@ class client_chat_window : public QMainWindow
     Q_OBJECT
 public:
     client_chat_window(const QString &my_ID, QWidget *parent = nullptr);
-    client_chat_window(const int &conversation_ID, const QString &destinator, const QString &name, QWidget *parent = nullptr);
+    client_chat_window(const int &conversation_ID, const QString &destinator, const QString &name, QWidget *parent = nullptr, const QStringList &group_members = QStringList());
 
     void set_name(const QString &insert_name);
 
@@ -134,7 +134,7 @@ signals:
 
     void saving_file(const QString &message);
 
-    void new_group_ID(const int &conversation_ID);
+    void new_group_ID(const int &group_ID);
 
     void item_clicked(const QString &name);
 

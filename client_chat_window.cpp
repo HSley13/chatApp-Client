@@ -9,8 +9,8 @@ client_manager *client_chat_window::_client = nullptr;
 client_chat_window::client_chat_window(const QString &my_ID, QWidget *parent)
     : QMainWindow(parent), _my_ID(my_ID) { set_up_window(); }
 
-client_chat_window::client_chat_window(const int &conversation_ID, const QString &destinator, const QString &name, QWidget *parent)
-    : QMainWindow(parent), _conversation_ID(conversation_ID), _destinator(destinator), _destinator_name(name)
+client_chat_window::client_chat_window(const int &conversation_ID, const QString &destinator, const QString &name, QWidget *parent, const QStringList &group_members)
+    : QMainWindow(parent), _conversation_ID(conversation_ID), _destinator(destinator), _destinator_name(name), _group_members(group_members)
 {
     set_up_window();
 

@@ -722,8 +722,7 @@ void client_main_window::on_new_group(const int &group_ID)
 {
     qDebug() << "Group ID is : " << group_ID;
 
-    client_chat_window *wid = new client_chat_window(group_ID, QString::number(group_ID), _group_name, this);
-    wid->_group_members = this->_group_members;
+    client_chat_window *wid = new client_chat_window(group_ID, QString::number(group_ID), _group_name, this, _group_members);
 
     connect(wid, &client_chat_window::swipe_right, this, &client_main_window::on_swipe_right);
 
