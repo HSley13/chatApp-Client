@@ -333,8 +333,8 @@ void client_main_window::on_login_request(const QString &hashed_password, bool t
                 {    QWidget *wid = _window_map.value(name, this);
                      if (wid)
                      {
-                         _stack->setCurrentIndex(_stack->indexOf(wid));
                          qDebug() << "trying to open the index clicked";
+                         _stack->setCurrentIndex(_stack->indexOf(wid));
                      }
                      else
                          _server_wid->add_friend(name); });
@@ -679,6 +679,8 @@ void client_main_window::on_delete_message(const QString &sender, const QString 
 
 void client_main_window::on_added_to_group(const int &group_ID, const QString &adm, const QStringList &group_members, const QString &group_name)
 {
+    qDebug() << "Group ID is : " << group_ID;
+
     client_chat_window *wid = new client_chat_window(group_ID, QString::number(group_ID), group_name, this);
     connect(wid, &client_chat_window::swipe_right, this, &client_main_window::on_swipe_right);
 
@@ -718,6 +720,8 @@ void client_main_window::on_added_to_group(const int &group_ID, const QString &a
 
 void client_main_window::on_new_group(const int &group_ID)
 {
+    qDebug() << "Group ID is : " << group_ID;
+
     client_chat_window *wid = new client_chat_window(group_ID, QString::number(group_ID), _group_name, this);
     wid->_group_members = this->_group_members;
 

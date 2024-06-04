@@ -346,16 +346,16 @@ void client_chat_window::set_up_window()
     QPushButton *button_file = new QPushButton("Server's Conversation", this);
     button_file->setStyleSheet("border: none;");
     connect(button_file, &QPushButton::clicked, this, [=]()
-            {   if (_group_members.isEmpty())
+            {   if (_group_members.count() < 1)
                     return;
                 else
                 {
                     group_member *members = new group_member(_group_members, this);
                     QStringList names =  members->name_selected();
                     
-                    emit item_clicked(names.first());
-
                     qDebug() << "Clicked name is :" << names.first();
+
+                    emit item_clicked(names.first());
 
                     members->open();
                 } });
