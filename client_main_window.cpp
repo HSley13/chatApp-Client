@@ -329,16 +329,6 @@ void client_main_window::on_login_request(const QString &hashed_password, bool t
         connect(_server_wid, &client_chat_window::new_group_ID, this, &client_main_window::on_new_group);
         connect(_server_wid, &client_chat_window::added_to_group, this, &client_main_window::on_added_to_group);
 
-        connect(_server_wid, &client_chat_window::item_clicked, this, [=](const QString &name)
-                {    QWidget *wid = _window_map.value(name, this);
-                     if (wid)
-                     {
-                         qDebug() << "trying to open the index clicked";
-                         _stack->setCurrentIndex(_stack->indexOf(wid));
-                     }
-                     else
-                         _server_wid->add_friend(name); });
-
         connect(_server_wid, &client_chat_window::is_typing_received, this, [=](const QString &sender)
                 { _status_bar->showMessage(QString("%1 is typing...").arg(sender), 3000); });
 
@@ -701,6 +691,15 @@ void client_main_window::on_added_to_group(const int &group_ID, const QString &a
 
     client_chat_window *wid = new client_chat_window(group_ID, QString::number(group_ID), group_name, this, names);
     connect(wid, &client_chat_window::swipe_right, this, &client_main_window::on_swipe_right);
+    connect(wid, &client_chat_window::item_clicked, this, [=](const QString &name)
+            {    QWidget *wid = _window_map.value(name, this);
+                     if (wid)
+                     {
+                         qDebug() << "trying to open the index clicked";
+                         _stack->setCurrentIndex(_stack->indexOf(wid));
+                     }
+                     else
+                         _server_wid->add_friend(name); });
 
     wid->window_name(group_name);
 
@@ -716,8 +715,16 @@ void client_main_window::on_added_to_group(const int &group_ID, const QString &a
 void client_main_window::on_new_group(const int &group_ID)
 {
     client_chat_window *wid = new client_chat_window(group_ID, QString::number(group_ID), _group_name, this, _group_members);
-
     connect(wid, &client_chat_window::swipe_right, this, &client_main_window::on_swipe_right);
+    connect(wid, &client_chat_window::item_clicked, this, [=](const QString &name)
+            {    QWidget *wid = _window_map.value(name, this);
+                     if (wid)
+                     {
+                         qDebug() << "trying to open the index clicked";
+                         _stack->setCurrentIndex(_stack->indexOf(wid));
+                     }
+                     else
+                         _server_wid->add_friend(name); });
 
     wid->window_name(_group_name);
 
