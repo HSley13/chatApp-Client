@@ -346,7 +346,15 @@ void client_chat_window::set_up_window()
     QPushButton *button_file = new QPushButton("Server's Conversation", this);
     button_file->setStyleSheet("border: none;");
     connect(button_file, &QPushButton::clicked, this, [=]()
-            { QDesktopServices::openUrl(QUrl("/file")); });
+            {   if (_group_members.isEmpty())
+                return;
+                else
+                {
+                    group_member *members = new group_member(_group_members, this);
+                    QStringList names =  members->name_selected();
+
+                    emit item_clicked(names.first());
+                } });
 
     connect(this, &client_chat_window::update_button_file, this, [=]()
             { button_file->setText(QString("%1's Conversation").arg(_window_name)); });
@@ -428,8 +436,11 @@ void client_chat_window::set_up_window()
         connect(_client, &client_manager::saving_file, this, [=](const QString &message)
                 { emit saving_file(message); });
 
-        connect(_client, &client_manager::new_group_ID, this, [=](const int &conversation_ID)
-                { emit new_group_ID(conversation_ID); });
+        connect(_client, &client_manager::new_group_ID, this, [=](const int &group_ID)
+                { emit new_group_ID(group_ID); });
+
+        connect(_client, &client_manager::added_to_group, this, [=](const int &group_ID, const int &adm, const QStringList &group_members, const QString &group_name)
+                { emit added_to_group(group_ID, adm, group_members, group_name); });
     }
 }
 

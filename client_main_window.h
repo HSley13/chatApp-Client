@@ -81,52 +81,7 @@ private slots:
 
     void create_group();
 
-    void on_new_group(const int &conversation_ID);
-};
+    void on_new_group(const int &group_ID);
 
-#include <QInputDialog>
-#include <QListWidget>
-#include <QVBoxLayout>
-#include <QDialogButtonBox>
-#include <QPushButton>
-
-class select_group_member : public QDialog
-{
-    Q_OBJECT
-
-private:
-    QListWidget *name_list;
-    QDialogButtonBox *button_box;
-
-public:
-    explicit select_group_member(const QStringList &names, QWidget *parent = nullptr)
-        : QDialog(parent)
-    {
-        setWindowTitle("Select Group Members");
-
-        QVBoxLayout *layout = new QVBoxLayout(this);
-
-        name_list = new QListWidget();
-        name_list->addItems(names);
-        name_list->setSelectionMode(QAbstractItemView::MultiSelection);
-
-        button_box = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
-        connect(button_box, &QDialogButtonBox::accepted, this, &QDialog::accept);
-        connect(button_box, &QDialogButtonBox::rejected, this, &QDialog::reject);
-
-        layout->addWidget(name_list);
-        layout->addWidget(button_box);
-
-        setLayout(layout);
-    }
-
-    QStringList name_selected() const
-    {
-        QStringList selected;
-
-        for (QListWidgetItem *item : name_list->selectedItems())
-            selected << item->text();
-
-        return selected;
-    }
+    void on_added_to_group(const int &group_ID, const int &adm, const QStringList &group_members, const QString &group_name);
 };

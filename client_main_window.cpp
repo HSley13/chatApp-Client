@@ -327,6 +327,14 @@ void client_main_window::on_login_request(const QString &hashed_password, bool t
         connect(_server_wid, &client_chat_window::file_received, this, &client_main_window::on_file_received);
         connect(_server_wid, &client_chat_window::delete_message, this, &client_main_window::on_delete_message);
         connect(_server_wid, &client_chat_window::new_group_ID, this, &client_main_window::on_new_group);
+        connect(_server_wid, &client_chat_window::added_to_group, this, &client_main_window::on_added_to_group);
+
+        connect(_server_wid, &client_chat_window::item_clicked, this, [=](const QString &name)
+                {    QWidget *wid = _window_map.value(name, this);
+                     if (wid)
+                         _stack->setCurrentIndex(_stack->indexOf(wid));
+                     else
+                         _server_wid->add_friend(name); });
 
         connect(_server_wid, &client_chat_window::is_typing_received, this, [=](const QString &sender)
                 { _status_bar->showMessage(QString("%1 is typing...").arg(sender), 3000); });
@@ -361,6 +369,7 @@ void client_main_window::on_login_request(const QString &hashed_password, bool t
             for (const QString &name : list.keys())
             {
                 _friend_list->addItem(name);
+                _friend_list->setItemData(_friend_list->count() - 1, QString::number(list.value(name)));
 
                 QIcon valid_icon = online_friends.contains(name) ? online_icon : offline_icon;
 
@@ -559,6 +568,7 @@ void client_main_window::on_lookup_friend_result(const int &conversation_ID, con
         _friend_list->addItem(name);
 
         _friend_list->setItemIcon(_friend_list->count() - 1, valid_icon);
+        _friend_list->setItemData(_friend_list->count() - 1, _search_phone_number->text());
 
         client_chat_window *wid = new client_chat_window(conversation_ID, _search_phone_number->text(), name, this);
         connect(wid, &client_chat_window::swipe_right, this, &client_main_window::on_swipe_right);
@@ -596,6 +606,7 @@ void client_main_window::on_client_added_you(const int &conversation_ID, const Q
         _friend_list->addItem(name);
 
         _friend_list->setItemIcon(_friend_list->count() - 1, create_dot_icon(Qt::green, 10));
+        _friend_list->setItemData(_friend_list->count() - 1, ID);
 
         client_chat_window *wid = new client_chat_window(conversation_ID, ID, name, this);
         if (!wid)
@@ -663,9 +674,45 @@ void client_main_window::on_delete_message(const QString &sender, const QString 
     }
 }
 
-void client_main_window::on_new_group(const int &conversation_ID)
+void client_main_window::on_added_to_group(const int &group_ID, const int &adm, const QStringList &group_members, const QString &group_name)
 {
-    client_chat_window *wid = new client_chat_window(conversation_ID, _group_name, _group_name, this);
+    client_chat_window *wid = new client_chat_window(group_ID, QString::number(group_ID), group_name, this);
+    connect(wid, &client_chat_window::swipe_right, this, &client_main_window::on_swipe_right);
+
+    wid->window_name(group_name);
+
+    _window_map.insert(group_name, wid);
+
+    _stack->addWidget(wid);
+
+    _friend_list->addItem(group_name);
+
+    QStringList names;
+    for (QString ID : group_members)
+    {
+        bool found = false;
+        for (int i = 0; i < _friend_list->count(); i++)
+        {
+            QString ID_2 = _friend_list->itemData(i).toString();
+            if (!ID.compare(ID_2))
+            {
+                names << _friend_list->itemText(i);
+                found = true;
+                break;
+            }
+        }
+        if (!found)
+            names << ID;
+    }
+
+    wid->_group_members = names;
+}
+
+void client_main_window::on_new_group(const int &group_ID)
+{
+    client_chat_window *wid = new client_chat_window(group_ID, QString::number(group_ID), _group_name, this);
+    wid->_group_members = this->_group_members;
+
     connect(wid, &client_chat_window::swipe_right, this, &client_main_window::on_swipe_right);
 
     wid->window_name(_group_name);
@@ -694,16 +741,28 @@ void client_main_window::create_group()
                         for (int i = 0; i < _friend_list->count(); i++)
                             friends_name << _friend_list->itemText(i);
 
-                        select_group_member *group_members = new select_group_member(friends_name, this);
-                        group_members->setFixedSize(300, 400);
+                        group_member *members = new group_member(friends_name, this);
+                        members->setFixedSize(300, 400);
 
-                        connect(group_members, &QDialog::accepted, this, [=]()
+                        connect(members, &QDialog::accepted, this, [=]()
                                 {
-                                     _group_members = group_members->name_selected();
-                                     _server_wid->create_new_group(_group_members, _group_name);
-                                });
+                                     _group_members = members->name_selected();
 
-                        group_members->open();
+                                     QStringList ID;
+                                     for (QString names : _group_members)
+                                     {
+                                         int index = _friend_list->findText(names, Qt::MatchExactly);
+                                         if (index != -1)
+                                         {
+                                             QVariant data = _friend_list->itemData(index);
+                                             ID << data.toString();
+                                         }
+                                     }
+
+                                         _server_wid->create_new_group(ID, _group_name);
+                                     });
+
+                        members->open();
                     }
                 } });
 

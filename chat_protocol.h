@@ -38,7 +38,9 @@ public:
         login_request,
 
         delete_message,
-        new_group
+
+        new_group,
+        added_to_group
     };
 
     QByteArray set_text_message(const QString &sender, const QString &receiver, const QString &message, const QString &time);
@@ -101,6 +103,11 @@ public:
 
     const QString &time() const;
 
+    const int &group_ID() const;
+    const int &adm() const;
+    const QStringList &group_members() const;
+    const QString &group_name() const;
+
 private:
     QByteArray get_data(message_type type, const QString &data);
 
@@ -137,4 +144,9 @@ private:
     bool _true_or_false;
 
     QString _time;
+
+    int _group_ID;
+    int _adm;
+    QStringList _group_members;
+    QString _group_name;
 };

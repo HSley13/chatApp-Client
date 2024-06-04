@@ -87,7 +87,12 @@ void chat_protocol::load_data(const QByteArray &data)
         break;
 
     case new_group:
-        in >> _conversation_ID;
+        in >> _group_ID;
+
+        break;
+
+    case added_to_group:
+        in >> _group_ID >> _adm >> _group_members << _group_name;
 
         break;
 
@@ -321,8 +326,6 @@ QByteArray chat_protocol::set_new_group_message(const QString &adm, const QStrin
 
     out << new_group << adm << members << group_name;
 
-    qDebug() << "group message sent";
-
     return byte;
 }
 
@@ -449,4 +452,24 @@ const QString &chat_protocol::file_sender() const
 const QString &chat_protocol::time() const
 {
     return _time;
+}
+
+const int &chat_protocol::group_ID() const
+{
+    return _group_ID;
+}
+
+const int &chat_protocol::adm() const
+{
+    return _adm;
+}
+
+const QStringList &chat_protocol::group_members() const
+{
+    return _group_members;
+}
+
+const QString &chat_protocol::group_name() const
+{
+    return _group_name;
 }

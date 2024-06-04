@@ -49,6 +49,7 @@ public:
     void message_deleted(const QString &time);
 
     Swipeable_list_widget *_list;
+    QStringList _group_members = QStringList();
 
     QString my_name();
 
@@ -135,6 +136,10 @@ signals:
 
     void new_group_ID(const int &conversation_ID);
 
+    void item_clicked(const QString &name);
+
+    void added_to_group(const int &group_ID, const int &adm, const QStringList &group_members, const QString &group_name);
+
 private slots:
     void send_message();
 
@@ -201,5 +206,46 @@ protected:
             }
         }
         QListWidget::mouseReleaseEvent(event);
+    }
+};
+
+class group_member : public QDialog
+{
+    Q_OBJECT
+
+private:
+    QListWidget *name_list;
+    QDialogButtonBox *button_box;
+
+public:
+    explicit group_member(const QStringList &names, QWidget *parent = nullptr)
+        : QDialog(parent)
+    {
+        setWindowTitle("Select Group Members");
+
+        QVBoxLayout *layout = new QVBoxLayout(this);
+
+        name_list = new QListWidget();
+        name_list->addItems(names);
+        name_list->setSelectionMode(QAbstractItemView::MultiSelection);
+
+        button_box = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
+        connect(button_box, &QDialogButtonBox::accepted, this, &QDialog::accept);
+        connect(button_box, &QDialogButtonBox::rejected, this, &QDialog::reject);
+
+        layout->addWidget(name_list);
+        layout->addWidget(button_box);
+
+        setLayout(layout);
+    }
+
+    QStringList name_selected() const
+    {
+        QStringList selected;
+
+        for (QListWidgetItem *item : name_list->selectedItems())
+            selected << item->text();
+
+        return selected;
     }
 };
