@@ -32,7 +32,7 @@ client_chat_window::client_chat_window(const int &conversation_ID, const QString
     _hbox->addWidget(record_button);
     _hbox->addWidget(_duration_label);
 
-    if (_group_members.isEmpty())
+    if (_conversation_ID != _destinator.toInt())
         _client->send_create_conversation(_conversation_ID, _client->_my_name, _client->_my_ID.toInt(), _destinator_name, _destinator.toInt());
 
     _send_file_button = new QPushButton("...", this);
@@ -353,14 +353,15 @@ void client_chat_window::set_up_window()
                 else
                 {
                     group_member *members = new group_member(_group_members, this);
-
                     connect(members, &QInputDialog::finished, this, [=](int result)
                             {   
+                                QString name = members->name_selected().first();
+
                                 if(result == QDialog::Accepted)
-                                    emit item_clicked(members->name_selected().first());
+                                    emit item_clicked(name);
 
                                     members->deleteLater(); });
-                                    
+
                     members->open();
                 } });
 

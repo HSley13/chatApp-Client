@@ -679,8 +679,6 @@ void client_main_window::on_delete_message(const QString &sender, const QString 
 
 void client_main_window::on_added_to_group(const int &group_ID, const QString &adm, const QStringList &group_members, const QString &group_name)
 {
-    qDebug() << "Group ID is : " << group_ID;
-
     client_chat_window *wid = new client_chat_window(group_ID, QString::number(group_ID), group_name, this);
     connect(wid, &client_chat_window::swipe_right, this, &client_main_window::on_swipe_right);
 
@@ -692,11 +690,13 @@ void client_main_window::on_added_to_group(const int &group_ID, const QString &a
 
     _friend_list->addItem(group_name);
 
+    _status_bar->showMessage(QString("%1 Added you do to a new Group called: %2").arg(adm, group_name), 5000);
+
     QStringList names;
     for (QString ID : group_members)
     {
         if (!ID.compare(wid->_client->_my_ID))
-            continue;
+            names << "You";
 
         bool found = false;
         for (int i = 0; i < _friend_list->count(); i++)
@@ -706,22 +706,20 @@ void client_main_window::on_added_to_group(const int &group_ID, const QString &a
             {
                 names << _friend_list->itemText(i);
                 found = true;
+
                 break;
             }
         }
+
         if (!found)
             names << ID;
     }
 
     wid->_group_members = names;
-
-    _status_bar->showMessage(QString("%1 Added you do to this new Group").arg(adm), 5000);
 }
 
 void client_main_window::on_new_group(const int &group_ID)
 {
-    qDebug() << "Group ID is : " << group_ID;
-
     client_chat_window *wid = new client_chat_window(group_ID, QString::number(group_ID), _group_name, this, _group_members);
 
     connect(wid, &client_chat_window::swipe_right, this, &client_main_window::on_swipe_right);
