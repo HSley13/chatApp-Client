@@ -32,7 +32,7 @@ client_chat_window::client_chat_window(const int &conversation_ID, const QString
     _hbox->addWidget(record_button);
     _hbox->addWidget(_duration_label);
 
-    if (_conversation_ID != _destinator.toInt())
+    if (_group_members.isEmpty())
         _client->send_create_conversation(_conversation_ID, _client->_my_name, _client->_my_ID.toInt(), _destinator_name, _destinator.toInt());
 
     _send_file_button = new QPushButton("...", this);
