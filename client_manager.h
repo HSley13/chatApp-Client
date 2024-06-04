@@ -96,7 +96,7 @@ signals:
 
     void new_group_ID(const int &group_ID);
 
-    void added_to_group(const int &group_ID, const int &adm, const QStringList &group_members, const QString &group_name);
+    void added_to_group(const int &group_ID, const QString &adm, const QStringList &group_members, const QString &group_name);
 
 private slots:
     void on_disconnected();

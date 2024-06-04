@@ -104,7 +104,7 @@ public:
     const QString &time() const;
 
     const int &group_ID() const;
-    const int &adm() const;
+    const QString &adm() const;
     const QStringList &group_members() const;
     const QString &group_name() const;
 
@@ -146,7 +146,7 @@ private:
     QString _time;
 
     int _group_ID;
-    int _adm;
+    QString _adm;
     QStringList _group_members;
     QString _group_name;
 };

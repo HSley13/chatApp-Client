@@ -461,7 +461,7 @@ const int &chat_protocol::group_ID() const
     return _group_ID;
 }
 
-const int &chat_protocol::adm() const
+const QString &chat_protocol::adm() const
 {
     return _adm;
 }

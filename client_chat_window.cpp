@@ -352,8 +352,10 @@ void client_chat_window::set_up_window()
                 {
                     group_member *members = new group_member(_group_members, this);
                     QStringList names =  members->name_selected();
-
+                    
                     emit item_clicked(names.first());
+                    
+                    members->open();
                 } });
 
     connect(this, &client_chat_window::update_button_file, this, [=]()
@@ -439,7 +441,7 @@ void client_chat_window::set_up_window()
         connect(_client, &client_manager::new_group_ID, this, [=](const int &group_ID)
                 { emit new_group_ID(group_ID); });
 
-        connect(_client, &client_manager::added_to_group, this, [=](const int &group_ID, const int &adm, const QStringList &group_members, const QString &group_name)
+        connect(_client, &client_manager::added_to_group, this, [=](const int &group_ID, const QString &adm, const QStringList &group_members, const QString &group_name)
                 { emit added_to_group(group_ID, adm, group_members, group_name); });
     }
 }

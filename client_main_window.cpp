@@ -674,7 +674,7 @@ void client_main_window::on_delete_message(const QString &sender, const QString 
     }
 }
 
-void client_main_window::on_added_to_group(const int &group_ID, const int &adm, const QStringList &group_members, const QString &group_name)
+void client_main_window::on_added_to_group(const int &group_ID, const QString &adm, const QStringList &group_members, const QString &group_name)
 {
     client_chat_window *wid = new client_chat_window(group_ID, QString::number(group_ID), group_name, this);
     connect(wid, &client_chat_window::swipe_right, this, &client_main_window::on_swipe_right);
@@ -709,6 +709,8 @@ void client_main_window::on_added_to_group(const int &group_ID, const int &adm, 
     }
 
     wid->_group_members = names;
+
+    _status_bar->showMessage(QString("%1 Added you do to this new Group").arg(adm), 5000);
 }
 
 void client_main_window::on_new_group(const int &group_ID)

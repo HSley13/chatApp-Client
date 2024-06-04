@@ -83,5 +83,5 @@ private slots:
 
     void on_new_group(const int &group_ID);
 
-    void on_added_to_group(const int &group_ID, const int &adm, const QStringList &group_members, const QString &group_name);
+    void on_added_to_group(const int &group_ID, const QString &adm, const QStringList &group_members, const QString &group_name);
 };
