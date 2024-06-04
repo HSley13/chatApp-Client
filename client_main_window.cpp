@@ -332,7 +332,10 @@ void client_main_window::on_login_request(const QString &hashed_password, bool t
         connect(_server_wid, &client_chat_window::item_clicked, this, [=](const QString &name)
                 {    QWidget *wid = _window_map.value(name, this);
                      if (wid)
+                     {
                          _stack->setCurrentIndex(_stack->indexOf(wid));
+                         qDebug() << "trying to open the index clicked";
+                     }
                      else
                          _server_wid->add_friend(name); });
 
