@@ -85,21 +85,6 @@ void client_manager::on_binary_message_received(const QByteArray &message)
 
     break;
 
-    case chat_protocol::init_send_file:
-        emit init_send_file_received(_protocol->file_sender(), _protocol->clients_ID(), _protocol->file_name(), _protocol->file_size());
-
-        break;
-
-    case chat_protocol::file_accepted:
-        emit file_accepted(_protocol->file_sender());
-
-        break;
-
-    case chat_protocol::file_rejected:
-        emit file_rejected(_protocol->file_sender());
-
-        break;
-
     case chat_protocol::file:
         save_file(_protocol->file_sender(), _protocol->file_name(), _protocol->file_data(), _protocol->time());
 
@@ -139,6 +124,8 @@ void client_manager::send_text(const QString &sender, const QString &receiver, c
 
 void client_manager::send_name(const QString &name)
 {
+    _my_name = name;
+
     _socket->sendBinaryMessage(_protocol->set_name_message(_my_ID, name));
 }
 
@@ -199,34 +186,20 @@ void client_manager::send_save_conversation(const int &conversation_ID, const QS
 
 void client_manager::send_sign_up(const QString &phone_number, const QString &first_name, const QString &last_name, const QString &password, const QString &secret_question, const QString &secret_answer)
 {
+    _my_ID = phone_number;
+
     _socket->sendBinaryMessage(_protocol->set_sign_up_message(phone_number, first_name, last_name, password, secret_question, secret_answer));
 }
 
 void client_manager::send_login_request(const QString &phone_number, const QString &password)
 {
     _my_ID = phone_number;
+
     _socket->sendBinaryMessage(_protocol->set_login_request_message(phone_number, password));
-}
-
-void client_manager::send_init_send_file(const QString &sender, const QString &my_ID, const QString &receiver, const QString &file_name, const qint64 &file_size)
-{
-    _socket->sendBinaryMessage(_protocol->set_init_send_file_message(sender, my_ID, receiver, file_name, file_size));
-}
-
-void client_manager::send_file_accepted(const QString &sender, const QString &receiver)
-{
-    _socket->sendBinaryMessage(_protocol->set_file_accepted_message(sender, receiver));
-}
-
-void client_manager::send_file_rejected(const QString &sender, const QString &receiver)
-{
-    _socket->sendBinaryMessage(_protocol->set_file_rejected_message(sender, receiver));
 }
 
 void client_manager::send_file(const QString &sender, const QString &receiver, const QString &file_name, const QByteArray &file_data, const QString &time)
 {
-    _file_name = file_name;
-
     _socket->sendBinaryMessage(_protocol->set_file_message(sender, receiver, file_name, file_data, time));
 }
 
@@ -566,4 +539,14 @@ void client_manager::delete_file_IDBFS(const QString &file_name)
             console.log('File system synced with IndexedDB'); });
         },
         file_path.c_str());
+}
+
+const QString &client_manager::my_ID() const
+{
+    return _my_ID;
+}
+
+const QString &client_manager::my_name() const
+{
+    return _my_name;
 }

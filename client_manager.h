@@ -35,9 +35,6 @@ public:
     void send_sign_up(const QString &phone_number, const QString &first_name, const QString &last_name, const QString &password, const QString &secret_question, const QString &secret_answer);
     void send_login_request(const QString &phone_number, const QString &password);
 
-    void send_init_send_file(const QString &sender, const QString &my_ID, const QString &receiver, const QString &file_name, const qint64 &file_size);
-    void send_file_accepted(const QString &sender, const QString &receiver);
-    void send_file_rejected(const QString &sender, const QString &receiver);
     void send_file(const QString &sender, const QString &receiver, const QString &file_name, const QByteArray &file_data, const QString &time);
 
     void send_delete_message(const int &conversation_ID, const QString &sender, const QString &receiver, const QString &time);
@@ -55,10 +52,9 @@ public:
     QUrl get_file_url(const QString &file_name);
     void delete_file_IDBFS(const QString &file_name);
 
-    static QString _my_ID;
-    static QString _my_name;
-
-    QString _file_name;
+    const QString &my_ID() const;
+    const QString &my_name() const;
+    const QString &file_name() const;
 
 private:
     static QWebSocket *_socket;
@@ -67,6 +63,9 @@ private:
 
     static QWebSocketServer *_file_server;
     QWebSocket *_file_socket;
+
+    static QString _my_ID;
+    static QString _my_name;
 
 signals:
     void text_message_received(const QString &sender, const QString &message, const QString &time);
@@ -85,10 +84,6 @@ signals:
     void lookup_friend_result(const int &conversation_ID, const QString &name, bool true_or_false);
 
     void login_request(const QString &hashed_password, bool true_or_false, const QHash<int, QHash<QString, int>> &friend_list, const QList<QString> &online_friends, const QHash<int, QVector<QString>> &messages, const QHash<int, QHash<QString, QByteArray>> &binary_data);
-
-    void init_send_file_received(const QString &sender, const QString &sender_ID, const QString &file_name, const qint64 &file_size);
-    void file_accepted(const QString &sender);
-    void file_rejected(const QString &sender);
 
     void delete_message(const QString &sender, const QString &time);
 

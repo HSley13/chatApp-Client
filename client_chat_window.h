@@ -29,8 +29,9 @@ class client_chat_window : public QMainWindow
 {
     Q_OBJECT
 public:
-    client_chat_window(const QString &my_ID, QWidget *parent = nullptr);
-    client_chat_window(const int &conversation_ID, const QString &destinator, const QString &name, QWidget *parent = nullptr, const QStringList &group_members = QStringList());
+    client_chat_window(QWidget *parent = nullptr);
+    client_chat_window(const int &conversation_ID, const QString &destinator, const QString &name, QWidget *parent = nullptr);
+    client_chat_window(const int &group_ID, const QString &group_name, const QStringList &group_members, QWidget *parent = nullptr);
 
     void set_name(const QString &insert_name);
 
@@ -49,6 +50,7 @@ public:
     void message_deleted(const QString &time);
 
     Swipeable_list_widget *_list;
+
     QStringList _group_members = QStringList();
 
     QString my_name();
@@ -72,6 +74,7 @@ private:
     QLineEdit *_insert_message;
 
     QPushButton *_send_file_button;
+    QPushButton *_send_button;
 
     QLabel *_duration_label;
 
@@ -143,11 +146,13 @@ signals:
 private slots:
     void send_message();
 
+    void send_group_message();
+
     void send_file();
 
-    void on_file_saved(const QString &path);
+    void send_group_file();
 
-    void on_init_send_file_received(const QString &sender, const QString &sender_ID, const QString &file_name, const qint64 &file_size);
+    void on_file_saved(const QString &path);
 
     void start_recording();
     void on_duration_changed(const qint64 &duration);

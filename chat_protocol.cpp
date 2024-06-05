@@ -66,16 +66,6 @@ void chat_protocol::load_data(const QByteArray &data)
 
         break;
 
-    case init_send_file:
-        in >> _file_sender >> _client_ID >> _file_name >> _file_size;
-
-        break;
-
-    case file_accepted:
-        in >> _file_sender;
-
-        break;
-
     case file:
         in >> _file_sender >> _file_name >> _file_data >> _time;
 
@@ -253,42 +243,6 @@ QByteArray chat_protocol::set_save_file_message(const int &conversation_ID, cons
     out.setVersion(QDataStream::Qt_6_7);
 
     out << save_data << conversation_ID << sender << receiver << file_name << file_data << type << time;
-
-    return byte;
-}
-
-QByteArray chat_protocol::set_init_send_file_message(const QString &sender, const QString &my_ID, const QString &receiver, const QString &file_name, const qint64 &file_size)
-{
-    QByteArray byte;
-
-    QDataStream out(&byte, QIODevice::WriteOnly);
-    out.setVersion(QDataStream::Qt_6_7);
-
-    out << init_send_file << sender << my_ID << receiver << file_name << file_size;
-
-    return byte;
-}
-
-QByteArray chat_protocol::set_file_accepted_message(const QString &sender, const QString &receiver)
-{
-    QByteArray byte;
-
-    QDataStream out(&byte, QIODevice::WriteOnly);
-    out.setVersion(QDataStream::Qt_6_7);
-
-    out << file_accepted << sender << receiver;
-
-    return byte;
-}
-
-QByteArray chat_protocol::set_file_rejected_message(const QString &sender, const QString &receiver)
-{
-    QByteArray byte;
-
-    QDataStream out(&byte, QIODevice::WriteOnly);
-    out.setVersion(QDataStream::Qt_6_7);
-
-    out << file_rejected << sender << receiver;
 
     return byte;
 }

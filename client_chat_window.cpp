@@ -6,11 +6,16 @@ QString client_chat_window::_insert_name = nullptr;
 
 client_manager *client_chat_window::_client = nullptr;
 
-client_chat_window::client_chat_window(const QString &my_ID, QWidget *parent)
-    : QMainWindow(parent), _my_ID(my_ID) { set_up_window(); }
+client_chat_window::client_chat_window(QWidget *parent)
+    : QMainWindow(parent)
+{
+    set_up_window();
 
-client_chat_window::client_chat_window(const int &conversation_ID, const QString &destinator, const QString &name, QWidget *parent, const QStringList &group_members)
-    : QMainWindow(parent), _conversation_ID(conversation_ID), _destinator(destinator), _destinator_name(name), _group_members(group_members)
+    connect(_send_button, &QPushButton::clicked, this, &client_chat_window::send_message);
+}
+
+client_chat_window::client_chat_window(const int &conversation_ID, const QString &destinator, const QString &name, QWidget *parent)
+    : QMainWindow(parent), _conversation_ID(conversation_ID), _destinator(destinator), _destinator_name(name)
 {
     set_up_window();
 
@@ -19,6 +24,8 @@ client_chat_window::client_chat_window(const int &conversation_ID, const QString
     QPixmap image_record(":/images/record_icon.png");
     if (!image_record)
         qDebug() << "Image Record Button is NULL";
+
+    connect(_send_button, &QPushButton::clicked, this, &client_chat_window::send_message);
 
     QPushButton *record_button = new QPushButton(this);
     record_button->setIcon(image_record);
@@ -32,11 +39,41 @@ client_chat_window::client_chat_window(const int &conversation_ID, const QString
     _hbox->addWidget(record_button);
     _hbox->addWidget(_duration_label);
 
-    if (_group_members.isEmpty())
-        _client->send_create_conversation(_conversation_ID, _client->_my_name, _client->_my_ID.toInt(), _destinator_name, _destinator.toInt());
+    _client->send_create_conversation(_conversation_ID, _client->my_name(), _client->my_ID().toInt(), _destinator_name, _destinator.toInt());
 
     _send_file_button = new QPushButton("...", this);
     connect(_send_file_button, &QPushButton::clicked, this, &client_chat_window::send_file);
+
+    _hbox->insertWidget(1, _send_file_button);
+}
+
+client_chat_window::client_chat_window(const int &group_ID, const QString &group_name, const QStringList &group_members, QWidget *parent)
+    : QMainWindow(parent), _group_members(group_members)
+{
+    set_up_window();
+
+    ask_microphone_permission();
+
+    QPixmap image_record(":/images/record_icon.png");
+    if (!image_record)
+        qDebug() << "Image Record Button is NULL";
+
+    connect(_send_button, &QPushButton::clicked, this, &client_chat_window::send_group_message);
+
+    QPushButton *record_button = new QPushButton(this);
+    record_button->setIcon(image_record);
+    record_button->setIconSize(QSize(50, 50));
+    record_button->setFixedSize(50, 50);
+    record_button->setStyleSheet("border: none");
+    connect(record_button, &QPushButton::clicked, this, &client_chat_window::start_recording);
+
+    _duration_label = new QLabel(this);
+    _duration_label->hide();
+    _hbox->addWidget(record_button);
+    _hbox->addWidget(_duration_label);
+
+    _send_file_button = new QPushButton("...", this);
+    connect(_send_file_button, &QPushButton::clicked, this, &client_chat_window::send_group_file);
 
     _hbox->insertWidget(1, _send_file_button);
 }
@@ -51,36 +88,6 @@ void client_chat_window::message_deleted(const QString &time)
 }
 
 /*-------------------------------------------------------------------- Slots --------------------------------------------------------------*/
-
-void client_chat_window::on_init_send_file_received(const QString &sender, const QString &sender_ID, const QString &file_name, const qint64 &file_size)
-{
-    QString message = QString("-------- %1 --------\n"
-                              "%2 wants to send a file. Willing to accept it or not?\n"
-                              "File Name: %3\n"
-                              "File Size: %4 bytes")
-                          .arg(my_name())
-                          .arg(sender)
-                          .arg(file_name)
-                          .arg(QString::number(static_cast<int>(file_size)));
-
-    QInputDialog *input_dialog = new QInputDialog(this);
-    input_dialog->setWindowTitle("Receiving File");
-    input_dialog->setLabelText("Please Review the Information below carefully:");
-    input_dialog->setOptions(QInputDialog::UsePlainTextEditForTextInput);
-    input_dialog->setTextValue(message);
-
-    connect(input_dialog, &QInputDialog::finished, this, [=](int result)
-            {   
-                if(result == QDialog::Accepted)
-                _client->send_file_accepted(my_name(), sender_ID);
-                else
-                    _client->send_file_rejected(my_name(), sender_ID);
-
-                input_dialog->deleteLater(); });
-
-    input_dialog->open();
-}
-
 void client_chat_window::on_file_saved(const QString &path)
 {
     QMessageBox::information(this, "File Saved", QString("File save at: %1").arg(path));
@@ -176,9 +183,16 @@ void client_chat_window::start_recording()
 
         add_audio(audio_name, true, current_time);
 
-        _client->send_audio(my_name(), _destinator, audio_path, current_time);
+        if (_group_members.isEmpty())
+        {
+            _client->send_audio(my_name(), _destinator, audio_path, current_time);
 
-        _client->send_save_audio(_conversation_ID, _client->_my_ID, _destinator, audio_path, "audio", current_time);
+            _client->send_save_audio(_conversation_ID, _client->my_ID(), _destinator, audio_path, "audio", current_time);
+        }
+        else
+        {
+            // Implementation to send group voice note
+        }
 
         emit data_received_sent(_window_name);
     }
@@ -290,6 +304,10 @@ void client_chat_window::send_message()
     emit data_received_sent(_window_name);
 }
 
+void client_chat_window::send_group_message()
+{
+}
+
 void client_chat_window::message_received(const QString &message, const QString &time)
 {
     chat_line *wid = new chat_line(this);
@@ -305,7 +323,7 @@ void client_chat_window::message_received(const QString &message, const QString 
     _list->setItemWidget(line, wid);
 
     if (_destinator.compare("Server"))
-        _client->send_save_conversation(_conversation_ID, _destinator, _client->_my_ID, message, time);
+        _client->send_save_conversation(_conversation_ID, _destinator, _client->my_ID(), message, time);
 }
 
 void client_chat_window::delete_message_received(const QString &time)
@@ -323,20 +341,22 @@ void client_chat_window::send_file()
     {
         if (!file_name.isEmpty())
         {
-            _client->send_init_send_file(my_name(), _client->_my_ID, _destinator, QFileInfo(file_name).fileName(), static_cast<int>(file_data.size()));
-
             QString IDBFS_file_name = QString("%1_%2").arg(QDateTime::currentDateTime().toString("yyyyMMdd_HHmmss"), QFileInfo(file_name).fileName());
             QString current_time = QTime::currentTime().toString();
 
-            connect(_client, &client_manager::file_accepted, this, [=](const QString &receiver)
-                    { add_file(file_name, true, current_time);
-                    _client->send_file(my_name(), _destinator, QFileInfo(file_name).fileName(), file_data, current_time);
-                    _client->IDBFS_save_file(file_name, file_data, static_cast<int>(file_data.size()));
-                    _client->send_save_file(_conversation_ID, _destinator, _client->_my_ID, QFileInfo(file_name).fileName(), file_data, "file", current_time); });
+            add_file(file_name, true, current_time);
+
+            _client->send_file(my_name(), _destinator, QFileInfo(file_name).fileName(), file_data, current_time);
+            _client->IDBFS_save_file(file_name, file_data, static_cast<int>(file_data.size()));
+            _client->send_save_file(_conversation_ID, _destinator, _client->my_ID(), QFileInfo(file_name).fileName(), file_data, "file", current_time);
         }
     };
 
     QFileDialog::getOpenFileContent("All Files (*)", file_content_ready);
+}
+
+void client_chat_window::send_group_file()
+{
 }
 
 void client_chat_window::set_up_window()
@@ -381,16 +401,15 @@ void client_chat_window::set_up_window()
     if (!image_send)
         qDebug() << "Image Send Button is NULL";
 
-    QPushButton *send_button = new QPushButton(this);
-    send_button->setIcon(image_send);
-    send_button->setIconSize(QSize(30, 30));
-    send_button->setFixedSize(30, 30);
-    send_button->setStyleSheet("border: none");
-    connect(send_button, &QPushButton::clicked, this, &client_chat_window::send_message);
+    _send_button = new QPushButton(this);
+    _send_button->setIcon(image_send);
+    _send_button->setIconSize(QSize(30, 30));
+    _send_button->setFixedSize(30, 30);
+    _send_button->setStyleSheet("border: none");
 
     _hbox = new QHBoxLayout();
     _hbox->addWidget(_insert_message);
-    _hbox->addWidget(send_button);
+    _hbox->addWidget(_send_button);
 
     QVBoxLayout *VBOX = new QVBoxLayout(central_widget);
     VBOX->addWidget(button_file);
@@ -433,12 +452,6 @@ void client_chat_window::set_up_window()
         connect(_client, &client_manager::login_request, this, [=](const QString &hashed_password, bool true_or_false, const QHash<int, QHash<QString, int>> &friend_list, const QList<QString> &online_friends, const QHash<int, QVector<QString>> &messages, const QHash<int, QHash<QString, QByteArray>> &binary_data)
                 { emit login_request(hashed_password, true_or_false, friend_list, online_friends, messages, binary_data); });
 
-        connect(_client, &client_manager::init_send_file_received, this, &client_chat_window::on_init_send_file_received);
-
-        connect(_client, &client_manager::file_rejected, this, [=](const QString &sender)
-                { QMessageBox *info = new QMessageBox(this); 
-                  info->information(this, "File Rejected",  QString ("%1 has rejected receiving your file").arg(sender)); });
-
         connect(_client, &client_manager::delete_message, this, [=](const QString &sender, const QString &time)
                 { emit delete_message(sender, time); });
 
@@ -455,7 +468,7 @@ void client_chat_window::set_up_window()
 
 QString client_chat_window::my_name()
 {
-    QString name = _insert_name.length() > 0 ? _insert_name : _client->_my_name;
+    QString name = _insert_name.length() > 0 ? _insert_name : _client->my_name();
 
     return name;
 }
@@ -463,8 +476,6 @@ QString client_chat_window::my_name()
 void client_chat_window::set_name(const QString &insert_name)
 {
     _insert_name = insert_name;
-
-    _client->_my_name = insert_name;
 
     _client->send_name(insert_name);
 }
@@ -617,7 +628,7 @@ void client_chat_window::retrieve_conversation(QVector<QString> &messages, QHash
         QString date_time = parts.at(3);
         QString type = parts.last();
 
-        if (!sender_ID.compare(_client->_my_ID))
+        if (!sender_ID.compare(_client->my_ID()))
             set_retrieve_message_window(type, content, binary_data.value(date_time), date_time, true);
         else
             set_retrieve_message_window(type, content, binary_data.value(date_time), date_time, false);
@@ -633,14 +644,14 @@ void client_chat_window::retrieve_conversation(QVector<QString> &messages, QHash
 
 void client_chat_window::add_friend(const QString &ID)
 {
-    if (!_client->_my_ID.compare(ID))
+    if (!_client->my_ID().compare(ID))
         return;
     _client->send_lookup_friend(ID);
 }
 
 void client_chat_window::create_new_group(QStringList group_members, QString group_name)
 {
-    group_members << _my_ID;
+    group_members << _client->my_ID();
 
     _client->send_create_new_group(my_name(), group_members, group_name);
 }

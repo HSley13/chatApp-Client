@@ -51,7 +51,7 @@ client_main_window::client_main_window(QWidget *parent)
             {  
                 log_in->setDisabled(true);
                    if (!_server_wid)
-                _server_wid = new client_chat_window(_user_phone_number->text(), this);
+                _server_wid = new client_chat_window(this);
                 connect(_server_wid, &client_chat_window::login_request, this, &client_main_window::on_login_request);
                 _status_bar->showMessage("LOADING YOUR DATA, WAIT!!!!!! ...", 10000);
                 QTimer::singleShot(2000, this, [=]() { _server_wid->_client->send_login_request(_user_phone_number->text(), _user_password->text());});
@@ -278,7 +278,7 @@ void client_main_window::on_sign_up()
                 {
                     if (!_server_wid)
                     {
-                        _server_wid = new client_chat_window(_user_phone_number->text(), this);
+                        _server_wid = new client_chat_window(this);
                         QTimer::singleShot(2000, this, [=]()
                                            { _server_wid->_client->send_sign_up(_insert_phone_number->text(), _insert_first_name->text(), _insert_last_name->text(), _insert_password->text(), _insert_secret_question->text(), _insert_secret_answer->text()); });
                     }
@@ -673,8 +673,16 @@ void client_main_window::on_added_to_group(const int &group_ID, const QString &a
     for (QString ID : group_members)
     {
         bool found = false;
+
+        if (!_server_wid->_client->my_ID().compare(ID))
+        {
+            names << "You";
+            continue;
+        }
+
         for (int i = 0; i < _friend_list->count(); i++)
         {
+
             QString ID_2 = _friend_list->itemData(i).toString();
             if (!ID.compare(ID_2))
             {
@@ -689,15 +697,12 @@ void client_main_window::on_added_to_group(const int &group_ID, const QString &a
             names << ID;
     }
 
-    client_chat_window *wid = new client_chat_window(group_ID, QString::number(group_ID), group_name, this, names);
+    client_chat_window *wid = new client_chat_window(group_ID, _group_name, names, this);
     connect(wid, &client_chat_window::swipe_right, this, &client_main_window::on_swipe_right);
     connect(wid, &client_chat_window::item_clicked, this, [=](const QString &name)
             {    QWidget *wid = _window_map.value(name, this);
                      if (wid)
-                     {
-                         qDebug() << "trying to open the index clicked";
                          _stack->setCurrentIndex(_stack->indexOf(wid));
-                     }
                      else
                          _server_wid->add_friend(name); });
 
@@ -714,15 +719,12 @@ void client_main_window::on_added_to_group(const int &group_ID, const QString &a
 
 void client_main_window::on_new_group(const int &group_ID)
 {
-    client_chat_window *wid = new client_chat_window(group_ID, QString::number(group_ID), _group_name, this, _group_members);
+    client_chat_window *wid = new client_chat_window(group_ID, _group_name, _group_members, this);
     connect(wid, &client_chat_window::swipe_right, this, &client_main_window::on_swipe_right);
     connect(wid, &client_chat_window::item_clicked, this, [=](const QString &name)
             {    QWidget *wid = _window_map.value(name, this);
                      if (wid)
-                     {
-                         qDebug() << "trying to open the index clicked";
                          _stack->setCurrentIndex(_stack->indexOf(wid));
-                     }
                      else
                          _server_wid->add_friend(name); });
 

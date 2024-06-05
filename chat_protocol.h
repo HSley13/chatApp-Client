@@ -17,9 +17,6 @@ public:
         is_typing,
         set_name,
 
-        init_send_file,
-        file_accepted,
-        file_rejected,
         file,
 
         client_new_name,
@@ -40,16 +37,17 @@ public:
         delete_message,
 
         new_group,
-        added_to_group
+        added_to_group,
+
+        group_is_typing,
+        group_text,
+        group_file,
+        group_audio
     };
 
     QByteArray set_text_message(const QString &sender, const QString &receiver, const QString &message, const QString &time);
     QByteArray set_is_typing_message(const QString &sender, const QString &receiver);
     QByteArray set_name_message(const QString &my_name, const QString &name);
-
-    QByteArray set_init_send_file_message(const QString &sender, const QString &my_ID, const QString &receiver, const QString &filename, const qint64 &file_size);
-    QByteArray set_file_accepted_message(const QString &sender, const QString &receiver);
-    QByteArray set_file_rejected_message(const QString &sender, const QString &receiver);
 
     QByteArray set_file_message(const QString &sender, const QString &receiver, const QString &file_name, const QByteArray &file_data, const QString &time);
     QByteArray set_audio_message(const QString &sender, const QString &receiver, const QString &audio_name, const QString &time);
