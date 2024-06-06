@@ -590,7 +590,6 @@ void client_main_window::new_conversation(const QString &name)
 {
     QWidget *wid = _window_map.value(name, this);
     if (wid)
-
         _stack->setCurrentIndex(_stack->indexOf(wid));
     else
         qDebug() << "client_main_window--> new_conversation()--> Widget not found in _window_map for name:" << name;
@@ -712,7 +711,7 @@ void client_main_window::on_added_to_group(const int &group_ID, const QString &a
 
     wid->window_name(group_name);
 
-    _window_map.insert(QString::number(group_ID), wid);
+    _window_map.insert(group_name, wid);
 
     _stack->addWidget(wid);
 
@@ -734,7 +733,7 @@ void client_main_window::on_new_group(const int &group_ID)
 
     wid->window_name(_group_name);
 
-    _window_map.insert(QString::number(group_ID), wid);
+    _window_map.insert(_group_name, wid);
 
     _stack->addWidget(wid);
 
@@ -786,69 +785,65 @@ void client_main_window::create_group()
     input_dialog->open();
 }
 
-void client_main_window::on_group_is_typing_received(const int &group_ID, const QString &sender)
+void client_main_window::on_group_is_typing_received(const int &group_ID, const QString &group_name, const QString &sender)
 {
-    QWidget *win = _window_map.value(QString::number(group_ID));
+    QWidget *win = _window_map.value(group_name);
     if (win)
     {
         client_chat_window *wid = qobject_cast<client_chat_window *>(win);
         if (wid)
-            _status_bar->showMessage(QString("%1 from group: %2 is typing...").arg(sender, wid->_group_name), 1000);
+            _status_bar->showMessage(QString("%1 from group: %2 is typing...").arg(sender, group_name), 1000);
         else
             qDebug() << "client_main_window ---> on_group_is_typing_received() --> ERROR CASTING THE WIDGET:";
     }
 }
 
-void client_main_window::on_group_text_received(const int &group_ID, const QString &sender, const QString &message, const QString &time)
+void client_main_window::on_group_text_received(const int &group_ID, const QString &group_name, const QString &sender, const QString &message, const QString &time)
 {
-    QWidget *win = _window_map.value(QString::number(group_ID));
+    QWidget *win = _window_map.value(group_name);
     if (win)
     {
+        int index = _friend_list->findText(group_name, Qt::MatchExactly);
+        if (index == -1)
+            _friend_list->addItem(group_name);
+
         client_chat_window *wid = qobject_cast<client_chat_window *>(win);
         if (wid)
         {
             wid->group_message_received(message, sender, time);
-
-            add_on_top(wid->_group_name);
+            add_on_top(group_name);
         }
         else
             qDebug() << "client_main_window ---> on_group_text_received() --> ERROR CASTING THE WIDGET:";
-
-        if (QString::number(group_ID).compare("Server"))
-        {
-            int index = _friend_list->findText(wid->_group_name, Qt::MatchExactly);
-            if (index == -1)
-                _friend_list->addItem(wid->_group_name);
-        }
     }
 }
 
-void client_main_window::on_group_audio_received(const int &group_ID, const QString &sender, const QString &audio_name, const QString &time)
+void client_main_window::on_group_audio_received(const int &group_ID, const QString &group_name, const QString &sender, const QString &audio_name, const QString &time)
 {
-    QWidget *win = _window_map.value(QString::number(group_ID));
+    QWidget *win = _window_map.value(group_name);
     if (win)
     {
         client_chat_window *wid = qobject_cast<client_chat_window *>(win);
         if (wid)
         {
             wid->add_file(audio_name, false, time);
-            add_on_top(wid->_group_name);
+            add_on_top(group_name);
         }
         else
             qDebug() << "client_main_window ---> on_group_audio_received() --> ERROR CASTING THE WIDGET:";
     }
 }
 
-void client_main_window::on_group_file_received(const int &group_ID, const QString &sender, const QString &file_name, const QString &time)
+void client_main_window::on_group_file_received(const int &group_ID, const QString &group_name, const QString &sender, const QString &file_name, const QString &time)
 {
-    QWidget *win = _window_map.value(QString::number(group_ID));
+    QWidget *win = _window_map.value(group_name);
     if (win)
     {
         client_chat_window *wid = qobject_cast<client_chat_window *>(win);
         if (wid)
         {
             wid->add_file(file_name, false, time);
-            add_on_top(wid->_group_name);
+            add_on_top(group_name);
         }
         else
             qDebug() << "client_main_window ---> on_group_file_received() --> ERROR CASTING THE WIDGET:";

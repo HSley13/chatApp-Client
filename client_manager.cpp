@@ -106,22 +106,22 @@ void client_manager::on_binary_message_received(const QByteArray &message)
         break;
 
     case chat_protocol::group_is_typing:
-        emit group_is_typing_received(_protocol->group_ID(), _protocol->group_sender());
+        emit group_is_typing_received(_protocol->group_ID(), _protocol->group_name(), _protocol->group_sender());
 
         break;
 
     case chat_protocol::group_text:
-        emit group_text_received(_protocol->group_ID(), _protocol->group_sender(), _protocol->group_message(), _protocol->group_time());
+        emit group_text_received(_protocol->group_ID(), _protocol->group_name(), _protocol->group_sender(), _protocol->group_message(), _protocol->group_time());
 
         break;
 
     case chat_protocol::group_audio:
-        save_group_audio(_protocol->group_ID(), _protocol->group_sender(), _protocol->group_audio_name(), _protocol->group_audio_data(), _protocol->group_time());
+        save_group_audio(_protocol->group_ID(), _protocol->group_name(), _protocol->group_sender(), _protocol->group_audio_name(), _protocol->group_audio_data(), _protocol->group_time());
 
         break;
 
     case chat_protocol::group_file:
-        save_group_file(_protocol->group_ID(), _protocol->group_sender(), _protocol->group_file_name(), _protocol->group_file_data(), _protocol->group_time());
+        save_group_file(_protocol->group_ID(), _protocol->group_name(), _protocol->group_sender(), _protocol->group_file_name(), _protocol->group_file_data(), _protocol->group_time());
 
         break;
 
@@ -184,7 +184,7 @@ void client_manager::save_audio(const QString &sender, const QString &audio_name
     emit audio_received(sender, full_audio_name, time);
 }
 
-void client_manager::save_group_file(const int &group_ID, const QString &sender, const QString &file_name, const QByteArray &file_data, const QString &time)
+void client_manager::save_group_file(const int &group_ID, const QString &group_name, const QString &sender, const QString &file_name, const QByteArray &file_data, const QString &time)
 {
     emit saving_file(QString("Saving file: %1").arg(file_name));
 
@@ -192,16 +192,16 @@ void client_manager::save_group_file(const int &group_ID, const QString &sender,
 
     IDBFS_save_file(full_file_name, file_data, static_cast<int>(file_data.size()));
 
-    emit group_file_received(group_ID, sender, full_file_name, time);
+    emit group_file_received(group_ID, group_name, sender, full_file_name, time);
 }
 
-void client_manager::save_group_audio(const int &group_ID, const QString &sender, const QString &audio_name, const QByteArray &audio_data, const QString &time)
+void client_manager::save_group_audio(const int &group_ID, const QString &group_name, const QString &sender, const QString &audio_name, const QByteArray &audio_data, const QString &time)
 {
     QString full_audio_name = QString("%1_%2").arg(QDateTime::currentDateTime().toString("yyyyMMdd_HHmmss"), audio_name);
 
     IDBFS_save_audio(full_audio_name, audio_data, static_cast<int>(audio_data.size()));
 
-    emit group_audio_received(group_ID, sender, full_audio_name, time);
+    emit group_audio_received(group_ID, group_name, sender, full_audio_name, time);
 }
 
 void client_manager::send_audio(const QString &sender, const QString &receiver, const QString &audio_name, const QString &time)
@@ -591,22 +591,22 @@ const QString &client_manager::my_name() const
     return _my_name;
 }
 
-void client_manager::send_group_is_typing(const int &group_ID, const QString &sender)
+void client_manager::send_group_is_typing(const int &group_ID, const QString &group_name, const QString &sender)
 {
-    _socket->sendBinaryMessage(_protocol->set_group_is_typing(group_ID, sender));
+    _socket->sendBinaryMessage(_protocol->set_group_is_typing(group_ID, group_name, sender));
 }
 
-void client_manager::send_group_text(const int &group_ID, const QString &sender, const QString &message, const QString &time)
+void client_manager::send_group_text(const int &group_ID, const QString &group_name, const QString &sender, const QString &message, const QString &time)
 {
-    _socket->sendBinaryMessage(_protocol->set_group_text_message(group_ID, sender, message, time));
+    _socket->sendBinaryMessage(_protocol->set_group_text_message(group_ID, group_name, sender, message, time));
 }
 
-void client_manager::send_group_file(const int &group_ID, const QString &sender, const QString &file_name, const QByteArray &file_data, const QString &time)
+void client_manager::send_group_file(const int &group_ID, const QString &group_name, const QString &sender, const QString &file_name, const QByteArray &file_data, const QString &time)
 {
-    _socket->sendBinaryMessage(_protocol->set_group_file_message(group_ID, sender, file_name, file_data, time));
+    _socket->sendBinaryMessage(_protocol->set_group_file_message(group_ID, group_name, sender, file_name, file_data, time));
 }
 
-void client_manager::send_group_audio(const int &group_ID, const QString &sender, const QString &audio_name, const QString &time)
+void client_manager::send_group_audio(const int &group_ID, const QString &group_name, const QString &sender, const QString &audio_name, const QString &time)
 {
-    _socket->sendBinaryMessage(_protocol->set_group_audio_message(group_ID, sender, audio_name, time));
+    _socket->sendBinaryMessage(_protocol->set_group_audio_message(group_ID, group_name, sender, audio_name, time));
 }

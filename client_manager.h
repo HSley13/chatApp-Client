@@ -52,13 +52,13 @@ public:
     QUrl get_file_url(const QString &file_name);
     void delete_file_IDBFS(const QString &file_name);
 
-    void send_group_is_typing(const int &group_ID, const QString &sender);
-    void send_group_text(const int &group_ID, const QString &sender, const QString &message, const QString &time);
-    void send_group_file(const int &group_ID, const QString &sender, const QString &file_name, const QByteArray &file_data, const QString &time);
-    void send_group_audio(const int &group_ID, const QString &sender, const QString &audio_name, const QString &time);
+    void send_group_is_typing(const int &group_ID, const QString &group_name, const QString &sender);
+    void send_group_text(const int &group_ID, const QString &group_name, const QString &sender, const QString &message, const QString &time);
+    void send_group_file(const int &group_ID, const QString &group_name, const QString &sender, const QString &file_name, const QByteArray &file_data, const QString &time);
+    void send_group_audio(const int &group_ID, const QString &group_name, const QString &sender, const QString &audio_name, const QString &time);
 
-    void save_group_file(const int &group_ID, const QString &sender, const QString &file_name, const QByteArray &file_data, const QString &time);
-    void save_group_audio(const int &group_ID, const QString &sender, const QString &audio_name, const QByteArray &audio_data, const QString &time);
+    void save_group_file(const int &group_ID, const QString &group_name, const QString &sender, const QString &file_name, const QByteArray &file_data, const QString &time);
+    void save_group_audio(const int &group_ID, const QString &group_name, const QString &sender, const QString &audio_name, const QByteArray &audio_data, const QString &time);
 
     const QString &my_ID() const;
     const QString &my_name() const;
@@ -101,11 +101,11 @@ signals:
 
     void added_to_group(const int &group_ID, const QString &adm, const QStringList &group_members, const QString &group_name);
 
-    void group_is_typing_received(const int &group_ID, const QString &sender);
-    void group_text_received(const int &group_ID, const QString &sender, const QString &message, const QString &time);
+    void group_is_typing_received(const int &group_ID, const QString &group_name, const QString &sender);
+    void group_text_received(const int &group_ID, const QString &group_name, const QString &sender, const QString &message, const QString &time);
 
-    void group_audio_received(const int &group_ID, const QString &sender, const QString &audio, const QString &time);
-    void group_file_received(const int &group_ID, const QString &sender, const QString &file_name, const QString &time);
+    void group_audio_received(const int &group_ID, const QString &group_name, const QString &sender, const QString &audio, const QString &time);
+    void group_file_received(const int &group_ID, const QString &group_name, const QString &sender, const QString &file_name, const QString &time);
 
 private slots:
     void on_disconnected();

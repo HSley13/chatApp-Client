@@ -191,7 +191,7 @@ void client_chat_window::start_recording()
         }
         else
         {
-            _client->send_group_audio(_group_ID, my_name(), audio_path, current_time);
+            _client->send_group_audio(_group_ID, _group_name, my_name(), audio_path, current_time);
             // saving mechanism to implement
         }
 
@@ -323,7 +323,7 @@ void client_chat_window::send_group_message()
 
     _list->setItemWidget(line, wid);
 
-    _client->send_group_text(_group_ID, my_name(), message, current_time);
+    _client->send_group_text(_group_ID, _group_name, my_name(), message, current_time);
 
     _insert_message->clear();
 
@@ -403,7 +403,7 @@ void client_chat_window::send_group_file()
 
             add_file(file_name, true, current_time);
 
-            _client->send_group_file(_group_ID, my_name(), QFileInfo(file_name).fileName(), file_data, current_time);
+            _client->send_group_file(_group_ID, _group_name, my_name(), QFileInfo(file_name).fileName(), file_data, current_time);
             _client->IDBFS_save_file(file_name, file_data, static_cast<int>(file_data.size()));
             // _client->send_save_file(_group_ID, _group_ID, _client->my_ID(), QFileInfo(file_name).fileName(), file_data, "file", current_time);
         }
@@ -517,17 +517,17 @@ void client_chat_window::set_up_window()
         connect(_client, &client_manager::added_to_group, this, [=](const int &group_ID, const QString &adm, const QStringList &group_members, const QString &group_name)
                 { emit added_to_group(group_ID, adm, group_members, group_name); });
 
-        connect(_client, &client_manager::group_is_typing_received, this, [=](const int &group_ID, const QString &sender)
-                { emit group_is_typing_received(group_ID, sender); });
+        connect(_client, &client_manager::group_is_typing_received, this, [=](const int &group_ID, const QString &group_name, const QString &sender)
+                { emit group_is_typing_received(group_ID, group_name, sender); });
 
-        connect(_client, &client_manager::group_text_received, this, [=](const int &group_ID, const QString &sender, const QString &message, const QString time)
-                { emit group_text_received(group_ID, sender, message, time); });
+        connect(_client, &client_manager::group_text_received, this, [=](const int &group_ID, const QString &group_name, const QString &sender, const QString &message, const QString time)
+                { emit group_text_received(group_ID, group_name, sender, message, time); });
 
-        connect(_client, &client_manager::group_audio_received, this, [=](const int &group_ID, const QString &sender, const QString &audio_name, const QString &time)
-                { emit group_audio_received(group_ID, sender, audio_name, time); });
+        connect(_client, &client_manager::group_audio_received, this, [=](const int &group_ID, const QString &group_name, const QString &sender, const QString &audio_name, const QString &time)
+                { emit group_audio_received(group_ID, group_name, sender, audio_name, time); });
 
-        connect(_client, &client_manager::group_file_received, this, [=](const int &group_ID, const QString &sender, const QString &file_name, const QString &time)
-                { emit group_file_received(group_ID, sender, file_name, time); });
+        connect(_client, &client_manager::group_file_received, this, [=](const int &group_ID, const QString &group_name, const QString &sender, const QString &file_name, const QString &time)
+                { emit group_file_received(group_ID, group_name, sender, file_name, time); });
     }
 }
 

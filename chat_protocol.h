@@ -65,10 +65,10 @@ public:
 
     QByteArray set_new_group_message(const QString &adm, const QStringList &members, const QString &group_name);
 
-    QByteArray set_group_is_typing(const int &group_ID, const QString &sender);
-    QByteArray set_group_text_message(const int &group_ID, const QString &sender, const QString &message, const QString &time);
-    QByteArray set_group_file_message(const int &group_ID, const QString &sender, const QString &file_name, const QByteArray &file_data, const QString &time);
-    QByteArray set_group_audio_message(const int &group_ID, const QString &sender, const QString &audio_name, const QString &time);
+    QByteArray set_group_is_typing(const int &group_ID, const QString &group_name, const QString &sender);
+    QByteArray set_group_text_message(const int &group_ID, const QString &group_name, const QString &sender, const QString &message, const QString &time);
+    QByteArray set_group_file_message(const int &group_ID, const QString &group_name, const QString &sender, const QString &file_name, const QByteArray &file_data, const QString &time);
+    QByteArray set_group_audio_message(const int &group_ID, const QString &group_name, const QString &sender, const QString &audio_name, const QString &time);
 
     void load_data(const QByteArray &data);
 

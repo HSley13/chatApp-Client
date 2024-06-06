@@ -147,11 +147,11 @@ signals:
 
     void added_to_group(const int &group_ID, const QString &adm, const QStringList &group_members, const QString &group_name);
 
-    void group_is_typing_received(const int &group_ID, const QString &sender);
-    void group_text_received(const int &group_ID, const QString &sender, const QString &message, const QString &time);
+    void group_is_typing_received(const int &group_ID, const QString &group_name, const QString &sender);
+    void group_text_received(const int &group_ID, const QString &group_name, const QString &sender, const QString &message, const QString &time);
 
-    void group_audio_received(const int &group_ID, const QString &sender, const QString &audio_name, const QString &time);
-    void group_file_received(const int &group_ID, const QString &sender, const QString &file_name, const QString &time);
+    void group_audio_received(const int &group_ID, const QString &group_name, const QString &sender, const QString &audio_name, const QString &time);
+    void group_file_received(const int &group_ID, const QString &group_name, const QString &sender, const QString &file_name, const QString &time);
 
 private slots:
     void send_message();
