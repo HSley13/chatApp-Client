@@ -37,6 +37,7 @@ public:
 
     void window_name(const QString &name);
     void message_received(const QString &message, const QString &time);
+    void group_message_received(const QString &message, const QString &sender, const QString &time);
     void retrieve_conversation(QVector<QString> &messages, QHash<QString, QByteArray> &binary_data);
 
     void add_file(const QString &path, bool is_mine, const QString &time);
@@ -52,6 +53,7 @@ public:
     Swipeable_list_widget *_list;
 
     QStringList _group_members = QStringList();
+    QString _group_name;
 
     QString my_name();
 
@@ -99,6 +101,8 @@ private:
 
     int paused_position = 0;
 
+    int _group_ID;
+
     void ask_microphone_permission();
 
     void mousePressEvent(QMouseEvent *event) override;
@@ -142,6 +146,12 @@ signals:
     void item_clicked(const QString &name);
 
     void added_to_group(const int &group_ID, const QString &adm, const QStringList &group_members, const QString &group_name);
+
+    void group_is_typing_received(const int &group_ID, const QString &sender);
+    void group_text_received(const int &group_ID, const QString &sender, const QString &message, const QString &time);
+
+    void group_audio_received(const int &group_ID, const QString &sender, const QString &audio_name, const QString &time);
+    void group_file_received(const int &group_ID, const QString &sender, const QString &file_name, const QString &time);
 
 private slots:
     void send_message();

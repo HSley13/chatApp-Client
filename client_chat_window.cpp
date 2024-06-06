@@ -48,7 +48,7 @@ client_chat_window::client_chat_window(const int &conversation_ID, const QString
 }
 
 client_chat_window::client_chat_window(const int &group_ID, const QString &group_name, const QStringList &group_members, QWidget *parent)
-    : QMainWindow(parent), _group_members(group_members)
+    : QMainWindow(parent), _group_ID(group_ID), _group_name(group_name), _group_members(group_members)
 {
     set_up_window();
 
@@ -191,7 +191,8 @@ void client_chat_window::start_recording()
         }
         else
         {
-            // Implementation to send group voice note
+            _client->send_group_audio(_group_ID, my_name(), audio_path, current_time);
+            // saving mechanism to implement
         }
 
         emit data_received_sent(_window_name);
@@ -306,12 +307,48 @@ void client_chat_window::send_message()
 
 void client_chat_window::send_group_message()
 {
+    QString message = _insert_message->text();
+
+    QString current_time = QTime::currentTime().toString();
+
+    chat_line *wid = new chat_line(this);
+    wid->set_message(message, true, current_time);
+    wid->setStyleSheet("color: black;");
+
+    QListWidgetItem *line = new QListWidgetItem(_list);
+    line->setSizeHint(QSize(0, 60));
+    line->setData(Qt::UserRole, current_time);
+
+    line->setBackground(QBrush(QColorConstants::Svg::lightskyblue));
+
+    _list->setItemWidget(line, wid);
+
+    _client->send_group_text(_group_ID, my_name(), message, current_time);
+
+    _insert_message->clear();
+
+    emit data_received_sent(_window_name);
 }
 
 void client_chat_window::message_received(const QString &message, const QString &time)
 {
     chat_line *wid = new chat_line(this);
     wid->set_message(message, false, time);
+    wid->setStyleSheet("color: black;");
+
+    QListWidgetItem *line = new QListWidgetItem();
+    line->setBackground(QBrush(QColorConstants::Svg::gray));
+    line->setSizeHint(QSize(0, 60));
+    line->setData(Qt::UserRole, time);
+
+    _list->addItem(line);
+    _list->setItemWidget(line, wid);
+}
+
+void client_chat_window::group_message_received(const QString &message, const QString &sender, const QString &time)
+{
+    chat_line *wid = new chat_line(this);
+    wid->set_group_message(message, sender, false, time);
     wid->setStyleSheet("color: black;");
 
     QListWidgetItem *line = new QListWidgetItem();
@@ -357,6 +394,22 @@ void client_chat_window::send_file()
 
 void client_chat_window::send_group_file()
 {
+    std::function<void(const QString &, const QByteArray &)> file_content_ready = [this](const QString &file_name, const QByteArray &file_data)
+    {
+        if (!file_name.isEmpty())
+        {
+            QString IDBFS_file_name = QString("%1_%2").arg(QDateTime::currentDateTime().toString("yyyyMMdd_HHmmss"), QFileInfo(file_name).fileName());
+            QString current_time = QTime::currentTime().toString();
+
+            add_file(file_name, true, current_time);
+
+            _client->send_group_file(_group_ID, my_name(), QFileInfo(file_name).fileName(), file_data, current_time);
+            _client->IDBFS_save_file(file_name, file_data, static_cast<int>(file_data.size()));
+            // _client->send_save_file(_group_ID, _group_ID, _client->my_ID(), QFileInfo(file_name).fileName(), file_data, "file", current_time);
+        }
+    };
+
+    QFileDialog::getOpenFileContent("All Files (*)", file_content_ready);
 }
 
 void client_chat_window::set_up_window()
@@ -463,6 +516,18 @@ void client_chat_window::set_up_window()
 
         connect(_client, &client_manager::added_to_group, this, [=](const int &group_ID, const QString &adm, const QStringList &group_members, const QString &group_name)
                 { emit added_to_group(group_ID, adm, group_members, group_name); });
+
+        connect(_client, &client_manager::group_is_typing_received, this, [=](const int &group_ID, const QString &sender)
+                { emit group_is_typing_received(group_ID, sender); });
+
+        connect(_client, &client_manager::group_text_received, this, [=](const int &group_ID, const QString &sender, const QString &message, const QString time)
+                { emit group_text_received(group_ID, sender, message, time); });
+
+        connect(_client, &client_manager::group_audio_received, this, [=](const int &group_ID, const QString &sender, const QString &audio_name, const QString &time)
+                { emit group_audio_received(group_ID, sender, audio_name, time); });
+
+        connect(_client, &client_manager::group_file_received, this, [=](const int &group_ID, const QString &sender, const QString &file_name, const QString &time)
+                { emit group_file_received(group_ID, sender, file_name, time); });
     }
 }
 

@@ -86,6 +86,26 @@ void chat_protocol::load_data(const QByteArray &data)
 
         break;
 
+    case group_is_typing:
+        in >> _group_ID >> _group_sender;
+
+        break;
+
+    case group_text:
+        in >> _group_ID >> _group_sender >> _group_message >> _group_time;
+
+        break;
+
+    case group_audio:
+        in >> _group_ID >> _group_sender >> _group_audio_name >> _group_audio_data >> _group_time;
+
+        break;
+
+    case group_file:
+        in >> _group_ID >> _group_sender >> _group_file_name >> _group_file_data >> _group_time;
+
+        break;
+
     default:
         break;
     }
@@ -235,6 +255,7 @@ QByteArray chat_protocol::set_save_audio_message(const int &conversation_ID, con
 
     return byte;
 }
+
 QByteArray chat_protocol::set_save_file_message(const int &conversation_ID, const QString &sender, const QString &receiver, const QString &file_name, const QByteArray &file_data, const QString &type, const QString &time)
 {
     QByteArray byte;
@@ -279,6 +300,64 @@ QByteArray chat_protocol::set_new_group_message(const QString &adm, const QStrin
     out.setVersion(QDataStream::Qt_6_7);
 
     out << new_group << adm << members << group_name;
+
+    return byte;
+}
+
+QByteArray chat_protocol::set_group_is_typing(const int &group_ID, const QString &sender)
+{
+    QByteArray byte;
+
+    QDataStream out(&byte, QIODevice::WriteOnly);
+    out.setVersion(QDataStream::Qt_6_7);
+
+    out << group_is_typing << group_ID << sender;
+
+    return byte;
+}
+
+QByteArray chat_protocol::set_group_text_message(const int &group_ID, const QString &sender, const QString &message, const QString &time)
+{
+    QByteArray byte;
+
+    QDataStream out(&byte, QIODevice::WriteOnly);
+    out.setVersion(QDataStream::Qt_6_7);
+
+    out << group_text << group_ID << sender << message << time;
+
+    return byte;
+}
+
+QByteArray chat_protocol::set_group_file_message(const int &group_ID, const QString &sender, const QString &file_name, const QByteArray &file_data, const QString &time)
+{
+    QByteArray byte;
+
+    QDataStream out(&byte, QIODevice::WriteOnly);
+    out.setVersion(QDataStream::Qt_6_7);
+
+    out << group_file << group_ID << sender << file_name << file_data << time;
+
+    return byte;
+}
+
+QByteArray chat_protocol::set_group_audio_message(const int &group_ID, const QString &sender, const QString &audio_name, const QString &time)
+{
+    QByteArray byte;
+
+    QFile file(audio_name);
+    if (file.open(QIODevice::ReadOnly))
+    {
+        QDataStream out(&byte, QIODevice::WriteOnly);
+        out.setVersion(QDataStream::Qt_6_7);
+
+        QFileInfo info(audio_name);
+
+        out << group_audio << group_ID << sender << info.fileName() << file.readAll() << time;
+
+        file.close();
+    }
+    else
+        qDebug() << "chat_protocol ---> set_group_audio_message() ---> Can't open the file you wanna send";
 
     return byte;
 }
@@ -398,6 +477,21 @@ const QByteArray &chat_protocol::file_data() const
     return _file_data;
 }
 
+const QString &chat_protocol::group_file_name() const
+{
+    return _group_file_name;
+}
+
+const qint64 &chat_protocol::group_file_size() const
+{
+    return _group_file_size;
+}
+
+const QByteArray &chat_protocol::group_file_data() const
+{
+    return _group_file_data;
+}
+
 const QString &chat_protocol::file_sender() const
 {
     return _file_sender;
@@ -426,4 +520,39 @@ const QStringList &chat_protocol::group_members() const
 const QString &chat_protocol::group_name() const
 {
     return _group_name;
+}
+
+const QString &chat_protocol::group_audio_name() const
+{
+    return _group_audio_name;
+}
+
+const QByteArray &chat_protocol::group_audio_data() const
+{
+    return _group_audio_data;
+}
+
+const QString &chat_protocol::group_audio_sender() const
+{
+    return _group_audio_sender;
+}
+
+const QString &chat_protocol::group_data_type() const
+{
+    return _group_data_type;
+}
+
+const QString &chat_protocol::group_sender() const
+{
+    return _group_sender;
+}
+
+const QString &chat_protocol::group_message() const
+{
+    return _group_message;
+}
+
+const QString &chat_protocol::group_time() const
+{
+    return _group_time;
 }

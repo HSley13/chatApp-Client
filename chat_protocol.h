@@ -65,6 +65,11 @@ public:
 
     QByteArray set_new_group_message(const QString &adm, const QStringList &members, const QString &group_name);
 
+    QByteArray set_group_is_typing(const int &group_ID, const QString &sender);
+    QByteArray set_group_text_message(const int &group_ID, const QString &sender, const QString &message, const QString &time);
+    QByteArray set_group_file_message(const int &group_ID, const QString &sender, const QString &file_name, const QByteArray &file_data, const QString &time);
+    QByteArray set_group_audio_message(const int &group_ID, const QString &sender, const QString &audio_name, const QString &time);
+
     void load_data(const QByteArray &data);
 
     message_type type() const;
@@ -79,6 +84,11 @@ public:
     const QByteArray &file_data() const;
     const QString &file_sender() const;
 
+    const QString &group_file_name() const;
+    const qint64 &group_file_size() const;
+    const QByteArray &group_file_data() const;
+    const QString &group_file_sender() const;
+
     const QString &my_ID() const;
     const QString &my_name() const;
 
@@ -89,6 +99,11 @@ public:
     const QString &audio_name() const;
     const QString &audio_sender() const;
     const QByteArray &audio_data() const;
+
+    const QString &group_audio_name() const;
+    const QString &group_audio_sender() const;
+    const QString &group_data_type() const;
+    const QByteArray &group_audio_data() const;
 
     const QList<QString> &online_friends() const;
     const QHash<int, QHash<QString, int>> &friend_list() const;
@@ -103,6 +118,9 @@ public:
 
     const int &group_ID() const;
     const QString &adm() const;
+    const QString &group_message() const;
+    const QString &group_time() const;
+    const QString &group_sender() const;
     const QStringList &group_members() const;
     const QString &group_name() const;
 
@@ -124,6 +142,11 @@ private:
     QByteArray _file_data;
     QString _file_sender;
 
+    QString _group_file_name;
+    qint64 _group_file_size;
+    QByteArray _group_file_data;
+    QString _group_file_sender;
+
     QString _client_ID;
     QString _client_name;
     QString _old_name;
@@ -138,6 +161,11 @@ private:
     QString _audio_sender;
     QByteArray _audio_data;
 
+    QString _group_audio_name;
+    QString _group_audio_sender;
+    QByteArray _group_audio_data;
+    QString _group_data_type;
+
     QString _hashed_password;
     bool _true_or_false;
 
@@ -145,6 +173,9 @@ private:
 
     int _group_ID;
     QString _adm;
+    QString _group_message;
+    QString _group_time;
     QStringList _group_members;
     QString _group_name;
+    QString _group_sender;
 };

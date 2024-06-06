@@ -84,4 +84,10 @@ private slots:
     void on_new_group(const int &group_ID);
 
     void on_added_to_group(const int &group_ID, const QString &adm, const QStringList &group_members, const QString &group_name);
+
+    void on_group_is_typing_received(const int &group_ID, const QString &sender);
+    void on_group_text_received(const int &group_ID, const QString &sender, const QString &message, const QString &time);
+
+    void on_group_audio_received(const int &group_ID, const QString &sender, const QString &audio_name, const QString &time);
+    void on_group_file_received(const int &group_ID, const QString &sender, const QString &file_name, const QString &time);
 };

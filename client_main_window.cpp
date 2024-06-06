@@ -328,9 +328,13 @@ void client_main_window::on_login_request(const QString &hashed_password, bool t
         connect(_server_wid, &client_chat_window::delete_message, this, &client_main_window::on_delete_message);
         connect(_server_wid, &client_chat_window::new_group_ID, this, &client_main_window::on_new_group);
         connect(_server_wid, &client_chat_window::added_to_group, this, &client_main_window::on_added_to_group);
+        connect(_server_wid, &client_chat_window::group_is_typing_received, this, &client_main_window::on_group_is_typing_received);
+        connect(_server_wid, &client_chat_window::group_text_received, this, &client_main_window::on_group_text_received);
+        connect(_server_wid, &client_chat_window::group_file_received, this, &client_main_window::on_group_file_received);
+        connect(_server_wid, &client_chat_window::group_audio_received, this, &client_main_window::on_group_audio_received);
 
         connect(_server_wid, &client_chat_window::is_typing_received, this, [=](const QString &sender)
-                { _status_bar->showMessage(QString("%1 is typing...").arg(sender), 3000); });
+                { _status_bar->showMessage(QString("%1 is typing...").arg(sender), 1000); });
 
         connect(_server_wid, &client_chat_window::socket_disconnected, this, [=]()
                 { _stack->setDisabled(true); _status_bar->showMessage("SERVER DISCONNECTED YOU", 999999); });
@@ -708,7 +712,7 @@ void client_main_window::on_added_to_group(const int &group_ID, const QString &a
 
     wid->window_name(group_name);
 
-    _window_map.insert(group_name, wid);
+    _window_map.insert(QString::number(group_ID), wid);
 
     _stack->addWidget(wid);
 
@@ -730,7 +734,7 @@ void client_main_window::on_new_group(const int &group_ID)
 
     wid->window_name(_group_name);
 
-    _window_map.insert(_group_name, wid);
+    _window_map.insert(QString::number(group_ID), wid);
 
     _stack->addWidget(wid);
 
@@ -780,6 +784,75 @@ void client_main_window::create_group()
                 } });
 
     input_dialog->open();
+}
+
+void client_main_window::on_group_is_typing_received(const int &group_ID, const QString &sender)
+{
+    QWidget *win = _window_map.value(QString::number(group_ID));
+    if (win)
+    {
+        client_chat_window *wid = qobject_cast<client_chat_window *>(win);
+        if (wid)
+            _status_bar->showMessage(QString("%1 from group: %2 is typing...").arg(sender, wid->_group_name), 1000);
+        else
+            qDebug() << "client_main_window ---> on_group_is_typing_received() --> ERROR CASTING THE WIDGET:";
+    }
+}
+
+void client_main_window::on_group_text_received(const int &group_ID, const QString &sender, const QString &message, const QString &time)
+{
+    QWidget *win = _window_map.value(QString::number(group_ID));
+    if (win)
+    {
+        client_chat_window *wid = qobject_cast<client_chat_window *>(win);
+        if (wid)
+        {
+            wid->group_message_received(message, sender, time);
+
+            add_on_top(wid->_group_name);
+        }
+        else
+            qDebug() << "client_main_window ---> on_group_text_received() --> ERROR CASTING THE WIDGET:";
+
+        if (QString::number(group_ID).compare("Server"))
+        {
+            int index = _friend_list->findText(wid->_group_name, Qt::MatchExactly);
+            if (index == -1)
+                _friend_list->addItem(wid->_group_name);
+        }
+    }
+}
+
+void client_main_window::on_group_audio_received(const int &group_ID, const QString &sender, const QString &audio_name, const QString &time)
+{
+    QWidget *win = _window_map.value(QString::number(group_ID));
+    if (win)
+    {
+        client_chat_window *wid = qobject_cast<client_chat_window *>(win);
+        if (wid)
+        {
+            wid->add_file(audio_name, false, time);
+            add_on_top(wid->_group_name);
+        }
+        else
+            qDebug() << "client_main_window ---> on_group_audio_received() --> ERROR CASTING THE WIDGET:";
+    }
+}
+
+void client_main_window::on_group_file_received(const int &group_ID, const QString &sender, const QString &file_name, const QString &time)
+{
+    QWidget *win = _window_map.value(QString::number(group_ID));
+    if (win)
+    {
+        client_chat_window *wid = qobject_cast<client_chat_window *>(win);
+        if (wid)
+        {
+            wid->add_file(file_name, false, time);
+            add_on_top(wid->_group_name);
+        }
+        else
+            qDebug() << "client_main_window ---> on_group_file_received() --> ERROR CASTING THE WIDGET:";
+    }
 }
 
 /*-------------------------------------------------------------------- Functions --------------------------------------------------------------*/
