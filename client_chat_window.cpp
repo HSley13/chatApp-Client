@@ -183,7 +183,7 @@ void client_chat_window::start_recording()
 
         add_audio(audio_name, true, current_time);
 
-        if (_group_members.isEmpty())
+        if (_group_name.isEmpty())
         {
             _client->send_audio(my_name(), _destinator, audio_path, current_time);
 

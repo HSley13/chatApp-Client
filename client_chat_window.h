@@ -53,7 +53,7 @@ public:
     Swipeable_list_widget *_list;
 
     QStringList _group_members = QStringList();
-    QString _group_name;
+    QString _group_name = QString();
 
     QString my_name();
 

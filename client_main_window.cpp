@@ -700,7 +700,7 @@ void client_main_window::on_added_to_group(const int &group_ID, const QString &a
             names << ID;
     }
 
-    client_chat_window *wid = new client_chat_window(group_ID, _group_name, names, this);
+    client_chat_window *wid = new client_chat_window(group_ID, group_name, names, this);
     connect(wid, &client_chat_window::swipe_right, this, &client_main_window::on_swipe_right);
     connect(wid, &client_chat_window::item_clicked, this, [=](const QString &name)
             {    QWidget *wid = _window_map.value(name, this);
@@ -826,7 +826,7 @@ void client_main_window::on_group_audio_received(const int &group_ID, const QStr
         client_chat_window *wid = qobject_cast<client_chat_window *>(win);
         if (wid)
         {
-            wid->add_file(audio_name, false, time);
+            wid->add_audio(audio_name, false, time);
             add_on_top(group_name);
         }
         else
