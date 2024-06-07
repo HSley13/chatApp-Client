@@ -748,7 +748,7 @@ void client_chat_window::set_retrieve_group_message_window(const QString &type, 
     _list->setItemWidget(line, wid);
 }
 
-void client_chat_window::retrieve_group_conversation(QVector<QString> &messages, QHash<QString, QByteArray> &binary_data)
+void client_chat_window::retrieve_group_conversation(QVector<QString> &messages, QHash<QString, QByteArray> &binary_data, const QString &my_name)
 {
     if (messages.isEmpty())
         return;
@@ -762,9 +762,10 @@ void client_chat_window::retrieve_group_conversation(QVector<QString> &messages,
         QString date_time = parts.at(2);
         QString type = parts.last();
 
-        qDebug() << "Sender is: " << sender << " , My ID is: " << _client->my_ID();
+        qDebug() << "Sender is: " << sender << ", Name is: " << my_name;
+        qDebug() << "My ID is: " << _client->my_ID();
 
-        if (!sender.compare(_client->my_name()))
+        if (!sender.compare(my_name))
             set_retrieve_group_message_window(type, content, sender, binary_data.value(date_time), date_time, true);
         else
             set_retrieve_group_message_window(type, content, sender, binary_data.value(date_time), date_time, false);
