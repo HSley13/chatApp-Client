@@ -878,7 +878,7 @@ void client_main_window::on_group_text_received(const int &group_ID, const QStri
         client_chat_window *wid = qobject_cast<client_chat_window *>(win);
         if (wid)
         {
-            wid->group_message_received(message, sender, time);
+            wid->message_received(message, time, sender);
             add_on_top(group_name);
         }
         else
@@ -894,7 +894,7 @@ void client_main_window::on_group_audio_received(const int &group_ID, const QStr
         client_chat_window *wid = qobject_cast<client_chat_window *>(win);
         if (wid)
         {
-            wid->add_audio(audio_name, false, time);
+            wid->add_audio(audio_name, false, time, sender);
             add_on_top(group_name);
         }
         else
@@ -910,7 +910,7 @@ void client_main_window::on_group_file_received(const int &group_ID, const QStri
         client_chat_window *wid = qobject_cast<client_chat_window *>(win);
         if (wid)
         {
-            wid->add_file(file_name, false, time);
+            wid->add_file(file_name, false, time, sender);
             add_on_top(group_name);
         }
         else

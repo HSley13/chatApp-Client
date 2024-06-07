@@ -36,14 +36,13 @@ public:
     void set_name(const QString &insert_name);
 
     void window_name(const QString &name);
-    void message_received(const QString &message, const QString &time);
-    void group_message_received(const QString &message, const QString &sender, const QString &time);
-    void retrieve_conversation(QVector<QString> &messages, QHash<QString, QByteArray> &binary_data);
+    void message_received(const QString &message, const QString &time, const QString &sender = QString());
 
+    void retrieve_conversation(QVector<QString> &messages, QHash<QString, QByteArray> &binary_data);
     void retrieve_group_conversation(QVector<QString> &group_messages, QHash<QString, QByteArray> &group_binary_data);
 
-    void add_file(const QString &path, bool is_mine, const QString &time);
-    void add_audio(const QString &audio_name, bool is_mine, const QString &time);
+    void add_file(const QString &path, bool is_mine, const QString &time, const QString &sender = QString());
+    void add_audio(const QString &audio_name, bool is_mine, const QString &time, const QString &sender = QString());
     void add_friend(const QString &ID);
 
     void delete_message_received(const QString &time);
@@ -111,10 +110,9 @@ private:
     void mouseMoveEvent(QMouseEvent *event) override;
 
     void set_up_window();
+    void set_up_window_2();
 
-    void set_retrieve_message_window(const QString &type, const QString &content, const QByteArray &file_data, const QString &date_time, bool true_or_false);
-
-    void set_retrieve_group_message_window(const QString &type, const QString &sender, const QString &content, const QByteArray &file_data, const QString &date_time, bool true_or_false);
+    void set_retrieve_message_window(const QString &type, const QString &content, const QByteArray &file_data, const QString &date_time, bool true_or_false, const QString &sender = QString());
 
 signals:
     void swipe_right();
@@ -160,13 +158,7 @@ signals:
 private slots:
     void send_message();
 
-    void send_group_message();
-
     void send_file();
-
-    void send_group_file();
-
-    void on_file_saved(const QString &path);
 
     void start_recording();
     void on_duration_changed(const qint64 &duration);
