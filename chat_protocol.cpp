@@ -104,8 +104,6 @@ void chat_protocol::load_data(const QByteArray &data)
     case group_file:
         in >> _group_ID >> _group_name >> _group_sender >> _group_file_name >> _group_file_data >> _group_time;
 
-        qDebug() << "chat_protocol --> load_data() ---> file sender is: " << _group_sender;
-
         break;
 
     default:
@@ -338,8 +336,6 @@ QByteArray chat_protocol::set_group_file_message(const int &group_ID, const QStr
     out.setVersion(QDataStream::Qt_6_7);
 
     out << group_file << group_ID << group_name << sender << file_name << file_data << time;
-
-    qDebug() << "chat_protocol() ---> set_group_file_message() ---> file sender is: " << sender;
 
     return byte;
 }

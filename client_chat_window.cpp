@@ -521,16 +521,16 @@ void client_chat_window::add_file(const QString &file_name, bool is_mine, const 
 
     QHBoxLayout *file_lay = new QHBoxLayout();
 
-    qDebug() << "client_chat_window() ---> add_file() ---> sender is: " << sender;
-
     if (sender.isEmpty())
         file_lay->addWidget(file);
     else
     {
         QLabel *lab = new QLabel(QString("%1: ").arg(sender), this);
 
-        file_lay->addWidget(lab);
-        file_lay->addWidget(file);
+        qDebug() << "client_chat_window ---> add_file() ---> inside the condition in which sender is not null";
+
+        file_lay->addWidget(lab, 3);
+        file_lay->addWidget(file, 7);
     }
 
     QVBoxLayout *vbox = new QVBoxLayout();
@@ -575,9 +575,9 @@ void client_chat_window::add_audio(const QString &audio_name, bool is_mine, cons
     {
         QLabel *lab = new QLabel(QString("%1: ").arg(sender), this);
 
-        hbox_1->addWidget(lab);
-        hbox_1->addWidget(audio);
-        hbox_1->addWidget(slider);
+        hbox_1->addWidget(lab, 3);
+        hbox_1->addWidget(audio, 2);
+        hbox_1->addWidget(slider, 5);
     }
 
     QVBoxLayout *vbox_1 = new QVBoxLayout(wid);
