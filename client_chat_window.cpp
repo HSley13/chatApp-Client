@@ -509,40 +509,37 @@ void client_chat_window::add_file(const QString &file_name, bool is_mine, const 
     if (image.isNull())
         qDebug() << "File Image is NULL";
 
-    QLabel *time_label = new QLabel(time, this);
+    QLabel *time_label = new QLabel(time, wid);
 
-    QPushButton *file = new QPushButton(this);
+    QPushButton *file = new QPushButton(wid);
     file->setIcon(image);
     file->setIconSize(QSize(30, 30));
     file->setFixedSize(QSize(30, 30));
     file->setStyleSheet("border: none");
-    file->connect(file, &QPushButton::clicked, this, [=]()
-                  { QDesktopServices::openUrl(_client->get_file_url(file_name)); });
+    connect(file, &QPushButton::clicked, this, [=]()
+            { QDesktopServices::openUrl(_client->get_file_url(file_name)); });
 
     QHBoxLayout *file_lay = new QHBoxLayout();
 
-    if (sender.isEmpty())
-        file_lay->addWidget(file);
-    else
+    file_lay->addSpacerItem(new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Minimum));
+    file_lay->addWidget(file);
+    file_lay->addSpacerItem(new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Minimum));
+
+    if (!sender.isEmpty())
     {
-        QLabel *lab = new QLabel(QString("%1: ").arg(sender), this);
-
-        qDebug() << "client_chat_window ---> add_file() ---> inside the condition in which sender is not null";
-
-        file_lay->addWidget(lab, 3);
-        file_lay->addWidget(file, 7);
+        QLabel *lab = new QLabel(QString("%1: ").arg(sender), wid);
+        file_lay->addWidget(lab);
     }
 
-    QVBoxLayout *vbox = new QVBoxLayout();
-    vbox->addWidget(file, 7);
-    vbox->addWidget(time_label, 3);
+    QVBoxLayout *vbox = new QVBoxLayout(wid);
+    vbox->addLayout(file_lay);
+    vbox->addWidget(time_label, 0, Qt::AlignHCenter);
 
     wid->setLayout(vbox);
 
     QListWidgetItem *line = new QListWidgetItem(_list);
     line->setSizeHint(QSize(0, 68));
     line->setData(Qt::UserRole, time);
-
     (is_mine) ? line->setBackground(QBrush(QColorConstants::Svg::lightskyblue)) : line->setBackground(QBrush(QColorConstants::Svg::gray));
 
     _list->setItemWidget(line, wid);
