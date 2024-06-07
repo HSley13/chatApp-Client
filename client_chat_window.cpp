@@ -11,6 +11,9 @@ client_chat_window::client_chat_window(QWidget *parent)
 {
     set_up_window();
 
+    connect(_insert_message, &QLineEdit::textChanged, this, [=]()
+            { _client->send_is_typing(my_name(), _destinator); });
+
     connect(_send_button, &QPushButton::clicked, this, &client_chat_window::send_message);
 }
 
@@ -24,6 +27,9 @@ client_chat_window::client_chat_window(const int &conversation_ID, const QString
     QPixmap image_record(":/images/record_icon.png");
     if (!image_record)
         qDebug() << "Image Record Button is NULL";
+
+    connect(_insert_message, &QLineEdit::textChanged, this, [=]()
+            { _client->send_is_typing(my_name(), _destinator); });
 
     connect(_send_button, &QPushButton::clicked, this, &client_chat_window::send_message);
 
@@ -57,6 +63,9 @@ client_chat_window::client_chat_window(const int &group_ID, const QString &group
     QPixmap image_record(":/images/record_icon.png");
     if (!image_record)
         qDebug() << "Image Record Button is NULL";
+
+    connect(_insert_message, &QLineEdit::textChanged, this, [=]()
+            { _client->send_group_is_typing(_group_ID, _group_name, my_name()); });
 
     connect(_send_button, &QPushButton::clicked, this, &client_chat_window::send_group_message);
 
@@ -190,10 +199,7 @@ void client_chat_window::start_recording()
             _client->send_save_audio(_conversation_ID, _client->my_ID(), _destinator, audio_path, "audio", current_time);
         }
         else
-        {
             _client->send_group_audio(_group_ID, _group_name, my_name(), audio_path, current_time);
-            // saving mechanism to implement
-        }
 
         emit data_received_sent(_window_name);
     }
@@ -343,6 +349,9 @@ void client_chat_window::message_received(const QString &message, const QString 
 
     _list->addItem(line);
     _list->setItemWidget(line, wid);
+
+    if (_destinator.compare("Server"))
+        _client->send_save_conversation(_conversation_ID, _destinator, _client->my_ID(), message, time);
 }
 
 void client_chat_window::group_message_received(const QString &message, const QString &sender, const QString &time)
@@ -358,9 +367,6 @@ void client_chat_window::group_message_received(const QString &message, const QS
 
     _list->addItem(line);
     _list->setItemWidget(line, wid);
-
-    if (_destinator.compare("Server"))
-        _client->send_save_conversation(_conversation_ID, _destinator, _client->my_ID(), message, time);
 }
 
 void client_chat_window::delete_message_received(const QString &time)
@@ -405,7 +411,6 @@ void client_chat_window::send_group_file()
 
             _client->send_group_file(_group_ID, _group_name, my_name(), QFileInfo(file_name).fileName(), file_data, current_time);
             _client->IDBFS_save_file(file_name, file_data, static_cast<int>(file_data.size()));
-            // _client->send_save_file(_group_ID, _group_ID, _client->my_ID(), QFileInfo(file_name).fileName(), file_data, "file", current_time);
         }
     };
 
@@ -447,8 +452,6 @@ void client_chat_window::set_up_window()
 
     _insert_message = new QLineEdit(this);
     _insert_message->setPlaceholderText("Insert New Message");
-    connect(_insert_message, &QLineEdit::textChanged, this, [=]()
-            { _client->send_is_typing(my_name(), _destinator); });
 
     QPixmap image_send(":/images/send_icon.png");
     if (!image_send)
@@ -502,8 +505,8 @@ void client_chat_window::set_up_window()
         connect(_client, &client_manager::file_received, this, [=](const QString &sender, const QString &file_name, const QString &time)
                 { emit file_received(sender, file_name, time); });
 
-        connect(_client, &client_manager::login_request, this, [=](const QString &hashed_password, bool true_or_false, const QHash<int, QHash<QString, int>> &friend_list, const QList<QString> &online_friends, const QHash<int, QVector<QString>> &messages, const QHash<int, QHash<QString, QByteArray>> &binary_data)
-                { emit login_request(hashed_password, true_or_false, friend_list, online_friends, messages, binary_data); });
+        connect(_client, &client_manager::login_request, this, [=](const QString &hashed_password, bool true_or_false, const QHash<int, QHash<QString, int>> &friend_list, const QList<QString> &online_friends, const QHash<int, QVector<QString>> &messages, const QHash<int, QHash<QString, QByteArray>> &binary_data, const QHash<int, QString> &group_list, const QHash<int, QVector<QString>> &group_messages, const QHash<int, QHash<QString, QByteArray>> &group_binary_data, const QHash<int, QStringList> &groups_members)
+                { emit login_request(hashed_password, true_or_false, friend_list, online_friends, messages, binary_data, group_list, group_messages, group_binary_data, groups_members); });
 
         connect(_client, &client_manager::delete_message, this, [=](const QString &sender, const QString &time)
                 { emit delete_message(sender, time); });
@@ -707,6 +710,70 @@ void client_chat_window::retrieve_conversation(QVector<QString> &messages, QHash
     });
 }
 
+void client_chat_window::set_retrieve_group_message_window(const QString &type, const QString &content, const QString &sender, const QByteArray &file_data, const QString &date_time, bool true_or_false)
+{
+    if (!type.compare("file"))
+    {
+        QString file_name = QString("%1_%2").arg(date_time, content);
+
+        _client->IDBFS_save_file(file_name, file_data, static_cast<int>(file_data.size()));
+
+        add_file(file_name, true_or_false, date_time);
+
+        return;
+    }
+    else if (!type.compare("audio"))
+    {
+        QString audio_name = QString("%1_%2").arg(date_time, content);
+
+        _client->IDBFS_save_audio(audio_name, file_data, static_cast<int>(file_data.size()));
+
+        add_audio(audio_name, true_or_false, date_time);
+
+        return;
+    }
+
+    chat_line *wid = new chat_line(this);
+    wid->set_group_message(content, sender, true_or_false, date_time);
+    wid->setStyleSheet("color: black;");
+
+    QListWidgetItem *line = new QListWidgetItem(_list);
+    line->setSizeHint(QSize(0, 60));
+    line->setData(Qt::UserRole, date_time);
+
+    (true_or_false) ? line->setBackground(QBrush(QColorConstants::Svg::lightskyblue)) : line->setBackground(QBrush(QColorConstants::Svg::gray));
+
+    _list->setItemWidget(line, wid);
+}
+
+void client_chat_window::retrieve_group_conversation(QVector<QString> &messages, QHash<QString, QByteArray> &binary_data)
+{
+    if (messages.isEmpty())
+        return;
+
+    for (QString message : messages)
+    {
+        QStringList parts = message.split("/");
+
+        QString sender = parts.first();
+        QString content = parts.at(1);
+        QString date_time = parts.at(2);
+        QString type = parts.last();
+
+        if (!sender.compare(_client->my_name()))
+            set_retrieve_message_window(type, content, binary_data.value(date_time), date_time, true);
+        else
+            set_retrieve_group_message_window(type, content, sender, binary_data.value(date_time), date_time, false);
+    }
+
+    EM_ASM({
+        FS.syncfs(function(err) {
+            assert(!err);
+            console.log('Audio & File saved and synced');
+        });
+    });
+}
+
 void client_chat_window::add_friend(const QString &ID)
 {
     if (!_client->my_ID().compare(ID))
@@ -716,7 +783,5 @@ void client_chat_window::add_friend(const QString &ID)
 
 void client_chat_window::create_new_group(QStringList group_members, QString group_name)
 {
-    group_members << _client->my_ID();
-
     _client->send_create_new_group(my_name(), group_members, group_name);
 }

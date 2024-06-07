@@ -40,6 +40,8 @@ public:
     void group_message_received(const QString &message, const QString &sender, const QString &time);
     void retrieve_conversation(QVector<QString> &messages, QHash<QString, QByteArray> &binary_data);
 
+    void retrieve_group_conversation(QVector<QString> &group_messages, QHash<QString, QByteArray> &group_binary_data);
+
     void add_file(const QString &path, bool is_mine, const QString &time);
     void add_audio(const QString &audio_name, bool is_mine, const QString &time);
     void add_friend(const QString &ID);
@@ -112,6 +114,8 @@ private:
 
     void set_retrieve_message_window(const QString &type, const QString &content, const QByteArray &file_data, const QString &date_time, bool true_or_false);
 
+    void set_retrieve_group_message_window(const QString &type, const QString &sender, const QString &content, const QByteArray &file_data, const QString &date_time, bool true_or_false);
+
 signals:
     void swipe_right();
 
@@ -135,7 +139,7 @@ signals:
     void audio_received(const QString &sender, const QString &audio_name, const QString &time);
     void file_received(const QString &sender, const QString &file_name, const QString &time);
 
-    void login_request(const QString &hashed_password, bool true_or_false, const QHash<int, QHash<QString, int>> &friend_list, const QList<QString> &online_friends, const QHash<int, QVector<QString>> &messages, const QHash<int, QHash<QString, QByteArray>> &binary_data);
+    void login_request(const QString &hashed_password, bool true_or_false, const QHash<int, QHash<QString, int>> &friend_list, const QList<QString> &online_friends, const QHash<int, QVector<QString>> &messages, const QHash<int, QHash<QString, QByteArray>> &binary_data, const QHash<int, QString> &group_list, const QHash<int, QVector<QString>> &group_messages, const QHash<int, QHash<QString, QByteArray>> &group_binary_data, const QHash<int, QStringList> &groups_members);
 
     void delete_message(const QString &sender, const QString &time);
 

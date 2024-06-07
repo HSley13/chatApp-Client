@@ -42,7 +42,7 @@ public:
         group_is_typing,
         group_text,
         group_file,
-        group_audio
+        group_audio,
     };
 
     QByteArray set_text_message(const QString &sender, const QString &receiver, const QString &message, const QString &time);
@@ -124,8 +124,14 @@ public:
     const QStringList &group_members() const;
     const QString &group_name() const;
 
+    const QHash<int, QString> &group_list() const;
+    const QHash<int, QVector<QString>> &group_messages() const;
+    const QHash<int, QHash<QString, QByteArray>> &group_binary_data() const;
+    const QHash<int, QStringList> &groups_members() const;
+
 private:
-    QByteArray get_data(message_type type, const QString &data);
+    QByteArray
+    get_data(message_type type, const QString &data);
 
     QString _my_name;
     QString _my_ID;
@@ -178,4 +184,8 @@ private:
     QStringList _group_members;
     QString _group_name;
     QString _group_sender;
+    QHash<int, QString> _group_list;
+    QHash<int, QVector<QString>> _group_messages;
+    QHash<int, QHash<QString, QByteArray>> _group_binary_data;
+    QHash<int, QStringList> _groups_members;
 };

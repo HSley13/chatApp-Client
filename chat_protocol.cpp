@@ -62,7 +62,7 @@ void chat_protocol::load_data(const QByteArray &data)
         break;
 
     case login_request:
-        in >> _hashed_password >> _true_or_false >> _my_name >> _friend_list >> _online_friends >> _messages >> _binary_data;
+        in >> _hashed_password >> _true_or_false >> _my_name >> _friend_list >> _online_friends >> _messages >> _binary_data >> _group_list >> _group_messages >> _group_binary_data >> _groups_members;
 
         break;
 
@@ -555,4 +555,24 @@ const QString &chat_protocol::group_message() const
 const QString &chat_protocol::group_time() const
 {
     return _group_time;
+}
+
+const QHash<int, QString> &chat_protocol::group_list() const
+{
+    return _group_list;
+}
+
+const QHash<int, QVector<QString>> &chat_protocol::group_messages() const
+{
+    return _group_messages;
+}
+
+const QHash<int, QHash<QString, QByteArray>> &chat_protocol::group_binary_data() const
+{
+    return _group_binary_data;
+}
+
+const QHash<int, QStringList> &chat_protocol::groups_members() const
+{
+    return _groups_members;
 }

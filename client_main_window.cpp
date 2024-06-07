@@ -291,7 +291,7 @@ void client_main_window::on_sign_up()
     input_dialog->open();
 }
 
-void client_main_window::on_login_request(const QString &hashed_password, bool true_or_false, const QHash<int, QHash<QString, int>> &list_g, const QList<QString> &online_friends, const QHash<int, QVector<QString>> &messages, const QHash<int, QHash<QString, QByteArray>> &binary_datas)
+void client_main_window::on_login_request(const QString &hashed_password, bool true_or_false, const QHash<int, QHash<QString, int>> &list_g, const QList<QString> &online_friends, const QHash<int, QVector<QString>> &messages, const QHash<int, QHash<QString, QByteArray>> &binary_datas, const QHash<int, QString> &group_lists, const QHash<int, QVector<QString>> &group_messages, const QHash<int, QHash<QString, QByteArray>> &group_binary_datas, const QHash<int, QStringList> &groups_members)
 {
     if (hashed_password.isEmpty())
     {
@@ -399,6 +399,74 @@ void client_main_window::on_login_request(const QString &hashed_password, bool t
         }
         _user_phone_number->clear();
         _user_password->clear();
+
+        for (const int &group_ID : group_lists.keys())
+        {
+            QString group_name = group_lists.value(group_ID);
+
+            QVector<QString> group_message = group_messages.value(group_ID);
+
+            QHash<QString, QByteArray> group_binary_data = group_binary_datas.value(group_ID);
+
+            QStringList group_members = groups_members.value(group_ID);
+
+            _friend_list->addItem(group_name);
+            _friend_list->setItemData(_friend_list->count() - 1, QString::number(group_ID));
+
+            if (_window_map.contains(group_name))
+                continue;
+
+            QStringList names;
+            for (QString ID : group_members)
+            {
+                bool found = false;
+
+                if (!_server_wid->_client->my_ID().compare(ID))
+                {
+                    names << "You";
+                    continue;
+                }
+
+                for (int i = 0; i < _friend_list->count(); i++)
+                {
+                    QString ID_2 = _friend_list->itemData(i).toString();
+                    if (!ID.compare(ID_2))
+                    {
+                        names << _friend_list->itemText(i);
+                        found = true;
+
+                        break;
+                    }
+                }
+
+                if (!found)
+                    names << ID;
+            }
+
+            client_chat_window *win = new client_chat_window(group_ID, group_name, names, this);
+            win->retrieve_group_conversation(group_message, group_binary_data);
+
+            connect(win, &client_chat_window::swipe_right, this, &client_main_window::on_swipe_right);
+            connect(win, &client_chat_window::item_clicked, this, [=](const QString &name)
+                    {    QWidget *wid = _window_map.value(name, this);
+                     if (wid)
+                         _stack->setCurrentIndex(_stack->indexOf(wid));
+                     else
+                         _server_wid->add_friend(name); });
+
+            win->window_name(group_name);
+
+            _window_map.insert(group_name, win);
+
+            _stack->addWidget(win);
+
+            if (!group_message.isEmpty())
+            {
+                QListWidgetItem *item = new QListWidgetItem(group_name);
+
+                _list->addItem(item);
+            }
+        }
     }
     else
     {
@@ -722,20 +790,20 @@ void client_main_window::on_added_to_group(const int &group_ID, const QString &a
 
 void client_main_window::on_new_group(const int &group_ID)
 {
-    client_chat_window *wid = new client_chat_window(group_ID, _group_name, _group_members, this);
-    connect(wid, &client_chat_window::swipe_right, this, &client_main_window::on_swipe_right);
-    connect(wid, &client_chat_window::item_clicked, this, [=](const QString &name)
+    client_chat_window *win = new client_chat_window(group_ID, _group_name, _group_members, this);
+    connect(win, &client_chat_window::swipe_right, this, &client_main_window::on_swipe_right);
+    connect(win, &client_chat_window::item_clicked, this, [=](const QString &name)
             {    QWidget *wid = _window_map.value(name, this);
                      if (wid)
                          _stack->setCurrentIndex(_stack->indexOf(wid));
                      else
                          _server_wid->add_friend(name); });
 
-    wid->window_name(_group_name);
+    win->window_name(_group_name);
 
-    _window_map.insert(_group_name, wid);
+    _window_map.insert(_group_name, win);
 
-    _stack->addWidget(wid);
+    _stack->addWidget(win);
 
     _friend_list->addItem(_group_name);
 }
@@ -764,18 +832,18 @@ void client_main_window::create_group()
                                 {
                                      _group_members = members->name_selected();
 
-                                     QStringList ID;
+                                     QStringList IDs;
                                      for (QString names : _group_members)
                                      {
                                          int index = _friend_list->findText(names, Qt::MatchExactly);
                                          if (index != -1)
                                          {
                                              QVariant data = _friend_list->itemData(index);
-                                             ID << data.toString();
+                                             IDs << data.toString();
                                          }
                                      }
 
-                                         _server_wid->create_new_group(ID, _group_name);
+                                         _server_wid->create_new_group(IDs, _group_name);
                                      });
 
                         members->open();
