@@ -499,7 +499,6 @@ void client_chat_window::mouseMoveEvent(QMouseEvent *event)
         }
     }
 }
-
 void client_chat_window::add_file(const QString &file_name, bool is_mine, const QString &time, const QString &sender)
 {
     QWidget *wid = new QWidget();
@@ -519,30 +518,31 @@ void client_chat_window::add_file(const QString &file_name, bool is_mine, const 
     connect(file, &QPushButton::clicked, this, [=]()
             { QDesktopServices::openUrl(_client->get_file_url(file_name)); });
 
+    QVBoxLayout *vbox = new QVBoxLayout();
+    vbox->addWidget(file);
+    vbox->addWidget(time_label, 0, Qt::AlignHCenter);
+
     QHBoxLayout *file_lay = new QHBoxLayout();
 
     if (sender.isEmpty())
     {
         file_lay->addSpacerItem(new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Minimum));
-        file_lay->addWidget(file);
+        file_lay->addLayout(vbox);
     }
     else
     {
         QLabel *lab = new QLabel(QString("%1: ").arg(sender), wid);
         file_lay->addWidget(lab);
-        file_lay->addWidget(file);
+        file_lay->addLayout(vbox);
         file_lay->addSpacerItem(new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Minimum));
     }
 
-    QVBoxLayout *vbox = new QVBoxLayout(wid);
-    vbox->addLayout(file_lay);
-    vbox->addWidget(time_label, 0, Qt::AlignHCenter);
-
-    wid->setLayout(vbox);
+    wid->setLayout(file_lay);
 
     QListWidgetItem *line = new QListWidgetItem(_list);
     line->setSizeHint(QSize(0, 68));
     line->setData(Qt::UserRole, time);
+
     (is_mine) ? line->setBackground(QBrush(QColorConstants::Svg::lightskyblue)) : line->setBackground(QBrush(QColorConstants::Svg::gray));
 
     _list->setItemWidget(line, wid);
@@ -555,35 +555,37 @@ void client_chat_window::add_audio(const QString &audio_name, bool is_mine, cons
     QWidget *wid = new QWidget();
     wid->setStyleSheet("color: black;");
 
-    QLabel *time_label = new QLabel(time, this);
+    QLabel *time_label = new QLabel(time, wid);
 
-    QSlider *slider = new QSlider(Qt::Horizontal, this);
+    QSlider *slider = new QSlider(Qt::Horizontal, wid);
     slider->hide();
 
-    QPushButton *audio = new QPushButton("▶️", this);
+    QPushButton *audio = new QPushButton("▶️", wid);
     connect(audio, &QPushButton::clicked, this, [=]()
             { play_audio(_client->get_audio_url(audio_name), audio, slider); });
 
     QHBoxLayout *hbox_1 = new QHBoxLayout();
 
+    QVBoxLayout *vbox_1 = new QVBoxLayout();
+    vbox_1->addWidget(audio);
+    vbox_1->addWidget(time_label, 0, Qt::AlignHCenter);
+
     if (sender.isEmpty())
     {
         hbox_1->addSpacerItem(new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Minimum));
-        hbox_1->addWidget(audio);
+        hbox_1->addLayout(vbox_1);
         hbox_1->addWidget(slider);
     }
     else
     {
         QLabel *lab = new QLabel(QString("%1: ").arg(sender), wid);
-        hbox_1->addWidget(lab, 3);
-        hbox_1->addWidget(audio, 2);
-        hbox_1->addWidget(slider, 5);
+        hbox_1->addWidget(lab);
+        hbox_1->addLayout(vbox_1);
+        hbox_1->addWidget(slider);
         hbox_1->addSpacerItem(new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Minimum));
     }
 
-    QVBoxLayout *vbox_1 = new QVBoxLayout(wid);
-    vbox_1->addLayout(hbox_1, 8);
-    vbox_1->addWidget(time_label, 2);
+    wid->setLayout(hbox_1);
 
     QListWidgetItem *line = new QListWidgetItem(_list);
     line->setSizeHint(QSize(0, 80));
