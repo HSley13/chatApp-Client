@@ -734,7 +734,9 @@ void client_chat_window::set_retrieve_group_message_window(const QString &type, 
     }
 
     chat_line *wid = new chat_line(this);
-    wid->set_group_message(content, sender, true_or_false, date_time);
+
+    (true_or_false) ? wid->set_group_message(content, "", true_or_false, date_time) : wid->set_group_message(content, sender, true_or_false, date_time);
+
     wid->setStyleSheet("color: black;");
 
     QListWidgetItem *line = new QListWidgetItem(_list);
@@ -760,8 +762,10 @@ void client_chat_window::retrieve_group_conversation(QVector<QString> &messages,
         QString date_time = parts.at(2);
         QString type = parts.last();
 
+        qDebug() << "Sender of the message is: " << sender << "and My name is: " << _client->my_name();
+
         if (!sender.compare(_client->my_name()))
-            set_retrieve_message_window(type, content, binary_data.value(date_time), date_time, true);
+            set_retrieve_group_message_window(type, content, sender, binary_data.value(date_time), date_time, true);
         else
             set_retrieve_group_message_window(type, content, sender, binary_data.value(date_time), date_time, false);
     }
