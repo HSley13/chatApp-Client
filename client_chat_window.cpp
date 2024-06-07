@@ -521,6 +521,8 @@ void client_chat_window::add_file(const QString &file_name, bool is_mine, const 
 
     QHBoxLayout *file_lay = new QHBoxLayout();
 
+    qDebug() << "client_chat_window() ---> add_file() ---> sender is: " << sender;
+
     if (sender.isEmpty())
         file_lay->addWidget(file);
     else
