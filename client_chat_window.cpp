@@ -521,14 +521,17 @@ void client_chat_window::add_file(const QString &file_name, bool is_mine, const 
 
     QHBoxLayout *file_lay = new QHBoxLayout();
 
-    file_lay->addSpacerItem(new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Minimum));
-    file_lay->addWidget(file);
-    file_lay->addSpacerItem(new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Minimum));
-
-    if (!sender.isEmpty())
+    if (sender.isEmpty())
+    {
+        file_lay->addSpacerItem(new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Minimum));
+        file_lay->addWidget(file);
+    }
+    else
     {
         QLabel *lab = new QLabel(QString("%1: ").arg(sender), wid);
         file_lay->addWidget(lab);
+        file_lay->addWidget(file);
+        file_lay->addSpacerItem(new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Minimum));
     }
 
     QVBoxLayout *vbox = new QVBoxLayout(wid);
@@ -565,16 +568,17 @@ void client_chat_window::add_audio(const QString &audio_name, bool is_mine, cons
 
     if (sender.isEmpty())
     {
+        hbox_1->addSpacerItem(new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Minimum));
         hbox_1->addWidget(audio);
         hbox_1->addWidget(slider);
     }
     else
     {
-        QLabel *lab = new QLabel(QString("%1: ").arg(sender), this);
-
+        QLabel *lab = new QLabel(QString("%1: ").arg(sender), wid);
         hbox_1->addWidget(lab, 3);
         hbox_1->addWidget(audio, 2);
         hbox_1->addWidget(slider, 5);
+        hbox_1->addSpacerItem(new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Minimum));
     }
 
     QVBoxLayout *vbox_1 = new QVBoxLayout(wid);
