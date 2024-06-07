@@ -104,6 +104,11 @@ private:
 
     int _group_ID;
 
+    static int color_counter;
+    static QString last_sender;
+    static QColor last_color;
+    static QColor colors[];
+
     void ask_microphone_permission();
 
     void mousePressEvent(QMouseEvent *event) override;

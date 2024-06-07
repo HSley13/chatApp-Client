@@ -5,9 +5,18 @@ QString client_chat_window::_my_name = nullptr;
 QString client_chat_window::_insert_name = nullptr;
 
 client_manager *client_chat_window::_client = nullptr;
+QColor client_chat_window::last_color;
+
+int client_chat_window::color_counter = 0;
+QString client_chat_window::last_sender = nullptr;
+
+QColor client_chat_window::colors[] = {QColorConstants::Svg::lightcoral, QColorConstants::Svg::lightgreen, QColorConstants::Svg::lightgray, QColorConstants::Svg::lightgoldenrodyellow, QColorConstants::Svg::lightpink};
 
 client_chat_window::client_chat_window(QWidget *parent)
-    : QMainWindow(parent) { set_up_window(); }
+    : QMainWindow(parent)
+{
+    set_up_window();
+}
 
 client_chat_window::client_chat_window(const int &conversation_ID, const QString &destinator, const QString &name, QWidget *parent)
     : QMainWindow(parent), _conversation_ID(conversation_ID), _destinator(destinator), _destinator_name(name)
@@ -254,6 +263,11 @@ void client_chat_window::send_message()
 void client_chat_window::message_received(const QString &message, const QString &time, const QString &sender)
 {
     chat_line *wid = new chat_line(this);
+    wid->setStyleSheet("color: black;");
+
+    QListWidgetItem *line = new QListWidgetItem();
+    line->setSizeHint(QSize(0, 60));
+    line->setData(Qt::UserRole, time);
 
     if (sender.isEmpty())
     {
@@ -261,16 +275,25 @@ void client_chat_window::message_received(const QString &message, const QString 
 
         if (_destinator.compare("Server"))
             _client->send_save_conversation(_conversation_ID, _destinator, _client->my_ID(), message, time);
+
+        line->setBackground(QBrush(QColorConstants::Svg::lightskyblue));
     }
     else
+    {
         wid->set_group_message(message, sender, false, time);
 
-    wid->setStyleSheet("color: black;");
+        if (!last_sender.compare(sender))
+            line->setBackground(QBrush(last_color));
+        else
+        {
+            line->setBackground(QBrush(colors[color_counter % 5]));
+            last_color = colors[color_counter % 5];
 
-    QListWidgetItem *line = new QListWidgetItem();
-    line->setBackground(QBrush(QColorConstants::Svg::gray));
-    line->setSizeHint(QSize(0, 60));
-    line->setData(Qt::UserRole, time);
+            color_counter++;
+        }
+
+        last_sender = sender;
+    }
 
     _list->addItem(line);
     _list->setItemWidget(line, wid);
@@ -508,9 +531,9 @@ void client_chat_window::add_file(const QString &file_name, bool is_mine, const 
     if (image.isNull())
         qDebug() << "File Image is NULL";
 
-    QLabel *time_label = new QLabel(time, wid);
+    QLabel *time_label = new QLabel(time, this);
 
-    QPushButton *file = new QPushButton(wid);
+    QPushButton *file = new QPushButton(this);
     file->setIcon(image);
     file->setIconSize(QSize(30, 30));
     file->setFixedSize(QSize(30, 30));
@@ -522,28 +545,43 @@ void client_chat_window::add_file(const QString &file_name, bool is_mine, const 
     vbox->addWidget(file);
     vbox->addWidget(time_label, 0, Qt::AlignHCenter);
 
-    QHBoxLayout *file_lay = new QHBoxLayout();
+    QHBoxLayout *hbox = new QHBoxLayout(wid);
 
     if (sender.isEmpty())
     {
-        file_lay->addSpacerItem(new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Minimum));
-        file_lay->addLayout(vbox);
+        hbox->addSpacerItem(new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Minimum));
+
+        hbox->addLayout(vbox);
     }
     else
     {
-        QLabel *lab = new QLabel(QString("%1: ").arg(sender), wid);
-        file_lay->addWidget(lab);
-        file_lay->addLayout(vbox);
-        file_lay->addSpacerItem(new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Minimum));
-    }
+        QLabel *lab = new QLabel(QString("%1: ").arg(sender), this);
+        hbox->addWidget(lab);
+        hbox->addLayout(vbox);
 
-    wid->setLayout(file_lay);
+        hbox->addSpacerItem(new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Minimum));
+    }
 
     QListWidgetItem *line = new QListWidgetItem(_list);
     line->setSizeHint(QSize(0, 68));
     line->setData(Qt::UserRole, time);
 
-    (is_mine) ? line->setBackground(QBrush(QColorConstants::Svg::lightskyblue)) : line->setBackground(QBrush(QColorConstants::Svg::gray));
+    if (is_mine)
+        line->setBackground(QBrush(QColorConstants::Svg::lightskyblue));
+    else
+    {
+        if (!last_sender.compare(sender))
+            line->setBackground(QBrush(last_color));
+        else
+        {
+            line->setBackground(QBrush(colors[color_counter % 5]));
+            last_color = colors[color_counter % 5];
+
+            color_counter++;
+        }
+
+        last_sender = sender;
+    }
 
     _list->setItemWidget(line, wid);
 
@@ -555,43 +593,58 @@ void client_chat_window::add_audio(const QString &audio_name, bool is_mine, cons
     QWidget *wid = new QWidget();
     wid->setStyleSheet("color: black;");
 
-    QLabel *time_label = new QLabel(time, wid);
+    QLabel *time_label = new QLabel(time, this);
 
-    QSlider *slider = new QSlider(Qt::Horizontal, wid);
+    QSlider *slider = new QSlider(Qt::Horizontal, this);
     slider->hide();
 
-    QPushButton *audio = new QPushButton("▶️", wid);
+    QPushButton *audio = new QPushButton("▶️", this);
     connect(audio, &QPushButton::clicked, this, [=]()
             { play_audio(_client->get_audio_url(audio_name), audio, slider); });
-
-    QHBoxLayout *hbox_1 = new QHBoxLayout();
 
     QVBoxLayout *vbox_1 = new QVBoxLayout();
     vbox_1->addWidget(audio);
     vbox_1->addWidget(time_label, 0, Qt::AlignHCenter);
 
+    QHBoxLayout *hbox = new QHBoxLayout(wid);
+
     if (sender.isEmpty())
     {
-        hbox_1->addSpacerItem(new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Minimum));
-        hbox_1->addLayout(vbox_1);
-        hbox_1->addWidget(slider);
+        hbox->addSpacerItem(new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Minimum));
+
+        hbox->addLayout(vbox_1);
+        hbox->addWidget(slider);
     }
     else
     {
-        QLabel *lab = new QLabel(QString("%1: ").arg(sender), wid);
-        hbox_1->addWidget(lab);
-        hbox_1->addLayout(vbox_1);
-        hbox_1->addWidget(slider);
-        hbox_1->addSpacerItem(new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Minimum));
-    }
+        QLabel *lab = new QLabel(QString("%1: ").arg(sender), this);
+        hbox->addWidget(lab);
+        hbox->addLayout(vbox_1);
+        hbox->addWidget(slider);
 
-    wid->setLayout(hbox_1);
+        hbox->addSpacerItem(new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Minimum));
+    }
 
     QListWidgetItem *line = new QListWidgetItem(_list);
     line->setSizeHint(QSize(0, 80));
     line->setData(Qt::UserRole, time);
 
-    (is_mine) ? line->setBackground(QBrush(QColorConstants::Svg::lightskyblue)) : line->setBackground(QBrush(QColorConstants::Svg::gray));
+    if (is_mine)
+        line->setBackground(QBrush(QColorConstants::Svg::lightskyblue));
+    else
+    {
+        if (!last_sender.compare(sender))
+            line->setBackground(QBrush(last_color));
+        else
+        {
+            line->setBackground(QBrush(colors[color_counter % 5]));
+            last_color = colors[color_counter % 5];
+
+            color_counter++;
+        }
+
+        last_sender = sender;
+    }
 
     _list->setItemWidget(line, wid);
 }
