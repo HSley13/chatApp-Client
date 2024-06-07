@@ -40,7 +40,7 @@ public:
     void group_message_received(const QString &message, const QString &sender, const QString &time);
     void retrieve_conversation(QVector<QString> &messages, QHash<QString, QByteArray> &binary_data);
 
-    void retrieve_group_conversation(QVector<QString> &group_messages, QHash<QString, QByteArray> &group_binary_data, const QString &my_name);
+    void retrieve_group_conversation(QVector<QString> &group_messages, QHash<QString, QByteArray> &group_binary_data);
 
     void add_file(const QString &path, bool is_mine, const QString &time);
     void add_audio(const QString &audio_name, bool is_mine, const QString &time);

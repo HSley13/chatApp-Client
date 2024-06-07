@@ -78,9 +78,9 @@ void client_manager::on_binary_message_received(const QByteArray &message)
 
     case chat_protocol::login_request:
     {
-        emit login_request(_protocol->hashed_password(), _protocol->true_or_false(), _protocol->friend_list(), _protocol->online_friends(), _protocol->messages(), _protocol->binary_data(), _protocol->group_list(), _protocol->group_messages(), _protocol->group_binary_data(), _protocol->groups_members());
-
         _my_name = _protocol->my_name();
+
+        emit login_request(_protocol->hashed_password(), _protocol->true_or_false(), _protocol->friend_list(), _protocol->online_friends(), _protocol->messages(), _protocol->binary_data(), _protocol->group_list(), _protocol->group_messages(), _protocol->group_binary_data(), _protocol->groups_members());
     }
 
     break;

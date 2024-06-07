@@ -45,7 +45,7 @@ client_chat_window::client_chat_window(const int &conversation_ID, const QString
     _hbox->addWidget(record_button);
     _hbox->addWidget(_duration_label);
 
-    _client->send_create_conversation(_conversation_ID, _client->my_name(), _client->my_ID().toInt(), _destinator_name, _destinator.toInt());
+    _client->send_create_conversation(_conversation_ID, my_name(), _client->my_ID().toInt(), _destinator_name, _destinator.toInt());
 
     _send_file_button = new QPushButton("...", this);
     connect(_send_file_button, &QPushButton::clicked, this, &client_chat_window::send_file);
@@ -748,7 +748,7 @@ void client_chat_window::set_retrieve_group_message_window(const QString &type, 
     _list->setItemWidget(line, wid);
 }
 
-void client_chat_window::retrieve_group_conversation(QVector<QString> &messages, QHash<QString, QByteArray> &binary_data, const QString &my_name)
+void client_chat_window::retrieve_group_conversation(QVector<QString> &messages, QHash<QString, QByteArray> &binary_data)
 {
     if (messages.isEmpty())
         return;
@@ -762,10 +762,7 @@ void client_chat_window::retrieve_group_conversation(QVector<QString> &messages,
         QString date_time = parts.at(2);
         QString type = parts.last();
 
-        qDebug() << "Sender is: " << sender << ", Name is: " << my_name;
-        qDebug() << "My ID is: " << _client->my_ID();
-
-        if (!sender.compare(my_name))
+        if (!sender.compare(my_name()))
             set_retrieve_group_message_window(type, content, sender, binary_data.value(date_time), date_time, true);
         else
             set_retrieve_group_message_window(type, content, sender, binary_data.value(date_time), date_time, false);

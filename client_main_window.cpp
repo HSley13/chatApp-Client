@@ -444,7 +444,7 @@ void client_main_window::on_login_request(const QString &hashed_password, bool t
             }
 
             client_chat_window *win = new client_chat_window(group_ID, group_name, names, this);
-            win->retrieve_group_conversation(group_message, group_binary_data, _server_wid->_client->my_name());
+            win->retrieve_group_conversation(group_message, group_binary_data);
 
             connect(win, &client_chat_window::swipe_right, this, &client_main_window::on_swipe_right);
             connect(win, &client_chat_window::item_clicked, this, [=](const QString &name)
