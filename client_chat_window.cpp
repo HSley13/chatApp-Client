@@ -276,7 +276,7 @@ void client_chat_window::message_received(const QString &message, const QString 
         if (_destinator.compare("Server"))
             _client->send_save_conversation(_conversation_ID, _destinator, _client->my_ID(), message, time);
 
-        line->setBackground(QBrush(QColorConstants::Svg::lightskyblue));
+        line->setBackground(QBrush(QColorConstants::Svg::lightgray));
     }
     else
     {
@@ -541,6 +541,10 @@ void client_chat_window::add_file(const QString &file_name, bool is_mine, const 
     connect(file, &QPushButton::clicked, this, [=]()
             { QDesktopServices::openUrl(_client->get_file_url(file_name)); });
 
+    QListWidgetItem *line = new QListWidgetItem(_list);
+    line->setSizeHint(QSize(0, 68));
+    line->setData(Qt::UserRole, time);
+
     QVBoxLayout *vbox = new QVBoxLayout();
     vbox->addWidget(file);
     vbox->addWidget(time_label, 0, Qt::AlignHCenter);
@@ -550,8 +554,9 @@ void client_chat_window::add_file(const QString &file_name, bool is_mine, const 
     if (sender.isEmpty())
     {
         hbox->addSpacerItem(new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Minimum));
-
         hbox->addLayout(vbox);
+
+        (is_mine) ? line->setBackground(QBrush(QColorConstants::Svg::lightskyblue)) : line->setBackground(QBrush(QColorConstants::Svg::lightgray));
     }
     else
     {
@@ -560,27 +565,23 @@ void client_chat_window::add_file(const QString &file_name, bool is_mine, const 
         hbox->addLayout(vbox);
 
         hbox->addSpacerItem(new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Minimum));
-    }
 
-    QListWidgetItem *line = new QListWidgetItem(_list);
-    line->setSizeHint(QSize(0, 68));
-    line->setData(Qt::UserRole, time);
-
-    if (is_mine)
-        line->setBackground(QBrush(QColorConstants::Svg::lightskyblue));
-    else
-    {
-        if (!last_sender.compare(sender))
-            line->setBackground(QBrush(last_color));
+        if (is_mine)
+            line->setBackground(QBrush(QColorConstants::Svg::lightskyblue));
         else
         {
-            line->setBackground(QBrush(colors[color_counter % 5]));
-            last_color = colors[color_counter % 5];
+            if (!last_sender.compare(sender))
+                line->setBackground(QBrush(last_color));
+            else
+            {
+                line->setBackground(QBrush(colors[color_counter % 5]));
+                last_color = colors[color_counter % 5];
 
-            color_counter++;
+                color_counter++;
+            }
+
+            last_sender = sender;
         }
-
-        last_sender = sender;
     }
 
     _list->setItemWidget(line, wid);
@@ -602,6 +603,10 @@ void client_chat_window::add_audio(const QString &audio_name, bool is_mine, cons
     connect(audio, &QPushButton::clicked, this, [=]()
             { play_audio(_client->get_audio_url(audio_name), audio, slider); });
 
+    QListWidgetItem *line = new QListWidgetItem(_list);
+    line->setSizeHint(QSize(0, 80));
+    line->setData(Qt::UserRole, time);
+
     QVBoxLayout *vbox_1 = new QVBoxLayout();
     vbox_1->addWidget(audio);
     vbox_1->addWidget(time_label, 0, Qt::AlignHCenter);
@@ -614,6 +619,8 @@ void client_chat_window::add_audio(const QString &audio_name, bool is_mine, cons
 
         hbox->addLayout(vbox_1);
         hbox->addWidget(slider);
+
+        (is_mine) ? line->setBackground(QBrush(QColorConstants::Svg::lightskyblue)) : line->setBackground(QBrush(QColorConstants::Svg::lightgray));
     }
     else
     {
@@ -623,27 +630,23 @@ void client_chat_window::add_audio(const QString &audio_name, bool is_mine, cons
         hbox->addWidget(slider);
 
         hbox->addSpacerItem(new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Minimum));
-    }
 
-    QListWidgetItem *line = new QListWidgetItem(_list);
-    line->setSizeHint(QSize(0, 80));
-    line->setData(Qt::UserRole, time);
-
-    if (is_mine)
-        line->setBackground(QBrush(QColorConstants::Svg::lightskyblue));
-    else
-    {
-        if (!last_sender.compare(sender))
-            line->setBackground(QBrush(last_color));
+        if (is_mine)
+            line->setBackground(QBrush(QColorConstants::Svg::lightskyblue));
         else
         {
-            line->setBackground(QBrush(colors[color_counter % 5]));
-            last_color = colors[color_counter % 5];
+            if (!last_sender.compare(sender))
+                line->setBackground(QBrush(last_color));
+            else
+            {
+                line->setBackground(QBrush(colors[color_counter % 5]));
+                last_color = colors[color_counter % 5];
 
-            color_counter++;
+                color_counter++;
+            }
+
+            last_sender = sender;
         }
-
-        last_sender = sender;
     }
 
     _list->setItemWidget(line, wid);
@@ -673,16 +676,39 @@ void client_chat_window::set_retrieve_message_window(const QString &type, const 
     }
 
     chat_line *wid = new chat_line(this);
-
-    (sender.isEmpty()) ? wid->set_message(content, true_or_false, date_time) : wid->set_group_message(content, sender, true_or_false, date_time);
-
     wid->setStyleSheet("color: black;");
 
     QListWidgetItem *line = new QListWidgetItem(_list);
     line->setSizeHint(QSize(0, 60));
     line->setData(Qt::UserRole, date_time);
 
-    (true_or_false) ? line->setBackground(QBrush(QColorConstants::Svg::lightskyblue)) : line->setBackground(QBrush(QColorConstants::Svg::gray));
+    if (sender.isEmpty())
+    {
+        (true_or_false) ? line->setBackground(QBrush(QColorConstants::Svg::lightskyblue)) : line->setBackground(QBrush(QColorConstants::Svg::lightgray));
+
+        wid->set_message(content, true_or_false, date_time);
+    }
+    else
+    {
+        wid->set_group_message(content, sender, true_or_false, date_time);
+
+        if (true_or_false)
+            line->setBackground(QBrush(QColorConstants::Svg::lightskyblue));
+        else
+        {
+            if (!last_sender.compare(sender))
+                line->setBackground(QBrush(last_color));
+            else
+            {
+                line->setBackground(QBrush(colors[color_counter % 5]));
+                last_color = colors[color_counter % 5];
+
+                color_counter++;
+            }
+
+            last_sender = sender;
+        }
+    }
 
     _list->setItemWidget(line, wid);
 }
