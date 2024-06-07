@@ -762,9 +762,9 @@ void client_chat_window::retrieve_group_conversation(QVector<QString> &messages,
         QString date_time = parts.at(2);
         QString type = parts.last();
 
-        qDebug() << "Sender of the message is: " << sender << "and My name is: " << _client->my_name();
+        qDebug() << "Sender of the message is: " << sender << "and My name is: " << my_name();
 
-        if (!sender.compare(_client->my_name()))
+        if (!sender.compare(my_name()))
             set_retrieve_group_message_window(type, content, sender, binary_data.value(date_time), date_time, true);
         else
             set_retrieve_group_message_window(type, content, sender, binary_data.value(date_time), date_time, false);
