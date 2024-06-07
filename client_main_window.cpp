@@ -344,7 +344,7 @@ void client_main_window::on_login_request(const QString &hashed_password, bool t
 
         connect(_server_wid, &client_chat_window::saving_file, this, [=](const QString &message)
                 { 
-                    if (message.compare("file saved"))
+                    if (!message.compare("file saved"))
                     _status_bar->showMessage(QString("%1").arg(message), 3000); 
                     else
                         _status_bar->showMessage(QString("%1").arg(message), 30000); });
@@ -860,7 +860,7 @@ void client_main_window::on_group_is_typing_received(const int &group_ID, const 
     {
         client_chat_window *wid = qobject_cast<client_chat_window *>(win);
         if (wid)
-            _status_bar->showMessage(QString("%1 from group: %2 is typing...").arg(sender, group_name), 1000);
+            _status_bar->showMessage(QString("Group>: %1,  %2 is typing...").arg(group_name, sender), 1000);
         else
             qDebug() << "client_main_window ---> on_group_is_typing_received() --> ERROR CASTING THE WIDGET:";
     }

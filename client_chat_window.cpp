@@ -10,7 +10,7 @@ QColor client_chat_window::last_color;
 int client_chat_window::color_counter = 0;
 QString client_chat_window::last_sender = nullptr;
 
-QColor client_chat_window::colors[] = {QColorConstants::Svg::lightcoral, QColorConstants::Svg::lightgreen, QColorConstants::Svg::lightgray, QColorConstants::Svg::lightgoldenrodyellow, QColorConstants::Svg::lightpink};
+QColor client_chat_window::colors[] = {QColorConstants::Svg::lightsalmon, QColorConstants::Svg::lightgreen, QColorConstants::Svg::lightgray, QColorConstants::Svg::lightgoldenrodyellow, QColorConstants::Svg::lightpink};
 
 client_chat_window::client_chat_window(QWidget *parent)
     : QMainWindow(parent)
@@ -46,10 +46,6 @@ client_chat_window::client_chat_window(const int &group_ID, const QString &group
 void client_chat_window::message_deleted(const QString &time)
 {
     _client->send_delete_message(_conversation_ID, my_name(), _destinator, time);
-
-    // _client->delete_audio_IDBFS();
-    // OR
-    // _client->delete_file_IDBFS();
 }
 
 /*-------------------------------------------------------------------- Slots --------------------------------------------------------------*/
