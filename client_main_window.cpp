@@ -178,12 +178,13 @@ client_main_window::client_main_window(QWidget *parent)
         qDebug() << "Image Send Button is NULL";
 
     QHBoxLayout *group_layout = new QHBoxLayout();
+
     QLabel *icon_label = new QLabel(this);
     icon_label->setPixmap(image_icon);
 
     _group_list = new QComboBox(this);
     _group_list->setWindowTitle("Group List");
-    connect(_friend_list, &QComboBox::textActivated, this, &client_main_window::new_conversation);
+    connect(_group_list, &QComboBox::textActivated, this, &client_main_window::new_conversation);
 
     group_layout->addWidget(icon_label);
     group_layout->addWidget(_group_list);
