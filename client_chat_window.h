@@ -60,12 +60,6 @@ public:
 
     void create_new_group(QStringList group_members, QString group_name);
 
-    bool eventFilter(QObject *obj, QEvent *event) override;
-
-    void adjust_widget_position(QWidget *widget);
-    void reset_widget_position(QWidget *widget);
-    QMap<QWidget *, QPoint> _original_positions;
-
 private:
     QStatusBar *_status_bar;
 

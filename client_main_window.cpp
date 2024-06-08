@@ -1,14 +1,12 @@
 #include "client_main_window.h"
 
 QHash<QString, QWidget *> client_main_window::_window_map = QHash<QString, QWidget *>();
-
 client_chat_window *client_main_window::_server_wid = nullptr;
 
 client_main_window::client_main_window(QWidget *parent)
     : QMainWindow(parent)
 {
     _stack = new QStackedWidget(this);
-
     setCentralWidget(_stack);
     setFixedSize(400, 500);
 
@@ -25,6 +23,11 @@ client_main_window::client_main_window(QWidget *parent)
     /*-----------------------------------¬------------------------------------------------------------------------------------------------------------------------------------*/
 
     QWidget *login_widget = new QWidget();
+    QScrollArea *login_scroll_area = new QScrollArea(this);
+    login_scroll_area->setWidget(login_widget);
+    login_scroll_area->setWidgetResizable(true);
+    login_scroll_area->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    login_scroll_area->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
 
     QLabel *id_label = new QLabel("Enter Your Phone Number: ", this);
     _user_phone_number = new QLineEdit(this);
@@ -50,12 +53,12 @@ client_main_window::client_main_window(QWidget *parent)
     connect(log_in, &QPushButton::clicked, this, [=]()
             {  
                 log_in->setDisabled(true);
-                   if (!_server_wid)
-                _server_wid = new client_chat_window(this);
+                if (!_server_wid)
+                    _server_wid = new client_chat_window(this);
                 connect(_server_wid, &client_chat_window::login_request, this, &client_main_window::on_login_request);
                 _status_bar->showMessage("LOADING YOUR DATA, WAIT!!!!!! ...", 10000);
-                QTimer::singleShot(2000, this, [=]() { _server_wid->_client->send_login_request(_user_phone_number->text(), _user_password->text());});
-                QTimer::singleShot(10000, this, [=](){log_in->setEnabled(true); }); });
+                QTimer::singleShot(2000, this, [=]() { _server_wid->_client->send_login_request(_user_phone_number->text(), _user_password->text()); });
+                QTimer::singleShot(10000, this, [=](){ log_in->setEnabled(true); }); });
 
     QVBoxLayout *VBOX = new QVBoxLayout();
     VBOX->addLayout(hbox);
@@ -81,7 +84,11 @@ client_main_window::client_main_window(QWidget *parent)
     /*-----------------------------------¬------------------------------------------------------------------------------------------------------------------------------------*/
 
     QWidget *sign_up_widget = new QWidget();
-    sign_up_widget->setWindowIconText("Sign Up");
+    QScrollArea *sign_up_scroll_area = new QScrollArea(this);
+    sign_up_scroll_area->setWidget(sign_up_widget);
+    sign_up_scroll_area->setWidgetResizable(true);
+    sign_up_scroll_area->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    sign_up_scroll_area->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
 
     QLabel *first_name_label = new QLabel("First Name: ", this);
     _insert_first_name = new QLineEdit(this);
@@ -154,12 +161,17 @@ client_main_window::client_main_window(QWidget *parent)
     /*-----------------------------------¬------------------------------------------------------------------------------------------------------------------------------------*/
 
     QWidget *chat_widget = new QWidget();
+    QScrollArea *chat_scroll_area = new QScrollArea(this);
+    chat_scroll_area->setWidget(chat_widget);
+    chat_scroll_area->setWidgetResizable(true);
+    chat_scroll_area->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    chat_scroll_area->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
 
     QPushButton *server = new QPushButton("Talk to an Agent/Server", this);
     connect(server, &QPushButton::clicked, this, [=]()
             { QWidget *wid = _window_map.value("Server", this);
             if (wid)
-             _stack->setCurrentIndex(_stack->indexOf(wid)); });
+                _stack->setCurrentIndex(_stack->indexOf(wid)); });
 
     QLabel *name = new QLabel("My Name: ", chat_widget);
     _name = new QLineEdit(chat_widget);
@@ -171,48 +183,18 @@ client_main_window::client_main_window(QWidget *parent)
     hbox_2->addWidget(_name);
 
     QPushButton *create_group = new QPushButton("New Group +", this);
-    connect(create_group, &QPushButton::clicked, this, &client_main_window::create_group);
+    connect(create_group, &QPushButton::clicked, this, [=]() {});
 
-    _list = new QListWidget(chat_widget);
-    _list->setSelectionMode(QAbstractItemView::NoSelection);
-    _list->setMinimumWidth(200);
-    _list->setFont(QFont("Arial", 20));
-    _list->setItemDelegate(new separator_delegate(_list));
-    connect(_list, &QListWidget::itemClicked, this, &client_main_window::on_item_clicked);
-
-    QLabel *chats_label = new QLabel("CHATS", chat_widget);
-
-    QLabel *fr_list = new QLabel("Start New conversation", this);
-    _friend_list = new QComboBox(this);
-    connect(_friend_list, &QComboBox::textActivated, this, &client_main_window::new_conversation);
-
-    QHBoxLayout *hbox_3 = new QHBoxLayout();
-    hbox_3->addWidget(fr_list);
-    hbox_3->addWidget(_friend_list);
-    hbox_3->addWidget(create_group);
-
-    _search_phone_number = new QLineEdit(this);
-    _search_phone_number->setPlaceholderText("ADD PEOPLE VIA PHONE NUMBER, THEN PRESS ENTER");
-    connect(_search_phone_number, &QLineEdit::returnPressed, this, [=]()
-            { _server_wid->add_friend(_search_phone_number->text()); });
-
-    QVBoxLayout *VBOX_2 = new QVBoxLayout(chat_widget);
-    VBOX_2->addLayout(hbox_2);
-    VBOX_2->addLayout(hbox_3);
-    VBOX_2->addWidget(server);
-    VBOX_2->addWidget(chats_label);
-    VBOX_2->addWidget(_list);
-    VBOX_2->addWidget(_search_phone_number);
-
-    _insert_secret_question->installEventFilter(this);
-    _insert_secret_answer->installEventFilter(this);
-    _search_phone_number->installEventFilter(this);
+    QVBoxLayout *chat_layout = new QVBoxLayout(chat_widget);
+    chat_layout->addLayout(hbox_2);
+    chat_layout->addWidget(server);
+    chat_layout->addWidget(create_group);
 
     /*-----------------------------------¬------------------------------------------------------------------------------------------------------------------------------------*/
 
-    _stack->addWidget(login_widget);
-    _stack->addWidget(sign_up_widget);
-    _stack->addWidget(chat_widget);
+    _stack->addWidget(login_scroll_area);
+    _stack->addWidget(sign_up_scroll_area);
+    _stack->addWidget(chat_scroll_area);
 }
 
 client_main_window::~client_main_window()

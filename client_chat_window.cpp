@@ -365,7 +365,6 @@ void client_chat_window::set_up_window()
 
     _insert_message = new QLineEdit(this);
     _insert_message->setPlaceholderText("Insert New Message");
-    _insert_message->installEventFilter(this);
 
     connect(_insert_message, &QLineEdit::textChanged, this, [=]()
             { if(_group_name.isEmpty()) 
@@ -779,45 +778,4 @@ void client_chat_window::create_new_group(QStringList group_members, QString gro
     group_members << _client->my_ID();
 
     _client->send_create_new_group(my_name(), group_members, group_name);
-}
-
-bool client_chat_window::eventFilter(QObject *obj, QEvent *event)
-{
-    if (event->type() == QEvent::FocusIn)
-    {
-        if (QLineEdit *edit = qobject_cast<QLineEdit *>(obj))
-            adjust_widget_position(edit);
-    }
-    else if (event->type() == QEvent::FocusOut)
-    {
-        if (QLineEdit *edit = qobject_cast<QLineEdit *>(obj))
-            reset_widget_position(edit);
-    }
-
-    return QMainWindow::eventFilter(obj, event);
-}
-
-void client_chat_window::adjust_widget_position(QWidget *widget)
-{
-    if (!_original_positions.contains(widget))
-        _original_positions[widget] = widget->pos();
-
-    int widgetBottom = widget->geometry().bottom();
-    int windowHeight = this->height();
-    int keyboardHeight = 200;
-
-    if (widgetBottom > windowHeight - keyboardHeight)
-    {
-        int delta = widgetBottom - (windowHeight - keyboardHeight);
-        widget->move(widget->x(), widget->y() - delta);
-    }
-}
-
-void client_chat_window::reset_widget_position(QWidget *widget)
-{
-    if (_original_positions.contains(widget))
-    {
-        widget->move(_original_positions[widget]);
-        _original_positions.remove(widget);
-    }
 }
