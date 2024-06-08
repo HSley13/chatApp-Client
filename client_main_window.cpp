@@ -176,19 +176,22 @@ client_main_window::client_main_window(QWidget *parent)
     QPixmap image_icon(":/images/group_icon.jpeg");
     if (!image_icon)
         qDebug() << "Image Send Button is NULL";
-    image_icon = image_icon.scaled(QSize(16, 16), Qt::KeepAspectRatio, Qt::SmoothTransformation);
 
-    QHBoxLayout *group_layout = new QHBoxLayout();
-    QLabel *icon_label = new QLabel(this);
-    icon_label->setFixedSize(16, 16);
-    icon_label->setPixmap(image_icon);
+    _friend_list = new QComboBox(this);
+    connect(_friend_list, &QComboBox::textActivated, this, &client_main_window::new_conversation);
+
+    QPushButton *friend_button = new QPushButton("Friend List", this);
+    connect(friend_button, &QPushButton::clicked, this, [=]()
+            { _friend_list->showNormal(); });
 
     _group_list = new QComboBox(this);
-    _group_list->setWindowTitle("Group List");
     connect(_group_list, &QComboBox::textActivated, this, &client_main_window::new_conversation);
 
-    group_layout->addWidget(icon_label);
-    group_layout->addWidget(_group_list);
+    QPushButton *group_button = new QPushButton("Group List", this);
+    connect(group_button, &QPushButton::clicked, this, [=]()
+            { _group_list->showNormal(); });
+
+    QLabel *chats_label = new QLabel("CHATS", chat_widget);
 
     _list = new QListWidget(chat_widget);
     _list->setSelectionMode(QAbstractItemView::NoSelection);
@@ -197,15 +200,9 @@ client_main_window::client_main_window(QWidget *parent)
     _list->setItemDelegate(new separator_delegate(_list));
     connect(_list, &QListWidget::itemClicked, this, &client_main_window::on_item_clicked);
 
-    QLabel *chats_label = new QLabel("CHATS", chat_widget);
-
-    _friend_list = new QComboBox(this);
-    _friend_list->setWindowIconText("Friend List");
-    connect(_friend_list, &QComboBox::textActivated, this, &client_main_window::new_conversation);
-
     QHBoxLayout *hbox_3 = new QHBoxLayout();
-    hbox_3->addWidget(_friend_list);
-    hbox_3->addWidget(group_layout);
+    hbox_3->addWidget(friend_button);
+    hbox_3->addWidget(group_button);
     hbox_3->addWidget(create_group);
 
     _search_phone_number = new QLineEdit(this);
