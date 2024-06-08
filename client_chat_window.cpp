@@ -425,7 +425,7 @@ void client_chat_window::set_up_window()
         connect(_client, &client_manager::file_received, this, [=](const QString &sender, const QString &file_name, const QString &time)
                 { emit file_received(sender, file_name, time); });
 
-        connect(_client, &client_manager::login_request, this, [=](const QString &hashed_password, bool true_or_false, const QHash<int, QHash<QString, int>> &friend_list, const QList<QString> &online_friends, const QHash<int, QVector<QString>> &messages, const QHash<int, QHash<QString, QByteArray>> &binary_data, const QHash<int, QString> &group_list, const QHash<int, QVector<QString>> &group_messages, const QHash<int, QHash<QString, QByteArray>> &group_binary_data, const QHash<int, QStringList> &groups_members)
+        connect(_client, &client_manager::login_request, this, [=](const QString &hashed_password, bool true_or_false, const QHash<int, QHash<QString, int>> &friend_list, const QStringList &online_friends, const QHash<int, QStringList> &messages, const QHash<int, QHash<QString, QByteArray>> &binary_data, const QHash<int, QString> &group_list, const QHash<int, QStringList> &group_messages, const QHash<int, QHash<QString, QByteArray>> &group_binary_data, const QHash<int, QStringList> &groups_members)
                 { emit login_request(hashed_password, true_or_false, friend_list, online_friends, messages, binary_data, group_list, group_messages, group_binary_data, groups_members); });
 
         connect(_client, &client_manager::delete_message, this, [=](const QString &sender, const QString &time)
@@ -709,7 +709,7 @@ void client_chat_window::set_retrieve_message_window(const QString &type, const 
     _list->setItemWidget(line, wid);
 }
 
-void client_chat_window::retrieve_conversation(QVector<QString> &messages, QHash<QString, QByteArray> &binary_data)
+void client_chat_window::retrieve_conversation(const QStringList &messages, const QHash<QString, QByteArray> &binary_data)
 {
     if (messages.isEmpty())
         return;
@@ -738,7 +738,7 @@ void client_chat_window::retrieve_conversation(QVector<QString> &messages, QHash
     });
 }
 
-void client_chat_window::retrieve_group_conversation(QVector<QString> &messages, QHash<QString, QByteArray> &binary_data)
+void client_chat_window::retrieve_group_conversation(const QStringList &messages, const QHash<QString, QByteArray> &binary_data)
 {
     if (messages.isEmpty())
         return;

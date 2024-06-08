@@ -51,6 +51,11 @@ private:
     void mousePressEvent(QMouseEvent *event) override;
     void mouseMoveEvent(QMouseEvent *event) override;
 
+    bool eventFilter(QObject *obj, QEvent *event) override;
+
+    void adjustWidgetPosition(QWidget *widget);
+    void resetWidgetPosition();
+
 signals:
     void swipe_right();
 
@@ -58,7 +63,7 @@ private slots:
     void on_swipe_right();
 
     void on_sign_up();
-    void on_login_request(const QString &hashed_password, bool true_or_false, const QHash<int, QHash<QString, int>> &friend_list, const QList<QString> &online_friends, const QHash<int, QVector<QString>> &messages, const QHash<int, QHash<QString, QByteArray>> &binary_data, const QHash<int, QString> &group_list, const QHash<int, QVector<QString>> &group_messages, const QHash<int, QHash<QString, QByteArray>> &group_binary_data, const QHash<int, QStringList> &groups_members);
+    void on_login_request(const QString &hashed_password, bool true_or_false, const QHash<int, QHash<QString, int>> &friend_list, const QStringList &online_friends, const QHash<int, QStringList> &messages, const QHash<int, QHash<QString, QByteArray>> &binary_data, const QHash<int, QString> &group_list, const QHash<int, QStringList> &group_messages, const QHash<int, QHash<QString, QByteArray>> &group_binary_data, const QHash<int, QStringList> &groups_members);
 
     void on_client_name_changed(const QString &old_name, const QString &client_name);
     void on_client_disconnected(const QString &client_name);

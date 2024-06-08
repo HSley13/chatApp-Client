@@ -412,7 +412,7 @@ const QHash<int, QHash<QString, int>> &chat_protocol::friend_list() const
     return _friend_list;
 }
 
-const QHash<int, QVector<QString>> &chat_protocol::messages() const
+const QHash<int, QStringList> &chat_protocol::messages() const
 {
     return _messages;
 }
@@ -442,7 +442,7 @@ const QString &chat_protocol::audio_sender() const
     return _audio_sender;
 }
 
-const QList<QString> &chat_protocol::online_friends() const
+const QStringList &chat_protocol::online_friends() const
 {
     return _online_friends;
 }
@@ -562,7 +562,7 @@ const QHash<int, QString> &chat_protocol::group_list() const
     return _group_list;
 }
 
-const QHash<int, QVector<QString>> &chat_protocol::group_messages() const
+const QHash<int, QStringList> &chat_protocol::group_messages() const
 {
     return _group_messages;
 }

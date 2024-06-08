@@ -204,6 +204,18 @@ client_main_window::client_main_window(QWidget *parent)
     VBOX_2->addWidget(_list);
     VBOX_2->addWidget(_search_phone_number);
 
+    _user_phone_number->installEventFilter(this);
+    _user_password->installEventFilter(this);
+    _insert_first_name->installEventFilter(this);
+    _insert_last_name->installEventFilter(this);
+    _insert_phone_number->installEventFilter(this);
+    _insert_password->installEventFilter(this);
+    _insert_password_confirmation->installEventFilter(this);
+    _insert_secret_question->installEventFilter(this);
+    _insert_secret_answer->installEventFilter(this);
+    _name->installEventFilter(this);
+    _search_phone_number->installEventFilter(this);
+
     /*-----------------------------------¬------------------------------------------------------------------------------------------------------------------------------------*/
 
     _stack->addWidget(login_widget);
@@ -291,7 +303,7 @@ void client_main_window::on_sign_up()
     input_dialog->open();
 }
 
-void client_main_window::on_login_request(const QString &hashed_password, bool true_or_false, const QHash<int, QHash<QString, int>> &list_g, const QList<QString> &online_friends, const QHash<int, QVector<QString>> &messages, const QHash<int, QHash<QString, QByteArray>> &binary_datas, const QHash<int, QString> &group_lists, const QHash<int, QVector<QString>> &group_messages, const QHash<int, QHash<QString, QByteArray>> &group_binary_datas, const QHash<int, QStringList> &groups_members)
+void client_main_window::on_login_request(const QString &hashed_password, bool true_or_false, const QHash<int, QHash<QString, int>> &friend_lists, const QStringList &online_friends, const QHash<int, QStringList> &messages, const QHash<int, QHash<QString, QByteArray>> &binary_datas, const QHash<int, QString> &group_lists, const QHash<int, QStringList> &group_messages, const QHash<int, QHash<QString, QByteArray>> &group_binary_datas, const QHash<int, QStringList> &groups_members)
 {
     if (hashed_password.isEmpty())
     {
@@ -349,122 +361,125 @@ void client_main_window::on_login_request(const QString &hashed_password, bool t
                     else
                         _status_bar->showMessage(QString("%1").arg(message), 30000); });
 
-        if (list_g.isEmpty())
-            return;
-
         QIcon offline_icon = create_dot_icon(Qt::red, 10);
         QIcon online_icon = create_dot_icon(Qt::green, 10);
 
-        for (const int &conversation_ID : list_g.keys())
+        if (!friend_lists.isEmpty())
         {
-            const QHash<QString, int> &list = list_g.value(conversation_ID);
-
-            QVector<QString> message = messages.value(conversation_ID);
-
-            QHash<QString, QByteArray> binary_data = binary_datas.value(conversation_ID);
-
-            for (const QString &name : list.keys())
+            for (const int &conversation_ID : friend_lists.keys())
             {
-                _friend_list->addItem(name);
-                _friend_list->setItemData(_friend_list->count() - 1, QString::number(list.value(name)));
+                const QHash<QString, int> &friend_info = friend_lists[conversation_ID];
 
-                QIcon valid_icon = online_friends.contains(name) ? online_icon : offline_icon;
+                const QStringList &message = messages[conversation_ID];
 
-                _friend_list->setItemIcon(_friend_list->count() - 1, valid_icon);
+                const QHash<QString, QByteArray> &binary_data = binary_datas[conversation_ID];
 
-                if (_window_map.contains(name))
-                    continue;
-
-                client_chat_window *wid = new client_chat_window(conversation_ID, QString::number(list.value(name)), name, this);
-                wid->retrieve_conversation(message, binary_data);
-
-                connect(wid, &client_chat_window::swipe_right, this, &client_main_window::on_swipe_right);
-                connect(wid, &client_chat_window::data_received_sent, this, [=](QString first_name)
-                        { add_on_top(first_name); });
-
-                wid->window_name(name);
-
-                _window_map.insert(name, wid);
-
-                _stack->addWidget(wid);
-
-                if (!messages.isEmpty())
+                for (const QString &name : friend_info.keys())
                 {
-                    QListWidgetItem *item = new QListWidgetItem(name);
-                    item->setIcon(valid_icon);
+                    _friend_list->addItem(name);
+                    _friend_list->setItemData(_friend_list->count() - 1, QString::number(friend_info.value(name)));
 
-                    _list->addItem(item);
+                    QIcon valid_icon = online_friends.contains(name) ? online_icon : offline_icon;
+
+                    _friend_list->setItemIcon(_friend_list->count() - 1, valid_icon);
+
+                    if (_window_map.contains(name))
+                        continue;
+
+                    client_chat_window *wid = new client_chat_window(conversation_ID, QString::number(friend_info.value(name)), name, this);
+                    wid->retrieve_conversation(message, binary_data);
+
+                    connect(wid, &client_chat_window::swipe_right, this, &client_main_window::on_swipe_right);
+                    connect(wid, &client_chat_window::data_received_sent, this, [=](QString first_name)
+                            { add_on_top(first_name); });
+
+                    wid->window_name(name);
+
+                    _window_map.insert(name, wid);
+
+                    _stack->addWidget(wid);
+
+                    if (!message.isEmpty())
+                    {
+                        QListWidgetItem *item = new QListWidgetItem(name);
+                        item->setIcon(valid_icon);
+
+                        _list->addItem(item);
+                    }
                 }
             }
         }
         _user_phone_number->clear();
         _user_password->clear();
 
-        for (const int &group_ID : group_lists.keys())
+        if (!group_lists.isEmpty())
         {
-            QString group_name = group_lists.value(group_ID);
-
-            QVector<QString> group_message = group_messages.value(group_ID);
-
-            QHash<QString, QByteArray> group_binary_data = group_binary_datas.value(group_ID);
-
-            QStringList group_members = groups_members.value(group_ID);
-
-            _friend_list->addItem(group_name);
-            _friend_list->setItemData(_friend_list->count() - 1, QString::number(group_ID));
-
-            if (_window_map.contains(group_name))
-                continue;
-
-            QStringList names;
-            for (QString ID : group_members)
+            for (const int &group_ID : group_lists.keys())
             {
-                bool found = false;
+                const QString &group_name = group_lists[group_ID];
 
-                if (!_server_wid->_client->my_ID().compare(ID))
-                {
-                    names << "You";
+                const QStringList &group_message = group_messages[group_ID];
+
+                const QHash<QString, QByteArray> group_binary_data = group_binary_datas[group_ID];
+
+                const QStringList group_members = groups_members[group_ID];
+
+                _friend_list->addItem(group_name);
+                _friend_list->setItemData(_friend_list->count() - 1, QString::number(group_ID));
+
+                if (_window_map.contains(group_name))
                     continue;
-                }
 
-                for (int i = 0; i < _friend_list->count(); i++)
+                QStringList names;
+                for (const QString &ID : group_members)
                 {
-                    QString ID_2 = _friend_list->itemData(i).toString();
-                    if (!ID.compare(ID_2))
-                    {
-                        names << _friend_list->itemText(i);
-                        found = true;
+                    bool found = false;
 
-                        break;
+                    if (!_server_wid->_client->my_ID().compare(ID))
+                    {
+                        names << "You";
+                        continue;
                     }
+
+                    for (int i = 0; i < _friend_list->count(); i++)
+                    {
+                        QString ID_2 = _friend_list->itemData(i).toString();
+                        if (!ID.compare(ID_2))
+                        {
+                            names << _friend_list->itemText(i);
+                            found = true;
+
+                            break;
+                        }
+                    }
+
+                    if (!found)
+                        names << ID;
                 }
 
-                if (!found)
-                    names << ID;
-            }
+                client_chat_window *win = new client_chat_window(group_ID, group_name, names, this);
+                win->retrieve_group_conversation(group_message, group_binary_data);
 
-            client_chat_window *win = new client_chat_window(group_ID, group_name, names, this);
-            win->retrieve_group_conversation(group_message, group_binary_data);
-
-            connect(win, &client_chat_window::swipe_right, this, &client_main_window::on_swipe_right);
-            connect(win, &client_chat_window::item_clicked, this, [=](const QString &name)
-                    {    QWidget *wid = _window_map.value(name, this);
+                connect(win, &client_chat_window::swipe_right, this, &client_main_window::on_swipe_right);
+                connect(win, &client_chat_window::item_clicked, this, [=](const QString &name)
+                        {    QWidget *wid = _window_map.value(name, this);
                      if (wid)
                          _stack->setCurrentIndex(_stack->indexOf(wid));
                      else
                          _server_wid->add_friend(name); });
 
-            win->window_name(group_name);
+                win->window_name(group_name);
 
-            _window_map.insert(group_name, win);
+                _window_map.insert(group_name, win);
 
-            _stack->addWidget(win);
+                _stack->addWidget(win);
 
-            if (!group_message.isEmpty())
-            {
-                QListWidgetItem *item = new QListWidgetItem(group_name);
+                if (!group_message.isEmpty())
+                {
+                    QListWidgetItem *item = new QListWidgetItem(group_name);
 
-                _list->addItem(item);
+                    _list->addItem(item);
+                }
             }
         }
     }
@@ -952,4 +967,46 @@ void client_main_window::mouseMoveEvent(QMouseEvent *event)
             dragging = false;
         }
     }
+}
+
+// Override the eventFilter method to handle focus events
+bool client_main_window::eventFilter(QObject *obj, QEvent *event)
+{
+    if (event->type() == QEvent::FocusIn)
+    {
+        // If a QLineEdit gains focus, move the window to make it visible
+        if (QLineEdit *edit = qobject_cast<QLineEdit *>(obj))
+        {
+            adjustWidgetPosition(edit);
+        }
+    }
+    else if (event->type() == QEvent::FocusOut)
+    {
+        // If a QLineEdit loses focus, you might want to reset the position
+        if (QLineEdit *edit = qobject_cast<QLineEdit *>(obj))
+        {
+            resetWidgetPosition();
+        }
+    }
+    return QMainWindow::eventFilter(obj, event);
+}
+
+void client_main_window::adjustWidgetPosition(QWidget *widget)
+{
+    // Calculate the new position for the widget to make it visible above the keyboard
+    int widgetBottom = widget->geometry().bottom();
+    int windowHeight = this->height();
+    int keyboardHeight = 200; // Estimate or dynamically calculate the height of the virtual keyboard
+
+    if (widgetBottom > windowHeight - keyboardHeight)
+    {
+        int delta = widgetBottom - (windowHeight - keyboardHeight);
+        this->move(this->x(), this->y() - delta);
+    }
+}
+
+void client_main_window::resetWidgetPosition()
+{
+    // Reset the window position if needed
+    this->move(this->x(), 0);
 }

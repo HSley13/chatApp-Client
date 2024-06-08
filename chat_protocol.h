@@ -105,10 +105,10 @@ public:
     const QString &group_data_type() const;
     const QByteArray &group_audio_data() const;
 
-    const QList<QString> &online_friends() const;
+    const QStringList &online_friends() const;
     const QHash<int, QHash<QString, int>> &friend_list() const;
     const int &conversation_ID() const;
-    const QHash<int, QVector<QString>> &messages() const;
+    const QHash<int, QStringList> &messages() const;
     const QHash<int, QHash<QString, QByteArray>> &binary_data() const;
 
     const QString &hashed_password() const;
@@ -125,7 +125,7 @@ public:
     const QString &group_name() const;
 
     const QHash<int, QString> &group_list() const;
-    const QHash<int, QVector<QString>> &group_messages() const;
+    const QHash<int, QStringList> &group_messages() const;
     const QHash<int, QHash<QString, QByteArray>> &group_binary_data() const;
     const QHash<int, QStringList> &groups_members() const;
 
@@ -158,9 +158,9 @@ private:
     QString _old_name;
 
     QHash<int, QHash<QString, int>> _friend_list;
-    QList<QString> _online_friends;
+    QStringList _online_friends;
     int _conversation_ID;
-    QHash<int, QVector<QString>> _messages;
+    QHash<int, QStringList> _messages;
     QHash<int, QHash<QString, QByteArray>> _binary_data;
 
     QString _audio_name;
@@ -185,7 +185,7 @@ private:
     QString _group_name;
     QString _group_sender;
     QHash<int, QString> _group_list;
-    QHash<int, QVector<QString>> _group_messages;
+    QHash<int, QStringList> _group_messages;
     QHash<int, QHash<QString, QByteArray>> _group_binary_data;
     QHash<int, QStringList> _groups_members;
 };

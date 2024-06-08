@@ -38,8 +38,8 @@ public:
     void window_name(const QString &name);
     void message_received(const QString &message, const QString &time, const QString &sender = QString());
 
-    void retrieve_conversation(QVector<QString> &messages, QHash<QString, QByteArray> &binary_data);
-    void retrieve_group_conversation(QVector<QString> &group_messages, QHash<QString, QByteArray> &group_binary_data);
+    void retrieve_conversation(const QStringList &messages, const QHash<QString, QByteArray> &binary_data);
+    void retrieve_group_conversation(const QStringList &group_messages, const QHash<QString, QByteArray> &group_binary_data);
 
     void add_file(const QString &path, bool is_mine, const QString &time, const QString &sender = QString());
     void add_audio(const QString &audio_name, bool is_mine, const QString &time, const QString &sender = QString());
@@ -142,7 +142,7 @@ signals:
     void audio_received(const QString &sender, const QString &audio_name, const QString &time);
     void file_received(const QString &sender, const QString &file_name, const QString &time);
 
-    void login_request(const QString &hashed_password, bool true_or_false, const QHash<int, QHash<QString, int>> &friend_list, const QList<QString> &online_friends, const QHash<int, QVector<QString>> &messages, const QHash<int, QHash<QString, QByteArray>> &binary_data, const QHash<int, QString> &group_list, const QHash<int, QVector<QString>> &group_messages, const QHash<int, QHash<QString, QByteArray>> &group_binary_data, const QHash<int, QStringList> &groups_members);
+    void login_request(const QString &hashed_password, bool true_or_false, const QHash<int, QHash<QString, int>> &friend_list, const QStringList &online_friends, const QHash<int, QStringList> &messages, const QHash<int, QHash<QString, QByteArray>> &binary_data, const QHash<int, QString> &group_list, const QHash<int, QStringList> &group_messages, const QHash<int, QHash<QString, QByteArray>> &group_binary_data, const QHash<int, QStringList> &groups_members);
 
     void delete_message(const QString &sender, const QString &time);
 
