@@ -179,7 +179,6 @@ client_main_window::client_main_window(QWidget *parent)
 
     QHBoxLayout *group_layout = new QHBoxLayout();
     QLabel *icon_label = new QLabel(this);
-    icon_label->setFixedSize(16, 16);
     icon_label->setPixmap(image_icon);
 
     _group_list = new QComboBox(this);
