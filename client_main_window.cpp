@@ -159,9 +159,12 @@ client_main_window::client_main_window(QWidget *parent)
     if (!server_icon)
         qDebug() << "Image Send Button is NULL";
 
-    RoundButton *server = new RoundButton(server_icon, this);
+    QPushButton *server = new QPushButton(this);
+    server->setIcon(server_icon);
+    server->setIconSize(QSize(50, 50));
     server->setFixedSize(50, 50);
-    connect(server, &RoundButton::clicked, this, [=]()
+    server->setStyleSheet("border: none");
+    connect(server, &QPushButton::clicked, this, [=]()
             { QWidget *wid = _window_map.value("Server", this);
             if (wid)
              _stack->setCurrentIndex(_stack->indexOf(wid)); });
@@ -175,13 +178,16 @@ client_main_window::client_main_window(QWidget *parent)
     hbox_2->addWidget(name);
     hbox_2->addWidget(_name);
 
-    QPixmap create_group_icon(":/images/create_group_icon.jpeg");
+    QPixmap create_group_icon(":/images/create_group_icon.png");
     if (!create_group_icon)
         qDebug() << "Image Send Button is NULL";
 
-    RoundButton *create_group = new RoundButton(create_group_icon, this);
+    QPushButton *create_group = new QPushButton(this);
+    create_group->setIcon(create_group_icon);
+    create_group->setIconSize(QSize(50, 50));
     create_group->setFixedSize(50, 50);
-    connect(create_group, &RoundButton::clicked, this, &client_main_window::create_group);
+    create_group->setStyleSheet("border: none");
+    connect(create_group, &QPushButton::clicked, this, &client_main_window::create_group);
 
     _friend_list = new QComboBox(this);
     connect(_friend_list, &QComboBox::textActivated, this, &client_main_window::new_conversation);
@@ -197,9 +203,12 @@ client_main_window::client_main_window(QWidget *parent)
     if (!friend_icon)
         qDebug() << "Image Send Button is NULL";
 
-    RoundButton *friend_button = new RoundButton(friend_icon, this);
-    friend_button->setFixedSize(50, 50);
-    connect(friend_button, &RoundButton::clicked, _friend_dialog, &QDialog::open);
+    QPushButton *friend_button = new QPushButton(this);
+    friend_button->setIcon(friend_icon);
+    friend_button->setIconSize(QSize(80, 40));
+    friend_button->setFixedSize(80, 40);
+    friend_button->setStyleSheet("border: none");
+    connect(friend_button, &QPushButton::clicked, _friend_dialog, &QDialog::open);
 
     _group_list = new QComboBox(this);
     connect(_group_list, &QComboBox::textActivated, this, &client_main_window::new_conversation);
@@ -214,9 +223,12 @@ client_main_window::client_main_window(QWidget *parent)
     if (!group_icon)
         qDebug() << "Image Send Button is NULL";
 
-    RoundButton *group_button = new RoundButton(group_icon, this);
+    QPushButton *group_button = new QPushButton(this);
+    group_button->setIcon(group_icon);
+    group_button->setIconSize(QSize(50, 50));
     group_button->setFixedSize(50, 50);
-    connect(group_button, &RoundButton::clicked, _group_dialog, &QDialog::open);
+    group_button->setStyleSheet("border: none");
+    connect(group_button, &QPushButton::clicked, _group_dialog, &QDialog::open);
 
     QLabel *chats_label = new QLabel("CHATS", chat_widget);
 
