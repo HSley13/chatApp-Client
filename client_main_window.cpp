@@ -187,7 +187,7 @@ client_main_window::client_main_window(QWidget *parent)
 
     _friend_dialog = new QDialog(this);
     _friend_dialog->resize(100, 100);
-    _friend_dialog->setWindowTitle("Friend List");
+    _friend_dialog->setWindowTitle("Friend List...");
     _friend_dialog->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     QVBoxLayout *layout = new QVBoxLayout(_friend_dialog);
     layout->addWidget(_friend_list);
@@ -198,8 +198,8 @@ client_main_window::client_main_window(QWidget *parent)
 
     QPushButton *friend_button = new QPushButton(this);
     friend_button->setIcon(friend_icon);
-    friend_button->setIconSize(QSize(100, 100));
-    friend_button->setFixedSize(100, 100);
+    friend_button->setIconSize(QSize(150, 150));
+    friend_button->setFixedSize(150, 150);
     friend_button->setStyleSheet("border: none");
     connect(friend_button, &QPushButton::clicked, _friend_dialog, &QDialog::open);
 
@@ -207,7 +207,7 @@ client_main_window::client_main_window(QWidget *parent)
     connect(_group_list, &QComboBox::textActivated, this, &client_main_window::new_conversation);
 
     _group_dialog = new QDialog(this);
-    _group_dialog->setWindowTitle("Group List");
+    _group_dialog->setWindowTitle("Group List...");
     _group_dialog->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     QVBoxLayout *layout_2 = new QVBoxLayout(_group_dialog);
     layout_2->addWidget(_group_list);
