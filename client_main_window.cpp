@@ -180,16 +180,22 @@ client_main_window::client_main_window(QWidget *parent)
     _friend_list = new QComboBox(this);
     connect(_friend_list, &QComboBox::textActivated, this, &client_main_window::new_conversation);
 
+    QDialog *friend_dialog = new QDialog(this);
+    QVBoxLayout *layout = new QVBoxLayout(friend_dialog);
+    layout->addWidget(_friend_list);
+
     QPushButton *friend_button = new QPushButton("Friend List", this);
-    connect(friend_button, &QPushButton::clicked, this, [=]()
-            { _friend_list->showNormal(); });
+    connect(friend_button, &QPushButton::clicked, friend_dialog, &QDialog::open);
 
     _group_list = new QComboBox(this);
     connect(_group_list, &QComboBox::textActivated, this, &client_main_window::new_conversation);
 
+    QDialog *group_dialog = new QDialog(this);
+    QVBoxLayout *layout_2 = new QVBoxLayout(group_dialog);
+    layout_2->addWidget(_group_list);
+
     QPushButton *group_button = new QPushButton("Group List", this);
-    connect(group_button, &QPushButton::clicked, this, [=]()
-            { _group_list->showNormal(); });
+    connect(group_button, &QPushButton::clicked, group_dialog, &QDialog::open);
 
     QLabel *chats_label = new QLabel("CHATS", chat_widget);
 
