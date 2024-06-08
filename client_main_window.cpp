@@ -176,7 +176,6 @@ client_main_window::client_main_window(QWidget *parent)
     QPixmap image_icon(":/images/group_icon.jpeg");
     if (!image_icon)
         qDebug() << "Image Send Button is NULL";
-    image_icon = image_icon.scaled(QSize(16, 16), Qt::KeepAspectRatio, Qt::SmoothTransformation);
 
     QHBoxLayout *group_layout = new QHBoxLayout();
     QLabel *icon_label = new QLabel(this);
