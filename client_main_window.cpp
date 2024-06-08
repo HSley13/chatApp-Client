@@ -181,7 +181,8 @@ client_main_window::client_main_window(QWidget *parent)
     connect(_friend_list, &QComboBox::textActivated, this, &client_main_window::new_conversation);
 
     _friend_dialog = new QDialog(this);
-    _friend_dialog->resize(80, 80);
+    _friend_dialog->resize(100, 100);
+    _friend_dialog->setWindowTitle("Friend List");
     QVBoxLayout *layout = new QVBoxLayout(_friend_dialog);
     layout->addWidget(_friend_list);
 
@@ -192,7 +193,8 @@ client_main_window::client_main_window(QWidget *parent)
     connect(_group_list, &QComboBox::textActivated, this, &client_main_window::new_conversation);
 
     _group_dialog = new QDialog(this);
-    _group_dialog->resize(80, 80);
+    _group_dialog->resize(100, 100);
+    _group_dialog->setWindowTitle("Group List");
     QVBoxLayout *layout_2 = new QVBoxLayout(_group_dialog);
     layout_2->addWidget(_group_list);
 
@@ -686,8 +688,8 @@ void client_main_window::new_conversation(const QString &name)
     else
         qDebug() << "client_main_window--> new_conversation()--> Widget not found in _window_map for name:" << name;
 
-    _group_dialog->deleteLater();
-    _group_dialog->deleteLater();
+    _group_dialog->close();
+    _friend_dialog->close();
 }
 
 void client_main_window::on_client_added_you(const int &conversation_ID, const QString &name, const QString &ID)
