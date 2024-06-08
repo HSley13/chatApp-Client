@@ -159,10 +159,8 @@ client_main_window::client_main_window(QWidget *parent)
     if (!server_icon)
         qDebug() << "Image Send Button is NULL";
 
-    RoundButton *server = new RoundButton(this);
-    server->setIcon(server_icon);
-    server->setStyleSheet("border: none");
-    server->setFixedSize(80, 80);
+    RoundButton *server = new RoundButton(server_icon, this);
+    server->setFixedSize(50, 50);
     connect(server, &RoundButton::clicked, this, [=]()
             { QWidget *wid = _window_map.value("Server", this);
             if (wid)
@@ -181,10 +179,8 @@ client_main_window::client_main_window(QWidget *parent)
     if (!create_group_icon)
         qDebug() << "Image Send Button is NULL";
 
-    RoundButton *create_group = new RoundButton(this);
-    create_group->setIcon(create_group_icon);
-    create_group->setStyleSheet("border: none");
-    create_group->setFixedSize(80, 80);
+    RoundButton *create_group = new RoundButton(create_group_icon, this);
+    create_group->setFixedSize(50, 50);
     connect(create_group, &RoundButton::clicked, this, &client_main_window::create_group);
 
     _friend_list = new QComboBox(this);
@@ -201,10 +197,8 @@ client_main_window::client_main_window(QWidget *parent)
     if (!friend_icon)
         qDebug() << "Image Send Button is NULL";
 
-    RoundButton *friend_button = new RoundButton(this);
-    friend_button->setIcon(friend_icon);
-    friend_button->setStyleSheet("border: none");
-    friend_button->setFixedSize(80, 80);
+    RoundButton *friend_button = new RoundButton(friend_icon, this);
+    friend_button->setFixedSize(50, 50);
     connect(friend_button, &RoundButton::clicked, _friend_dialog, &QDialog::open);
 
     _group_list = new QComboBox(this);
@@ -220,10 +214,8 @@ client_main_window::client_main_window(QWidget *parent)
     if (!group_icon)
         qDebug() << "Image Send Button is NULL";
 
-    RoundButton *group_button = new RoundButton(this);
-    group_button->setIcon(group_icon);
-    group_button->setStyleSheet("border: none");
-    group_button->setFixedSize(80, 80);
+    RoundButton *group_button = new RoundButton(group_icon, this);
+    group_button->setFixedSize(50, 50);
     connect(group_button, &RoundButton::clicked, _group_dialog, &QDialog::open);
 
     QLabel *chats_label = new QLabel("CHATS", chat_widget);

@@ -97,9 +97,12 @@ private slots:
 };
 class RoundButton : public QPushButton
 {
+private:
+    QIcon m_icon;
+
 public:
-    RoundButton(QWidget *parent = nullptr)
-        : QPushButton(parent) {}
+    RoundButton(const QIcon &icon, QWidget *parent = nullptr)
+        : QPushButton(parent), m_icon(icon) {}
 
 protected:
     void paintEvent(QPaintEvent *event) override
@@ -112,10 +115,15 @@ protected:
         QPen pen(Qt::transparent);
         painter.setPen(pen);
 
-        QBrush brush(Qt::blue);
-        painter.setBrush(brush);
-
         QRect rect = contentsRect();
+
+        // Draw the rounded rectangle
         painter.drawRoundedRect(rect, 10, 10);
+
+        int iconWidth = m_icon.actualSize(rect.size()).width();
+        int iconHeight = m_icon.actualSize(rect.size()).height();
+        int x = rect.x() + (rect.width() - iconWidth) / 2;
+        int y = rect.y() + (rect.height() - iconHeight) / 2;
+        m_icon.paint(&painter, x, y, iconWidth, iconHeight);
     }
 };
