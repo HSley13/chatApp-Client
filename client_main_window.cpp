@@ -155,19 +155,11 @@ client_main_window::client_main_window(QWidget *parent)
 
     QWidget *chat_widget = new QWidget();
 
-    QPixmap server_icon(":/images/server_icon.jpeg");
-    if (!server_icon)
-        qDebug() << "Image Send Button is NULL";
-
-    QPushButton *server = new QPushButton(this);
-    server->setIcon(server_icon);
-    server->setIconSize(QSize(50, 50));
-    server->setFixedSize(50, 50);
-    server->setStyleSheet("border: none");
+    QPushButton *server = new QPushButton("Help!!!", this);
     connect(server, &QPushButton::clicked, this, [=]()
             { QWidget *wid = _window_map.value("Server", this);
-            if (wid)
-             _stack->setCurrentIndex(_stack->indexOf(wid)); });
+                if (wid)
+                 _stack->setCurrentIndex(_stack->indexOf(wid)); });
 
     QLabel *name = new QLabel("My Name: ", chat_widget);
     _name = new QLineEdit(chat_widget);
@@ -205,8 +197,6 @@ client_main_window::client_main_window(QWidget *parent)
 
     QPushButton *friend_button = new QPushButton(this);
     friend_button->setIcon(friend_icon);
-    friend_button->setIconSize(QSize(80, 40));
-    friend_button->setFixedSize(80, 40);
     friend_button->setStyleSheet("border: none");
     connect(friend_button, &QPushButton::clicked, _friend_dialog, &QDialog::open);
 
@@ -219,7 +209,7 @@ client_main_window::client_main_window(QWidget *parent)
     QVBoxLayout *layout_2 = new QVBoxLayout(_group_dialog);
     layout_2->addWidget(_group_list);
 
-    QPixmap group_icon(":/images/group_icon.jpeg");
+    QPixmap group_icon(":/images/group_icon.png");
     if (!group_icon)
         qDebug() << "Image Send Button is NULL";
 
