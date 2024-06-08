@@ -176,10 +176,11 @@ client_main_window::client_main_window(QWidget *parent)
     QPixmap image_icon(":/images/group_icon.jpeg");
     if (!image_icon)
         qDebug() << "Image Send Button is NULL";
+    image_icon = image_icon.scaled(QSize(16, 16), Qt::KeepAspectRatio, Qt::SmoothTransformation);
 
     QHBoxLayout *group_layout = new QHBoxLayout();
-
     QLabel *icon_label = new QLabel(this);
+    icon_label->setFixedSize(16, 16);
     icon_label->setPixmap(image_icon);
 
     _group_list = new QComboBox(this);
@@ -199,12 +200,12 @@ client_main_window::client_main_window(QWidget *parent)
     QLabel *chats_label = new QLabel("CHATS", chat_widget);
 
     _friend_list = new QComboBox(this);
-    _friend_list->setWindowTitle("Friend List");
+    _friend_list->setWindowIconText("Friend List");
     connect(_friend_list, &QComboBox::textActivated, this, &client_main_window::new_conversation);
 
     QHBoxLayout *hbox_3 = new QHBoxLayout();
     hbox_3->addWidget(_friend_list);
-    hbox_3->addLayout(group_layout);
+    hbox_3->addWidget(_group_list);
     hbox_3->addWidget(create_group);
 
     _search_phone_number = new QLineEdit(this);
