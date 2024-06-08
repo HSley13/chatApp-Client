@@ -95,3 +95,27 @@ private slots:
     void on_group_audio_received(const int &group_ID, const QString &group_name, const QString &sender, const QString &audio_name, const QString &time);
     void on_group_file_received(const int &group_ID, const QString &group_name, const QString &sender, const QString &file_name, const QString &time);
 };
+class RoundButton : public QPushButton
+{
+public:
+    RoundButton(QWidget *parent = nullptr)
+        : QPushButton(parent) {}
+
+protected:
+    void paintEvent(QPaintEvent *event) override
+    {
+        QPushButton::paintEvent(event);
+
+        QPainter painter(this);
+        painter.setRenderHint(QPainter::Antialiasing, true);
+
+        QPen pen(Qt::transparent);
+        painter.setPen(pen);
+
+        QBrush brush(Qt::blue);
+        painter.setBrush(brush);
+
+        QRect rect = contentsRect();
+        painter.drawRoundedRect(rect, 10, 10);
+    }
+};

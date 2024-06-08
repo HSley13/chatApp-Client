@@ -155,8 +155,15 @@ client_main_window::client_main_window(QWidget *parent)
 
     QWidget *chat_widget = new QWidget();
 
-    QPushButton *server = new QPushButton("Talk to an Agent/Server", this);
-    connect(server, &QPushButton::clicked, this, [=]()
+    QPixmap server_icon(":/images/server_icon.jpeg");
+    if (!server_icon)
+        qDebug() << "Image Send Button is NULL";
+
+    RoundButton *server = new RoundButton(this);
+    server->setIcon(server_icon);
+    server->setStyleSheet("border: none");
+    server->setFixedSize(80, 80);
+    connect(server, &RoundButton::clicked, this, [=]()
             { QWidget *wid = _window_map.value("Server", this);
             if (wid)
              _stack->setCurrentIndex(_stack->indexOf(wid)); });
@@ -170,12 +177,15 @@ client_main_window::client_main_window(QWidget *parent)
     hbox_2->addWidget(name);
     hbox_2->addWidget(_name);
 
-    QPushButton *create_group = new QPushButton("Create Group", this);
-    connect(create_group, &QPushButton::clicked, this, &client_main_window::create_group);
-
-    QPixmap image_icon(":/images/group_icon.jpeg");
-    if (!image_icon)
+    QPixmap create_group_icon(":/images/create_group_icon.jpeg");
+    if (!create_group_icon)
         qDebug() << "Image Send Button is NULL";
+
+    RoundButton *create_group = new RoundButton(this);
+    create_group->setIcon(create_group_icon);
+    create_group->setStyleSheet("border: none");
+    create_group->setFixedSize(80, 80);
+    connect(create_group, &RoundButton::clicked, this, &client_main_window::create_group);
 
     _friend_list = new QComboBox(this);
     connect(_friend_list, &QComboBox::textActivated, this, &client_main_window::new_conversation);
@@ -183,23 +193,38 @@ client_main_window::client_main_window(QWidget *parent)
     _friend_dialog = new QDialog(this);
     _friend_dialog->resize(100, 100);
     _friend_dialog->setWindowTitle("Friend List");
+    _friend_dialog->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     QVBoxLayout *layout = new QVBoxLayout(_friend_dialog);
     layout->addWidget(_friend_list);
 
-    QPushButton *friend_button = new QPushButton("Friend List", this);
-    connect(friend_button, &QPushButton::clicked, _friend_dialog, &QDialog::open);
+    QPixmap friend_icon(":/images/friends_list_icon.png");
+    if (!friend_icon)
+        qDebug() << "Image Send Button is NULL";
+
+    RoundButton *friend_button = new RoundButton(this);
+    friend_button->setIcon(friend_icon);
+    friend_button->setStyleSheet("border: none");
+    friend_button->setFixedSize(80, 80);
+    connect(friend_button, &RoundButton::clicked, _friend_dialog, &QDialog::open);
 
     _group_list = new QComboBox(this);
     connect(_group_list, &QComboBox::textActivated, this, &client_main_window::new_conversation);
 
     _group_dialog = new QDialog(this);
-    _group_dialog->resize(100, 100);
     _group_dialog->setWindowTitle("Group List");
+    _group_dialog->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     QVBoxLayout *layout_2 = new QVBoxLayout(_group_dialog);
     layout_2->addWidget(_group_list);
 
-    QPushButton *group_button = new QPushButton("Group List", this);
-    connect(group_button, &QPushButton::clicked, _group_dialog, &QDialog::open);
+    QPixmap group_icon(":/images/group_icon.jpeg");
+    if (!group_icon)
+        qDebug() << "Image Send Button is NULL";
+
+    RoundButton *group_button = new RoundButton(this);
+    group_button->setIcon(group_icon);
+    group_button->setStyleSheet("border: none");
+    group_button->setFixedSize(80, 80);
+    connect(group_button, &RoundButton::clicked, _group_dialog, &QDialog::open);
 
     QLabel *chats_label = new QLabel("CHATS", chat_widget);
 
@@ -214,6 +239,7 @@ client_main_window::client_main_window(QWidget *parent)
     hbox_3->addWidget(friend_button);
     hbox_3->addWidget(group_button);
     hbox_3->addWidget(create_group);
+    hbox_3->addWidget(server);
 
     _search_phone_number = new QLineEdit(this);
     _search_phone_number->setPlaceholderText("ADD PEOPLE VIA PHONE NUMBER, THEN PRESS ENTER");
@@ -223,7 +249,6 @@ client_main_window::client_main_window(QWidget *parent)
     QVBoxLayout *VBOX_2 = new QVBoxLayout(chat_widget);
     VBOX_2->addLayout(hbox_2);
     VBOX_2->addLayout(hbox_3);
-    VBOX_2->addWidget(server);
     VBOX_2->addWidget(chats_label);
     VBOX_2->addWidget(_list);
     VBOX_2->addWidget(_search_phone_number);

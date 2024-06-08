@@ -706,7 +706,7 @@ function dbg(text) {
 }
 
 var ASM_CONSTS = {
- 9499392: () => {
+ 9549520: () => {
   FS.mkdir("/audio");
   FS.mount(IDBFS, {}, "/audio");
   FS.syncfs(true, function(err) {
@@ -714,7 +714,7 @@ var ASM_CONSTS = {
    console.log("IDBFS audio mounted and synced");
   });
  },
- 9499544: () => {
+ 9549672: () => {
   FS.mkdir("/file");
   FS.mount(IDBFS, {}, "/file");
   FS.syncfs(true, function(err) {
@@ -722,7 +722,7 @@ var ASM_CONSTS = {
    console.log("IDBFS file mounted and synced");
   });
  },
- 9499693: $0 => {
+ 9549821: $0 => {
   var audio_path = UTF8ToString($0);
   var audio_data = FS.readFile(audio_path);
   if (!audio_data) {
@@ -738,7 +738,7 @@ var ASM_CONSTS = {
   stringToUTF8(url, stringOnWasmHeap, url_length);
   return stringOnWasmHeap;
  },
- 9500113: $0 => {
+ 9550241: $0 => {
   var file_path = UTF8ToString($0);
   var file_data = FS.readFile(file_path);
   if (!file_data) {
@@ -933,7 +933,7 @@ var ASM_CONSTS = {
   stringToUTF8(url, stringOnWasmHeap, url_length);
   return stringOnWasmHeap;
  },
- 9503104: $0 => {
+ 9553232: $0 => {
   var filePath = Pointer_stringify($0);
   try {
    FS.unlink(audio_path);
@@ -946,7 +946,7 @@ var ASM_CONSTS = {
    console.log("Audio system synced with IndexedDB");
   });
  },
- 9503393: $0 => {
+ 9553521: $0 => {
   var filePath = Pointer_stringify($0);
   try {
    FS.unlink(filePath);
@@ -959,19 +959,19 @@ var ASM_CONSTS = {
    console.log("File system synced with IndexedDB");
   });
  },
- 9503677: () => {
+ 9553805: () => {
   FS.syncfs(function(err) {
    assert(!err);
    console.log("Audio file saved and synced");
   });
  },
- 9503769: () => {
+ 9553897: () => {
   FS.syncfs(function(err) {
    assert(!err);
    console.log("Audio & File saved and synced");
   });
  },
- 9503863: () => {
+ 9553991: () => {
   FS.syncfs(function(err) {
    assert(!err);
    console.log("Audio & File saved and synced");
@@ -15826,9 +15826,9 @@ var ___cxa_can_catch = createExportWrapper("__cxa_can_catch");
 
 var ___cxa_is_pointer_type = createExportWrapper("__cxa_is_pointer_type");
 
-var ___start_em_js = Module["___start_em_js"] = 9503957;
+var ___start_em_js = Module["___start_em_js"] = 9554085;
 
-var ___stop_em_js = Module["___stop_em_js"] = 9505047;
+var ___stop_em_js = Module["___stop_em_js"] = 9555175;
 
 function invoke_viiii(index, a1, a2, a3, a4) {
  var sp = stackSave();

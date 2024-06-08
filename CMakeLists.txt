@@ -25,7 +25,7 @@ target_link_libraries(client PRIVATE
 
 qt_add_resources(client "client_images"
                     PREFIX "/images"
-                    FILES send_icon.png file_icon.webp record_icon.png style.css group_icon.jpeg
+                    FILES send_icon.png file_icon.webp record_icon.png style.css group_icon.jpeg server_icon.jpeg friends_list_icon.png create_group_icon.png
                 )
 
 set(MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/Info.plist)
