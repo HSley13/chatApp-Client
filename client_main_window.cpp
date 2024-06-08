@@ -183,12 +183,38 @@ client_main_window::client_main_window(QWidget *parent)
     hbox_2->addWidget(_name);
 
     QPushButton *create_group = new QPushButton("New Group +", this);
-    connect(create_group, &QPushButton::clicked, this, [=]() {});
+    connect(create_group, &QPushButton::clicked, this, &client_main_window::create_group);
 
-    QVBoxLayout *chat_layout = new QVBoxLayout(chat_widget);
-    chat_layout->addLayout(hbox_2);
-    chat_layout->addWidget(server);
-    chat_layout->addWidget(create_group);
+    _list = new QListWidget(chat_widget);
+    _list->setSelectionMode(QAbstractItemView::NoSelection);
+    _list->setMinimumWidth(200);
+    _list->setFont(QFont("Arial", 20));
+    _list->setItemDelegate(new separator_delegate(_list));
+    connect(_list, &QListWidget::itemClicked, this, &client_main_window::on_item_clicked);
+
+    QLabel *chats_label = new QLabel("CHATS", chat_widget);
+
+    QLabel *fr_list = new QLabel("Start New conversation", this);
+    _friend_list = new QComboBox(this);
+    connect(_friend_list, &QComboBox::textActivated, this, &client_main_window::new_conversation);
+
+    QHBoxLayout *hbox_3 = new QHBoxLayout();
+    hbox_3->addWidget(fr_list);
+    hbox_3->addWidget(_friend_list);
+    hbox_3->addWidget(create_group);
+
+    _search_phone_number = new QLineEdit(this);
+    _search_phone_number->setPlaceholderText("ADD PEOPLE VIA PHONE NUMBER, THEN PRESS ENTER");
+    connect(_search_phone_number, &QLineEdit::returnPressed, this, [=]()
+            { _server_wid->add_friend(_search_phone_number->text()); });
+
+    QVBoxLayout *VBOX_2 = new QVBoxLayout(chat_widget);
+    VBOX_2->addLayout(hbox_2);
+    VBOX_2->addLayout(hbox_3);
+    VBOX_2->addWidget(server);
+    VBOX_2->addWidget(chats_label);
+    VBOX_2->addWidget(_list);
+    VBOX_2->addWidget(_search_phone_number);
 
     /*-----------------------------------¬------------------------------------------------------------------------------------------------------------------------------------*/
 
