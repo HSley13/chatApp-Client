@@ -180,22 +180,24 @@ client_main_window::client_main_window(QWidget *parent)
     _friend_list = new QComboBox(this);
     connect(_friend_list, &QComboBox::textActivated, this, &client_main_window::new_conversation);
 
-    QDialog *friend_dialog = new QDialog(this);
-    QVBoxLayout *layout = new QVBoxLayout(friend_dialog);
+    _friend_dialog = new QDialog(this);
+    _friend_dialog->resize(80, 80);
+    QVBoxLayout *layout = new QVBoxLayout(_friend_dialog);
     layout->addWidget(_friend_list);
 
     QPushButton *friend_button = new QPushButton("Friend List", this);
-    connect(friend_button, &QPushButton::clicked, friend_dialog, &QDialog::open);
+    connect(friend_button, &QPushButton::clicked, _friend_dialog, &QDialog::open);
 
     _group_list = new QComboBox(this);
     connect(_group_list, &QComboBox::textActivated, this, &client_main_window::new_conversation);
 
-    QDialog *group_dialog = new QDialog(this);
-    QVBoxLayout *layout_2 = new QVBoxLayout(group_dialog);
+    _group_dialog = new QDialog(this);
+    _group_dialog->resize(80, 80);
+    QVBoxLayout *layout_2 = new QVBoxLayout(_group_dialog);
     layout_2->addWidget(_group_list);
 
     QPushButton *group_button = new QPushButton("Group List", this);
-    connect(group_button, &QPushButton::clicked, group_dialog, &QDialog::open);
+    connect(group_button, &QPushButton::clicked, _group_dialog, &QDialog::open);
 
     QLabel *chats_label = new QLabel("CHATS", chat_widget);
 
@@ -683,6 +685,9 @@ void client_main_window::new_conversation(const QString &name)
         _stack->setCurrentIndex(_stack->indexOf(wid));
     else
         qDebug() << "client_main_window--> new_conversation()--> Widget not found in _window_map for name:" << name;
+
+    _group_dialog->deleteLater();
+    _group_dialog->deleteLater();
 }
 
 void client_main_window::on_client_added_you(const int &conversation_ID, const QString &name, const QString &ID)
