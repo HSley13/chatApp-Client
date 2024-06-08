@@ -204,7 +204,7 @@ client_main_window::client_main_window(QWidget *parent)
 
     QHBoxLayout *hbox_3 = new QHBoxLayout();
     hbox_3->addWidget(_friend_list);
-    hbox_3->addWidget(_group_list);
+    hbox_3->addLayout(group_layout);
     hbox_3->addWidget(create_group);
 
     _search_phone_number = new QLineEdit(this);
