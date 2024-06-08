@@ -43,6 +43,7 @@ private:
 
     QListWidget *_list;
 
+    QComboBox *_group_list;
     QComboBox *_friend_list;
 
     void add_on_top(const QString &client_name);

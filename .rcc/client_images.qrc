@@ -4,6 +4,7 @@
     <file alias="file_icon.webp">/Users/test/Documents/client_app/file_icon.webp</file>
     <file alias="record_icon.png">/Users/test/Documents/client_app/record_icon.png</file>
     <file alias="style.css">/Users/test/Documents/client_app/style.css</file>
+    <file alias="group_icon.jpeg">/Users/test/Documents/client_app/group_icon.jpeg</file>
   </qresource>
 </RCC>
 

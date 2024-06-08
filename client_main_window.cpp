@@ -1,12 +1,14 @@
 #include "client_main_window.h"
 
 QHash<QString, QWidget *> client_main_window::_window_map = QHash<QString, QWidget *>();
+
 client_chat_window *client_main_window::_server_wid = nullptr;
 
 client_main_window::client_main_window(QWidget *parent)
     : QMainWindow(parent)
 {
     _stack = new QStackedWidget(this);
+
     setCentralWidget(_stack);
     setFixedSize(400, 500);
 
@@ -23,11 +25,6 @@ client_main_window::client_main_window(QWidget *parent)
     /*-----------------------------------¬------------------------------------------------------------------------------------------------------------------------------------*/
 
     QWidget *login_widget = new QWidget();
-    QScrollArea *login_scroll_area = new QScrollArea(this);
-    login_scroll_area->setWidget(login_widget);
-    login_scroll_area->setWidgetResizable(true);
-    login_scroll_area->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    login_scroll_area->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
 
     QLabel *id_label = new QLabel("Enter Your Phone Number: ", this);
     _user_phone_number = new QLineEdit(this);
@@ -53,12 +50,12 @@ client_main_window::client_main_window(QWidget *parent)
     connect(log_in, &QPushButton::clicked, this, [=]()
             {  
                 log_in->setDisabled(true);
-                if (!_server_wid)
-                    _server_wid = new client_chat_window(this);
+                   if (!_server_wid)
+                _server_wid = new client_chat_window(this);
                 connect(_server_wid, &client_chat_window::login_request, this, &client_main_window::on_login_request);
-                _status_bar->showMessage("LOADING YOUR DATA, WAIT!!!!!! ...", 10000);
-                QTimer::singleShot(2000, this, [=]() { _server_wid->_client->send_login_request(_user_phone_number->text(), _user_password->text()); });
-                QTimer::singleShot(10000, this, [=](){ log_in->setEnabled(true); }); });
+                _status_bar->showMessage("LOADING YOUR DATA, WAIT!!!!!! ...", 30000);
+                QTimer::singleShot(2000, this, [=]() { _server_wid->_client->send_login_request(_user_phone_number->text(), _user_password->text());});
+                QTimer::singleShot(10000, this, [=](){log_in->setEnabled(true); }); });
 
     QVBoxLayout *VBOX = new QVBoxLayout();
     VBOX->addLayout(hbox);
@@ -84,11 +81,7 @@ client_main_window::client_main_window(QWidget *parent)
     /*-----------------------------------¬------------------------------------------------------------------------------------------------------------------------------------*/
 
     QWidget *sign_up_widget = new QWidget();
-    QScrollArea *sign_up_scroll_area = new QScrollArea(this);
-    sign_up_scroll_area->setWidget(sign_up_widget);
-    sign_up_scroll_area->setWidgetResizable(true);
-    sign_up_scroll_area->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    sign_up_scroll_area->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+    sign_up_widget->setWindowIconText("Sign Up");
 
     QLabel *first_name_label = new QLabel("First Name: ", this);
     _insert_first_name = new QLineEdit(this);
@@ -161,17 +154,12 @@ client_main_window::client_main_window(QWidget *parent)
     /*-----------------------------------¬------------------------------------------------------------------------------------------------------------------------------------*/
 
     QWidget *chat_widget = new QWidget();
-    QScrollArea *chat_scroll_area = new QScrollArea(this);
-    chat_scroll_area->setWidget(chat_widget);
-    chat_scroll_area->setWidgetResizable(true);
-    chat_scroll_area->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    chat_scroll_area->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
 
     QPushButton *server = new QPushButton("Talk to an Agent/Server", this);
     connect(server, &QPushButton::clicked, this, [=]()
             { QWidget *wid = _window_map.value("Server", this);
             if (wid)
-                _stack->setCurrentIndex(_stack->indexOf(wid)); });
+             _stack->setCurrentIndex(_stack->indexOf(wid)); });
 
     QLabel *name = new QLabel("My Name: ", chat_widget);
     _name = new QLineEdit(chat_widget);
@@ -182,8 +170,25 @@ client_main_window::client_main_window(QWidget *parent)
     hbox_2->addWidget(name);
     hbox_2->addWidget(_name);
 
-    QPushButton *create_group = new QPushButton("New Group +", this);
+    QPushButton *create_group = new QPushButton("Create Group", this);
     connect(create_group, &QPushButton::clicked, this, &client_main_window::create_group);
+
+    QPixmap image_icon(":/images/group_icon.jpeg");
+    if (!image_icon)
+        qDebug() << "Image Send Button is NULL";
+    image_icon = image_icon.scaled(QSize(16, 16), Qt::KeepAspectRatio, Qt::SmoothTransformation);
+
+    QHBoxLayout *group_layout = new QHBoxLayout();
+    QLabel *icon_label = new QLabel(this);
+    icon_label->setFixedSize(16, 16);
+    icon_label->setPixmap(image_icon);
+
+    _group_list = new QComboBox(this);
+    _group_list->setWindowTitle("Group List");
+    connect(_friend_list, &QComboBox::textActivated, this, &client_main_window::new_conversation);
+
+    group_layout->addWidget(icon_label);
+    group_layout->addWidget(_group_list);
 
     _list = new QListWidget(chat_widget);
     _list->setSelectionMode(QAbstractItemView::NoSelection);
@@ -194,13 +199,13 @@ client_main_window::client_main_window(QWidget *parent)
 
     QLabel *chats_label = new QLabel("CHATS", chat_widget);
 
-    QLabel *fr_list = new QLabel("Start New conversation", this);
     _friend_list = new QComboBox(this);
+    _friend_list->setWindowTitle("Friend List");
     connect(_friend_list, &QComboBox::textActivated, this, &client_main_window::new_conversation);
 
     QHBoxLayout *hbox_3 = new QHBoxLayout();
-    hbox_3->addWidget(fr_list);
     hbox_3->addWidget(_friend_list);
+    hbox_3->addWidget(_group_list);
     hbox_3->addWidget(create_group);
 
     _search_phone_number = new QLineEdit(this);
@@ -218,9 +223,9 @@ client_main_window::client_main_window(QWidget *parent)
 
     /*-----------------------------------¬------------------------------------------------------------------------------------------------------------------------------------*/
 
-    _stack->addWidget(login_scroll_area);
-    _stack->addWidget(sign_up_scroll_area);
-    _stack->addWidget(chat_scroll_area);
+    _stack->addWidget(login_widget);
+    _stack->addWidget(sign_up_widget);
+    _stack->addWidget(chat_widget);
 }
 
 client_main_window::~client_main_window()
@@ -424,8 +429,7 @@ void client_main_window::on_login_request(const QString &hashed_password, bool t
 
                 const QStringList group_members = groups_members[group_ID];
 
-                _friend_list->addItem(group_name);
-                _friend_list->setItemData(_friend_list->count() - 1, QString::number(group_ID));
+                _group_list->addItem(group_name);
 
                 if (_window_map.contains(group_name))
                     continue;
@@ -798,7 +802,7 @@ void client_main_window::on_added_to_group(const int &group_ID, const QString &a
 
     _stack->addWidget(wid);
 
-    _friend_list->addItem(group_name);
+    _group_list->addItem(group_name);
 
     _status_bar->showMessage(QString("%1 Added you do to a new Group called: %2").arg(adm, group_name), 5000);
 }
@@ -820,7 +824,7 @@ void client_main_window::on_new_group(const int &group_ID)
 
     _stack->addWidget(win);
 
-    _friend_list->addItem(_group_name);
+    _group_list->addItem(_group_name);
 }
 
 void client_main_window::create_group()
