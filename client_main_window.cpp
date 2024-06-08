@@ -155,8 +155,8 @@ client_main_window::client_main_window(QWidget *parent)
 
     QWidget *chat_widget = new QWidget();
 
-    QPushButton *server = new QPushButton("Help!!!", this);
-    server->setFixedSize(40, 40);
+    QPushButton *server = new QPushButton("Help!", this);
+    server->setFixedSize(50, 40);
     connect(server, &QPushButton::clicked, this, [=]()
             { QWidget *wid = _window_map.value("Server", this);
                 if (wid)
@@ -198,8 +198,8 @@ client_main_window::client_main_window(QWidget *parent)
 
     QPushButton *friend_button = new QPushButton(this);
     friend_button->setIcon(friend_icon);
-    friend_button->setIconSize(QSize(80, 80));
-    friend_button->setFixedSize(80, 80);
+    friend_button->setIconSize(QSize(100, 100));
+    friend_button->setFixedSize(100, 100);
     friend_button->setStyleSheet("border: none");
     connect(friend_button, &QPushButton::clicked, _friend_dialog, &QDialog::open);
 
