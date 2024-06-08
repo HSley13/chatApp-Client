@@ -204,16 +204,8 @@ client_main_window::client_main_window(QWidget *parent)
     VBOX_2->addWidget(_list);
     VBOX_2->addWidget(_search_phone_number);
 
-    _user_phone_number->installEventFilter(this);
-    _user_password->installEventFilter(this);
-    _insert_first_name->installEventFilter(this);
-    _insert_last_name->installEventFilter(this);
-    _insert_phone_number->installEventFilter(this);
-    _insert_password->installEventFilter(this);
-    _insert_password_confirmation->installEventFilter(this);
     _insert_secret_question->installEventFilter(this);
     _insert_secret_answer->installEventFilter(this);
-    _name->installEventFilter(this);
     _search_phone_number->installEventFilter(this);
 
     /*-----------------------------------¬------------------------------------------------------------------------------------------------------------------------------------*/
@@ -967,46 +959,4 @@ void client_main_window::mouseMoveEvent(QMouseEvent *event)
             dragging = false;
         }
     }
-}
-
-// Override the eventFilter method to handle focus events
-bool client_main_window::eventFilter(QObject *obj, QEvent *event)
-{
-    if (event->type() == QEvent::FocusIn)
-    {
-        // If a QLineEdit gains focus, move the window to make it visible
-        if (QLineEdit *edit = qobject_cast<QLineEdit *>(obj))
-        {
-            adjustWidgetPosition(edit);
-        }
-    }
-    else if (event->type() == QEvent::FocusOut)
-    {
-        // If a QLineEdit loses focus, you might want to reset the position
-        if (QLineEdit *edit = qobject_cast<QLineEdit *>(obj))
-        {
-            resetWidgetPosition();
-        }
-    }
-    return QMainWindow::eventFilter(obj, event);
-}
-
-void client_main_window::adjustWidgetPosition(QWidget *widget)
-{
-    // Calculate the new position for the widget to make it visible above the keyboard
-    int widgetBottom = widget->geometry().bottom();
-    int windowHeight = this->height();
-    int keyboardHeight = 200; // Estimate or dynamically calculate the height of the virtual keyboard
-
-    if (widgetBottom > windowHeight - keyboardHeight)
-    {
-        int delta = widgetBottom - (windowHeight - keyboardHeight);
-        this->move(this->x(), this->y() - delta);
-    }
-}
-
-void client_main_window::resetWidgetPosition()
-{
-    // Reset the window position if needed
-    this->move(this->x(), 0);
 }

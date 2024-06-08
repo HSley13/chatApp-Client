@@ -51,11 +51,6 @@ private:
     void mousePressEvent(QMouseEvent *event) override;
     void mouseMoveEvent(QMouseEvent *event) override;
 
-    bool eventFilter(QObject *obj, QEvent *event) override;
-
-    void adjustWidgetPosition(QWidget *widget);
-    void resetWidgetPosition();
-
 signals:
     void swipe_right();
 
