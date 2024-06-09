@@ -155,9 +155,9 @@ client_main_window::client_main_window(QWidget *parent)
 
     QWidget *chat_widget = new QWidget();
 
-    QPushButton *server = new QPushButton("Help!", this);
-    server->setFixedSize(50, 40);
-    connect(server, &QPushButton::clicked, this, [=]()
+    QPushButton *server_button = new QPushButton("Help!", this);
+    server_button->setFixedSize(50, 40);
+    connect(server_button, &QPushButton::clicked, this, [=]()
             { QWidget *wid = _window_map.value("Server", this);
                 if (wid)
                  _stack->setCurrentIndex(_stack->indexOf(wid)); });
@@ -236,7 +236,7 @@ client_main_window::client_main_window(QWidget *parent)
     hbox_3->addWidget(friend_button);
     hbox_3->addWidget(group_button);
     hbox_3->addWidget(create_group);
-    hbox_3->addWidget(server);
+    hbox_3->addWidget(server_button);
 
     _search_phone_number = new CustomLineEdit(this);
     _search_phone_number->setPlaceholderText("ADD PEOPLE VIA PHONE NUMBER, THEN PRESS ENTER");
@@ -246,14 +246,13 @@ client_main_window::client_main_window(QWidget *parent)
     _overlay_widget = new OverlayWidget(this);
 
     connect(_search_phone_number, &CustomLineEdit::focusGained, this, [=]()
-            {
-                _overlay_widget->setText(_search_phone_number->text());
-                client_chat_window::adjust_overlay(_overlay_widget, chat_widget); });
+            { _overlay_widget->setText(_search_phone_number->text()); });
 
     connect(_search_phone_number, &CustomLineEdit::focusLost, this, [=]()
             { _overlay_widget->hide(); });
 
     QVBoxLayout *VBOX_2 = new QVBoxLayout(chat_widget);
+    VBOX_2->addWidget(_overlay_widget);
     VBOX_2->addLayout(hbox_2);
     VBOX_2->addLayout(hbox_3);
 

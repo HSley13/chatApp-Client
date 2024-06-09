@@ -8,6 +8,9 @@ class separator_delegate;
 class Swipeable_list_widget;
 
 class OverlayWidget;
+
+class CustomLineEdit;
+
 class client_chat_window : public QMainWindow
 {
     Q_OBJECT
@@ -40,7 +43,6 @@ public:
     QString _group_name = QString();
 
     OverlayWidget *_overlay_widget;
-    static void adjust_overlay(OverlayWidget *overlay, QWidget *widget);
 
     QString my_name();
 
@@ -60,7 +62,7 @@ private:
     static QString _my_name;
     static QString _insert_name;
 
-    QLineEdit *_insert_message;
+    CustomLineEdit *_insert_message;
 
     QPushButton *_send_file_button;
     QPushButton *_send_button;
@@ -301,5 +303,29 @@ public:
         m_text = text;
         show();
         update();
+    }
+};
+
+class CustomLineEdit : public QLineEdit
+{
+    Q_OBJECT
+signals:
+    void focusGained();
+    void focusLost();
+
+public:
+    explicit CustomLineEdit(QWidget *parent = nullptr) : QLineEdit(parent) {}
+
+protected:
+    void focusInEvent(QFocusEvent *event) override
+    {
+        QLineEdit::focusInEvent(event);
+        emit focusGained();
+    }
+
+    void focusOutEvent(QFocusEvent *event) override
+    {
+        QLineEdit::focusOutEvent(event);
+        emit focusLost();
     }
 };

@@ -363,14 +363,21 @@ void client_chat_window::set_up_window()
     _list->setItemDelegate(new separator_delegate(_list));
     _list->setSelectionMode(QAbstractItemView::NoSelection);
 
-    _insert_message = new QLineEdit(this);
+    _insert_message = new CustomLineEdit(this);
     _insert_message->setPlaceholderText("Insert New Message");
 
-    connect(_insert_message, &QLineEdit::textChanged, this, [=]()
+    connect(_insert_message, &CustomLineEdit::textChanged, this, [=]()
             { if(_group_name.isEmpty()) 
                 _client->send_is_typing(my_name(), _destinator); 
               else
                  _client->send_group_is_typing(_group_ID, _group_name, my_name()); });
+
+    _overlay_widget = new OverlayWidget(this);
+    connect(_insert_message, &CustomLineEdit::focusGained, this, [=]()
+            { _overlay_widget->setText(_insert_message->text());; });
+
+    connect(_insert_message, &CustomLineEdit::focusLost, this, [=]()
+            { _overlay_widget->hide(); });
 
     QPixmap image_send(":/images/send_icon.png");
     if (!image_send)
@@ -388,6 +395,7 @@ void client_chat_window::set_up_window()
     _hbox->addWidget(_send_button);
 
     QVBoxLayout *VBOX = new QVBoxLayout(central_widget);
+    VBOX->addWidget(_overlay_widget);
     VBOX->addWidget(button_file);
     VBOX->addWidget(_list);
     VBOX->addLayout(_hbox);
@@ -778,14 +786,4 @@ void client_chat_window::create_new_group(QStringList group_members, QString gro
     group_members << _client->my_ID();
 
     _client->send_create_new_group(my_name(), group_members, group_name);
-}
-
-void client_chat_window::adjust_overlay(OverlayWidget *overlay, QWidget *widget)
-{
-    QSize window_size = widget->size();
-
-    int overlayX = (window_size.width() - overlay->width()) / 2;
-    int overlayY = (window_size.height() - overlay->height()) / 2;
-
-    overlay->move(overlayX, overlayY);
 }
