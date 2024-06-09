@@ -160,12 +160,12 @@ client_main_window::client_main_window(QWidget *parent)
     QStringList choices;
     choices << "Chat with an Agent" << "Change Name";
     connect(settings, &QPushButton::clicked, this, [=]()
-            {   ListDialog *members = new ListDialog(choices, "Settings", this);
-                connect(members, &QInputDialog::finished, this, [=](int result)
-                            {   
+            {   ListDialog *settings_info = new ListDialog(choices, "Settings", this);
+                connect(settings_info, &QInputDialog::finished, this, [=](int result)
+                {   
                                 if(result == QDialog::Accepted)
                                 {
-                                    QString name = members->name_selected().first();
+                                    QString name = settings_info->name_selected().first();
                                     if (!name.compare("Chat with an Agent"))
                                     {
                                         QWidget *wid = _window_map.value("Server", this);
@@ -188,20 +188,20 @@ client_main_window::client_main_window(QWidget *parent)
                                         new_name->open();
                                     }
                                 }
-                                    members->deleteLater(); });
+                                settings_info->deleteLater(); });
 
-                members->open(); });
+        settings_info->open(); });
 
-    QPixmap create_group_icon(":/images/create_group_icon.png");
-    if (!create_group_icon)
+    QPixmap group_icon(":/images/create_group_icon.png");
+    if (!group_icon)
         qDebug() << "Image Send Button is NULL";
 
-    QPushButton *create_group = new QPushButton(this);
-    create_group->setIcon(create_group_icon);
-    create_group->setIconSize(QSize(50, 50));
-    create_group->setFixedSize(50, 50);
-    create_group->setStyleSheet("border: none");
-    connect(create_group, &QPushButton::clicked, this, &client_main_window::create_group);
+    QPushButton *group_button = new QPushButton(this);
+    group_button->setIcon(group_icon);
+    group_button->setIconSize(QSize(50, 50));
+    group_button->setFixedSize(50, 50);
+    group_button->setStyleSheet("border: none");
+    connect(group_button, &QPushButton::clicked, this, &client_main_window::create_group);
 
     _friend_list = new QComboBox(this);
     connect(_friend_list, &QComboBox::textActivated, this, &client_main_window::new_conversation);
@@ -234,16 +234,16 @@ client_main_window::client_main_window(QWidget *parent)
     QVBoxLayout *layout_2 = new QVBoxLayout(_group_dialog);
     layout_2->addWidget(_group_list);
 
-    QPixmap group_icon(":/images/group_icon.png");
-    if (!group_icon)
+    QPixmap groups_icon(":/images/group_icon.png");
+    if (!groups_icon)
         qDebug() << "Image Send Button is NULL";
 
-    QPushButton *group_button = new QPushButton(this);
-    group_button->setIcon(group_icon);
-    group_button->setIconSize(QSize(50, 50));
-    group_button->setFixedSize(50, 50);
-    group_button->setStyleSheet("border: none");
-    connect(group_button, &QPushButton::clicked, _group_dialog, &QDialog::open);
+    QPushButton *groups = new QPushButton(this);
+    groups->setIcon(groups_icon);
+    groups->setIconSize(QSize(50, 50));
+    groups->setFixedSize(50, 50);
+    groups->setStyleSheet("border: none");
+    connect(groups, &QPushButton::clicked, _group_dialog, &QDialog::open);
 
     QLabel *chats_label = new QLabel("CHATS", this);
 
@@ -257,7 +257,7 @@ client_main_window::client_main_window(QWidget *parent)
     QHBoxLayout *hbox_3 = new QHBoxLayout();
     hbox_3->addWidget(friend_button);
     hbox_3->addWidget(group_button);
-    hbox_3->addWidget(create_group);
+    hbox_3->addWidget(groups);
     hbox_3->addWidget(settings);
 
     _search_phone_number = new CustomLineEdit(this);
