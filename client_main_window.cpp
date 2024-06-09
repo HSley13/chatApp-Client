@@ -495,11 +495,16 @@ void client_main_window::on_login_request(const QString &hashed_password, bool t
 
                 connect(win, &client_chat_window::swipe_right, this, &client_main_window::on_swipe_right);
                 connect(win, &client_chat_window::item_clicked, this, [=](const QString &name)
-                        {    QWidget *wid = _window_map.value(name, this);
-                     if (wid)
-                         _stack->setCurrentIndex(_stack->indexOf(wid));
-                     else
-                         _server_wid->add_friend(name); });
+                        {
+                            int index = _friend_list->findText(name, Qt::MatchExactly);
+                            if (index != -1)
+                            {
+                                QWidget *wid = _window_map.value(name, this);
+                                if (wid)
+                                    _stack->setCurrentIndex(_stack->indexOf(wid));
+                            }
+                            else
+                                _server_wid->add_friend(name); });
 
                 win->window_name(group_name);
 
@@ -821,12 +826,17 @@ void client_main_window::on_added_to_group(const int &group_ID, const QString &a
 
     client_chat_window *wid = new client_chat_window(group_ID, group_name, names, this);
     connect(wid, &client_chat_window::swipe_right, this, &client_main_window::on_swipe_right);
-    connect(wid, &client_chat_window::item_clicked, this, [=](const QString &name)
-            {    QWidget *wid = _window_map.value(name, this);
-                     if (wid)
-                         _stack->setCurrentIndex(_stack->indexOf(wid));
-                     else
-                         _server_wid->add_friend(name); });
+    connect(win, &client_chat_window::item_clicked, this, [=](const QString &name)
+            {
+                int index = _friend_list->findText(name, Qt::MatchExactly);
+                if (index != -1)
+                {
+                    QWidget *wid = _window_map.value(name, this);
+                    if (wid)
+                        _stack->setCurrentIndex(_stack->indexOf(wid));
+                }
+                else
+                    _server_wid->add_friend(name); });
 
     wid->window_name(group_name);
 
@@ -844,11 +854,16 @@ void client_main_window::on_new_group(const int &group_ID)
     client_chat_window *win = new client_chat_window(group_ID, _group_name, _group_members, this);
     connect(win, &client_chat_window::swipe_right, this, &client_main_window::on_swipe_right);
     connect(win, &client_chat_window::item_clicked, this, [=](const QString &name)
-            {    QWidget *wid = _window_map.value(name, this);
-                     if (wid)
-                         _stack->setCurrentIndex(_stack->indexOf(wid));
-                     else
-                         _server_wid->add_friend(name); });
+            {
+                int index = _friend_list->findText(name, Qt::MatchExactly);
+                if (index != -1)
+                {
+                    QWidget *wid = _window_map.value(name, this);
+                    if (wid)
+                        _stack->setCurrentIndex(_stack->indexOf(wid));
+                }
+                else
+                    _server_wid->add_friend(name); });
 
     win->window_name(_group_name);
 

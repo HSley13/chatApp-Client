@@ -1,0 +1,11 @@
+-rootPath
+/Users/test/Documents/client_app
+-cmake-output
+-output-file
+/Users/test/Documents/client_app/.qt_plugins/Qt6_QmlPlugins_Imports_client.cmake
+-importPath
+/Users/test/Documents/client_app
+-importPath
+/Users/test/qt-wasm/qtbase/qml
+-qrcFiles
+/Users/test/Documents/client_app/.rcc/client_images.qrc
