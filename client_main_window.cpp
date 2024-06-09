@@ -9,7 +9,12 @@ client_main_window::client_main_window(QWidget *parent)
 {
     _stack = new QStackedWidget(this);
 
-    setCentralWidget(_stack);
+    QScrollArea *scroll_area = new QScrollArea(this);
+    scroll_area->setWidget(_stack);
+    scroll_area->setWidgetResizable(true);
+
+    setCentralWidget(scroll_area);
+
     setFixedSize(400, 500);
 
     _status_bar = new QStatusBar(this);
@@ -196,11 +201,7 @@ client_main_window::client_main_window(QWidget *parent)
     if (!friend_icon)
         qDebug() << "Image Send Button is NULL";
 
-    QPushButton *friend_button = new QPushButton(this);
-    friend_button->setIcon(friend_icon);
-    friend_button->setIconSize(QSize(150, 150));
-    friend_button->setFixedSize(150, 150);
-    friend_button->setStyleSheet("border: none");
+    QPushButton *friend_button = new QPushButton("Friend List", this);
     connect(friend_button, &QPushButton::clicked, _friend_dialog, &QDialog::open);
 
     _group_list = new QComboBox(this);
@@ -238,9 +239,9 @@ client_main_window::client_main_window(QWidget *parent)
     hbox_3->addWidget(create_group);
     hbox_3->addWidget(server);
 
-    _search_phone_number = new QLineEdit(this);
+    _search_phone_number = new AutoScrollLineEdit(scroll_area, this);
     _search_phone_number->setPlaceholderText("ADD PEOPLE VIA PHONE NUMBER, THEN PRESS ENTER");
-    connect(_search_phone_number, &QLineEdit::returnPressed, this, [=]()
+    connect(_search_phone_number, &AutoScrollLineEdit::returnPressed, this, [=]()
             { _server_wid->add_friend(_search_phone_number->text()); });
 
     QVBoxLayout *VBOX_2 = new QVBoxLayout(chat_widget);
