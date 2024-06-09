@@ -42,7 +42,7 @@ public:
     QStringList _group_members = QStringList();
     QString _group_name = QString();
 
-    DisplayWidget *_overlay_widget;
+    DisplayWidget *_display_widget;
 
     QString my_name();
 

@@ -266,13 +266,15 @@ client_main_window::client_main_window(QWidget *parent)
     connect(_search_phone_number, &CustomLineEdit::returnPressed, this, [=]()
             { _server_wid->add_friend(_search_phone_number->text()); });
 
-    _overlay_widget = new DisplayWidget(this);
+    _display_widget = new DisplayWidget(this);
+    _display_widget->hide();
 
-    connect(_search_phone_number, &CustomLineEdit::textChanged, this, [=](const QString &text)
-            { _overlay_widget->setText(text); });
+    connect(_search_phone_number, &CustomLineEdit::textChanged, _display_widget, &DisplayWidget::setText);
+    connect(_search_phone_number, &CustomLineEdit::focusGained, _display_widget, &QWidget::show);
+    connect(_search_phone_number, &CustomLineEdit::focusLost, _display_widget, &QWidget::hide);
 
     QVBoxLayout *VBOX_2 = new QVBoxLayout(chat_widget);
-    VBOX_2->addWidget(_overlay_widget);
+    VBOX_2->addWidget(_display_widget);
     VBOX_2->addLayout(hbox_3);
 
     VBOX_2->addWidget(chats_label);

@@ -55,7 +55,7 @@ private:
     void mousePressEvent(QMouseEvent *event) override;
     void mouseMoveEvent(QMouseEvent *event) override;
 
-    DisplayWidget *_overlay_widget;
+    DisplayWidget *_display_widget;
 
 signals:
     void swipe_right();

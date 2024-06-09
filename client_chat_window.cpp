@@ -372,10 +372,12 @@ void client_chat_window::set_up_window()
               else
                  _client->send_group_is_typing(_group_ID, _group_name, my_name()); });
 
-    _overlay_widget = new DisplayWidget(this);
+    _display_widget = new DisplayWidget(this);
+    _display_widget->hide();
 
-    connect(_insert_message, &CustomLineEdit::textChanged, this, [=](const QString &text)
-            { _overlay_widget->setText(text); });
+    connect(_insert_message, &CustomLineEdit::textChanged, _display_widget, &DisplayWidget::setText);
+    connect(_insert_message, &CustomLineEdit::focusGained, _display_widget, &QWidget::show);
+    connect(_insert_message, &CustomLineEdit::focusLost, _display_widget, &QWidget::hide);
 
     QPixmap image_send(":/images/send_icon.png");
     if (!image_send)
@@ -393,7 +395,7 @@ void client_chat_window::set_up_window()
     _hbox->addWidget(_send_button);
 
     QVBoxLayout *VBOX = new QVBoxLayout(central_widget);
-    VBOX->addWidget(_overlay_widget);
+    VBOX->addWidget(_display_widget);
     VBOX->addWidget(button_file);
     VBOX->addWidget(_list);
     VBOX->addLayout(_hbox);
