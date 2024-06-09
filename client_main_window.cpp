@@ -266,8 +266,7 @@ client_main_window::client_main_window(QWidget *parent)
     connect(_search_phone_number, &CustomLineEdit::returnPressed, this, [=]()
             { _server_wid->add_friend(_search_phone_number->text()); });
 
-    _overlay_widget = new OverlayWidget(this);
-    _overlay_widget->resize(200, 30);
+    _overlay_widget = new DisplayWidget(this);
 
     connect(_search_phone_number, &CustomLineEdit::textChanged, this, [=](const QString &text)
             { _overlay_widget->setText(text); });

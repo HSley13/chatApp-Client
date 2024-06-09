@@ -7,7 +7,7 @@ class separator_delegate;
 
 class Swipeable_list_widget;
 
-class OverlayWidget;
+class DisplayWidget;
 
 class CustomLineEdit;
 
@@ -42,7 +42,7 @@ public:
     QStringList _group_members = QStringList();
     QString _group_name = QString();
 
-    OverlayWidget *_overlay_widget;
+    DisplayWidget *_overlay_widget;
 
     QString my_name();
 
@@ -248,7 +248,7 @@ public:
         : QDialog(parent)
     {
         setWindowTitle(title);
-        resize(100, 100);
+        resize(200, 200);
 
         QVBoxLayout *layout = new QVBoxLayout(this);
 
@@ -277,26 +277,25 @@ public:
     }
 };
 
-class OverlayWidget : public QWidget
+class DisplayWidget : public QWidget
 {
-protected:
-    void paintEvent(QPaintEvent *event) override
-    {
-        QPainter painter(this);
-        painter.fillRect(rect(), QColor(135, 206, 235, 200));
-        painter.drawText(rect(), Qt::AlignCenter, m_text);
-    }
+    Q_OBJECT
 
 private:
-    QString m_text;
+    QLabel *label;
 
 public:
-    OverlayWidget(QWidget *parent = nullptr) : QWidget(parent) { setAttribute(Qt::WA_TransparentForMouseEvents); }
+    DisplayWidget(QWidget *parent = nullptr) : QWidget(parent)
+    {
+        QHBoxLayout *layout = new QHBoxLayout(this);
+        label = new QLabel(this);
+        layout->addWidget(label);
+        setLayout(layout);
+    }
 
     void setText(const QString &text)
     {
-        m_text = text;
-        update();
+        label->setText(text);
     }
 };
 

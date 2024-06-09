@@ -372,8 +372,7 @@ void client_chat_window::set_up_window()
               else
                  _client->send_group_is_typing(_group_ID, _group_name, my_name()); });
 
-    _overlay_widget = new OverlayWidget(this);
-    _overlay_widget->resize(100, 30);
+    _overlay_widget = new DisplayWidget(this);
 
     connect(_insert_message, &CustomLineEdit::textChanged, this, [=](const QString &text)
             { _overlay_widget->setText(text); });
