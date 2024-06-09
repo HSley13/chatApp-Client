@@ -51,6 +51,7 @@ private:
 
     void add_on_top(const QString &client_name);
     QIcon create_dot_icon(const QColor &color, int size);
+    void name_changed(const QString &name);
 
     void mousePressEvent(QMouseEvent *event) override;
     void mouseMoveEvent(QMouseEvent *event) override;
@@ -70,7 +71,6 @@ private slots:
     void on_client_connected(const QString &client_name);
 
     void on_text_message_received(const QString &sender, const QString &message, const QString &time);
-    void on_name_changed();
 
     void on_item_clicked(QListWidgetItem *item);
     void new_conversation(const QString &name);

@@ -155,19 +155,10 @@ client_main_window::client_main_window(QWidget *parent)
 
     QWidget *chat_widget = new QWidget();
 
-    // QLabel *name = new QLabel("My Name: ", chat_widget);
-    // _name = new QLineEdit(chat_widget);
-    // _name->setPlaceholderText("INSERT YOUR NAME THEN PRESS ENTER");
-    // connect(_name, &QLineEdit::returnPressed, this, &client_main_window::on_name_changed);
-
-    // QHBoxLayout *hbox_2 = new QHBoxLayout();
-    // hbox_2->addWidget(name);
-    // hbox_2->addWidget(_name);
-
     QPushButton *settings = new QPushButton("...", this);
     settings->setFixedSize(50, 20);
     QStringList choices;
-    choices << "Chat with an Agent" << "Change Name" << "Change Phone Number";
+    choices << "Chat with an Agent" << "Change Name";
     connect(settings, &QPushButton::clicked, this, [=]()
             {   ListDialog *members = new ListDialog(choices, "Settings", this);
                 connect(members, &QInputDialog::finished, this, [=](int result)
@@ -183,11 +174,18 @@ client_main_window::client_main_window(QWidget *parent)
                                     }
                                     else if (!name.compare("Change Name"))
                                     {
+                                        QInputDialog *new_name = new QInputDialog(this);
+                                        new_name->setWindowTitle("Change Name");
+                                        new_name->setLabelText("Enter Desired New Name: ");
 
-                                    }
-                                    else 
-                                    {
+                                        connect(new_name, &QInputDialog::finished, this, [=](int result)
+                                                {
+                                                    if(result == QDialog::Accepted)
+                                                        name_changed(new_name->textValue());
 
+                                                    new_name->deleteLater(); });
+
+                                        new_name->open();
                                     }
                                 }
                                     members->deleteLater(); });
@@ -209,7 +207,7 @@ client_main_window::client_main_window(QWidget *parent)
     connect(_friend_list, &QComboBox::textActivated, this, &client_main_window::new_conversation);
 
     _friend_dialog = new QDialog(this);
-    _friend_dialog->resize(100, 100);
+    _friend_dialog->resize(150, 150);
     _friend_dialog->setWindowTitle("Friend List...");
     _friend_dialog->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     QVBoxLayout *layout = new QVBoxLayout(_friend_dialog);
@@ -230,6 +228,7 @@ client_main_window::client_main_window(QWidget *parent)
     connect(_group_list, &QComboBox::textActivated, this, &client_main_window::new_conversation);
 
     _group_dialog = new QDialog(this);
+    _group_dialog->resize(150, 150);
     _group_dialog->setWindowTitle("Group List...");
     _group_dialog->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     QVBoxLayout *layout_2 = new QVBoxLayout(_group_dialog);
@@ -246,9 +245,9 @@ client_main_window::client_main_window(QWidget *parent)
     group_button->setStyleSheet("border: none");
     connect(group_button, &QPushButton::clicked, _group_dialog, &QDialog::open);
 
-    QLabel *chats_label = new QLabel("CHATS", chat_widget);
+    QLabel *chats_label = new QLabel("CHATS", this);
 
-    _list = new QListWidget(chat_widget);
+    _list = new QListWidget(this);
     _list->setSelectionMode(QAbstractItemView::NoSelection);
     _list->setMinimumWidth(200);
     _list->setFont(QFont("Arial", 20));
@@ -564,14 +563,14 @@ void client_main_window::on_login_request(const QString &hashed_password, bool t
     _user_password->setStyleSheet("border: 1px solid gray");
 }
 
-void client_main_window::on_name_changed()
+void client_main_window::name_changed(const QString &name)
 {
-    if (!_name->text().isEmpty())
+    if (!name.isEmpty())
     {
         for (QWidget *win : _window_map)
         {
             client_chat_window *wid = qobject_cast<client_chat_window *>(win);
-            wid->set_name(_name->text());
+            wid->set_name(name);
         }
     }
 }
@@ -941,7 +940,8 @@ void client_main_window::create_group()
                                      }
 
                                          _server_wid->create_new_group(IDs, _group_name);
-                                     });
+                                         members->deleteLater();
+                                });
 
                         members->open();
                     }

@@ -178,6 +178,49 @@ public:
     }
 };
 
+class ListDialog : public QDialog
+{
+    Q_OBJECT
+
+private:
+    QListWidget *name_list;
+    QDialogButtonBox *button_box;
+
+public:
+    explicit ListDialog(const QStringList &names, const QString &title, QWidget *parent = nullptr)
+        : QDialog(parent)
+    {
+        setWindowTitle(title);
+        resize(200, 200);
+
+        QVBoxLayout *layout = new QVBoxLayout(this);
+
+        name_list = new QListWidget();
+        name_list->addItems(names);
+        name_list->setItemDelegate(new separator_delegate(name_list));
+        name_list->setSelectionMode(QAbstractItemView::MultiSelection);
+
+        button_box = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
+        connect(button_box, &QDialogButtonBox::accepted, this, &QDialog::accept);
+        connect(button_box, &QDialogButtonBox::rejected, this, &QDialog::reject);
+
+        layout->addWidget(name_list);
+        layout->addWidget(button_box);
+
+        setLayout(layout);
+    }
+
+    QStringList name_selected() const
+    {
+        QStringList selected;
+
+        for (QListWidgetItem *item : name_list->selectedItems())
+            selected << item->text();
+
+        return selected;
+    }
+};
+
 class Swipeable_list_widget : public QListWidget
 {
 
@@ -207,71 +250,25 @@ protected:
                 QListWidgetItem *item = itemAt(drag_start_position);
                 if (item)
                 {
-                    QString message = QString("Do you really want to delete this Message: %1?\n Press OK to confirm").arg(item->text());
+                    QStringList info;
+                    info << "Do you really want to delete this Message: " << item->text() << " Press OK to confirm";
 
-                    QInputDialog *input_dialog = new QInputDialog(this);
-                    input_dialog->setWindowTitle("Deleting Message");
-                    input_dialog->setLabelText("Please Review the Information below carefully:");
-                    input_dialog->setOptions(QInputDialog::UsePlainTextEditForTextInput);
-                    input_dialog->setTextValue(message);
-
-                    connect(input_dialog, &QInputDialog::finished, this, [=](int result)
-                            {   
+                    ListDialog *dialog = new ListDialog(info, "Delete Message", this);
+                    connect(dialog, &QInputDialog::finished, this, [=](int result)
+                            {
                                 if(result == QDialog::Accepted)
-                                { 
+                                {
                                     _window->message_deleted(item->data(Qt::UserRole).toString());
                                     delete _window->_list->takeItem(_window->_list->row(item));
-                                }
+                                }  
 
-                                input_dialog->deleteLater(); });
+                                dialog->deleteLater(); });
 
-                    input_dialog->open();
+                    dialog->open();
                 }
             }
         }
         QListWidget::mouseReleaseEvent(event);
-    }
-};
-
-class ListDialog : public QDialog
-{
-    Q_OBJECT
-
-private:
-    QListWidget *name_list;
-    QDialogButtonBox *button_box;
-
-public:
-    explicit ListDialog(const QStringList &names, const QString &title, QWidget *parent = nullptr)
-        : QDialog(parent)
-    {
-        setWindowTitle(title);
-        resize(200, 200);
-
-        QVBoxLayout *layout = new QVBoxLayout(this);
-
-        name_list = new QListWidget();
-        name_list->addItems(names);
-        name_list->setSelectionMode(QAbstractItemView::MultiSelection);
-
-        button_box = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
-        connect(button_box, &QDialogButtonBox::accepted, this, &QDialog::accept);
-        connect(button_box, &QDialogButtonBox::rejected, this, &QDialog::reject);
-
-        layout->addWidget(name_list);
-        layout->addWidget(button_box);
-
-        setLayout(layout);
-    }
-
-    QStringList name_selected() const
-    {
-        QStringList selected;
-
-        for (QListWidgetItem *item : name_list->selectedItems())
-            selected << item->text();
-
-        return selected;
     }
 };
 
