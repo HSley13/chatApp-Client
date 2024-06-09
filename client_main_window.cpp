@@ -4,6 +4,32 @@ QHash<QString, QWidget *> client_main_window::_window_map = QHash<QString, QWidg
 
 client_chat_window *client_main_window::_server_wid = nullptr;
 
+class OverlayWidget : public QWidget
+{
+public:
+    OverlayWidget(QWidget *parent = nullptr) : QWidget(parent)
+    {
+        setAttribute(Qt::WA_TransparentForMouseEvents); // Make the overlay transparent to mouse events
+    }
+
+    void setText(const QString &text)
+    {
+        m_text = text;
+        update(); // Schedule a repaint to display the updated text
+    }
+
+protected:
+    void paintEvent(QPaintEvent *event) override
+    {
+        QPainter painter(this);
+        painter.fillRect(rect(), QColor(255, 255, 255, 200)); // Semi-transparent white background
+        painter.drawText(rect(), Qt::AlignCenter, m_text);    // Display the text in the center
+    }
+
+private:
+    QString m_text;
+};
+
 client_main_window::client_main_window(QWidget *parent)
     : QMainWindow(parent)
 {
@@ -242,6 +268,14 @@ client_main_window::client_main_window(QWidget *parent)
     _search_phone_number->setPlaceholderText("ADD PEOPLE VIA PHONE NUMBER, THEN PRESS ENTER");
     connect(_search_phone_number, &QLineEdit::returnPressed, this, [=]()
             { _server_wid->add_friend(_search_phone_number->text()); });
+
+    OverlayWidget *overlayWidget = new OverlayWidget(this);
+    overlayWidget->resize(200, 30);
+    overlayWidget->move(10, 10); // Adjust position as needed
+
+    // Connect QLineEdit's textChanged signal to update the overlay text
+    connect(_search_phone_number, &QLineEdit::textChanged, this, [=](const QString &text)
+            { overlayWidget->setText(text); });
 
     QVBoxLayout *VBOX_2 = new QVBoxLayout(chat_widget);
     VBOX_2->addLayout(hbox_2);
@@ -504,7 +538,7 @@ void client_main_window::on_login_request(const QString &hashed_password, bool t
                                     _stack->setCurrentIndex(_stack->indexOf(wid));
                             }
                             else
-                                _server_wid->add_friend(name); });
+                                win->add_friend(name); });
 
                 win->window_name(group_name);
 
@@ -824,8 +858,8 @@ void client_main_window::on_added_to_group(const int &group_ID, const QString &a
             names << ID;
     }
 
-    client_chat_window *wid = new client_chat_window(group_ID, group_name, names, this);
-    connect(wid, &client_chat_window::swipe_right, this, &client_main_window::on_swipe_right);
+    client_chat_window *win = new client_chat_window(group_ID, group_name, names, this);
+    connect(win, &client_chat_window::swipe_right, this, &client_main_window::on_swipe_right);
     connect(win, &client_chat_window::item_clicked, this, [=](const QString &name)
             {
                 int index = _friend_list->findText(name, Qt::MatchExactly);
@@ -836,13 +870,13 @@ void client_main_window::on_added_to_group(const int &group_ID, const QString &a
                         _stack->setCurrentIndex(_stack->indexOf(wid));
                 }
                 else
-                    _server_wid->add_friend(name); });
+                    win->add_friend(name); });
 
-    wid->window_name(group_name);
+    win->window_name(group_name);
 
-    _window_map.insert(group_name, wid);
+    _window_map.insert(group_name, win);
 
-    _stack->addWidget(wid);
+    _stack->addWidget(win);
 
     _group_list->addItem(group_name);
 
@@ -863,7 +897,7 @@ void client_main_window::on_new_group(const int &group_ID)
                         _stack->setCurrentIndex(_stack->indexOf(wid));
                 }
                 else
-                    _server_wid->add_friend(name); });
+                    win->add_friend(name); });
 
     win->window_name(_group_name);
 
