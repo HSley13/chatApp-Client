@@ -235,7 +235,7 @@ protected:
     }
 };
 
-class group_member : public QDialog
+class ListDialog : public QDialog
 {
     Q_OBJECT
 
@@ -244,10 +244,10 @@ private:
     QDialogButtonBox *button_box;
 
 public:
-    explicit group_member(const QStringList &names, QWidget *parent = nullptr)
+    explicit ListDialog(const QStringList &names, const QString &title, QWidget *parent = nullptr)
         : QDialog(parent)
     {
-        setWindowTitle("Select Group Members");
+        setWindowTitle(title);
 
         QVBoxLayout *layout = new QVBoxLayout(this);
 

@@ -155,21 +155,14 @@ client_main_window::client_main_window(QWidget *parent)
 
     QWidget *chat_widget = new QWidget();
 
-    QPushButton *server_button = new QPushButton("Help!", this);
-    server_button->setFixedSize(50, 40);
-    connect(server_button, &QPushButton::clicked, this, [=]()
-            { QWidget *wid = _window_map.value("Server", this);
-                if (wid)
-                 _stack->setCurrentIndex(_stack->indexOf(wid)); });
+    // QLabel *name = new QLabel("My Name: ", chat_widget);
+    // _name = new QLineEdit(chat_widget);
+    // _name->setPlaceholderText("INSERT YOUR NAME THEN PRESS ENTER");
+    // connect(_name, &QLineEdit::returnPressed, this, &client_main_window::on_name_changed);
 
-    QLabel *name = new QLabel("My Name: ", chat_widget);
-    _name = new QLineEdit(chat_widget);
-    _name->setPlaceholderText("INSERT YOUR NAME THEN PRESS ENTER");
-    connect(_name, &QLineEdit::returnPressed, this, &client_main_window::on_name_changed);
-
-    QHBoxLayout *hbox_2 = new QHBoxLayout();
-    hbox_2->addWidget(name);
-    hbox_2->addWidget(_name);
+    // QHBoxLayout *hbox_2 = new QHBoxLayout();
+    // hbox_2->addWidget(name);
+    // hbox_2->addWidget(_name);
 
     QPixmap create_group_icon(":/images/create_group_icon.png");
     if (!create_group_icon)
@@ -236,7 +229,6 @@ client_main_window::client_main_window(QWidget *parent)
     hbox_3->addWidget(friend_button);
     hbox_3->addWidget(group_button);
     hbox_3->addWidget(create_group);
-    hbox_3->addWidget(server_button);
 
     _search_phone_number = new CustomLineEdit(this);
     _search_phone_number->setPlaceholderText("ADD PEOPLE VIA PHONE NUMBER, THEN PRESS ENTER");
@@ -254,9 +246,38 @@ client_main_window::client_main_window(QWidget *parent)
     connect(_search_phone_number, &CustomLineEdit::focusLost, this, [=]()
             { _overlay_widget->hide(); });
 
+    QPushButton *setting = new QPushButton("...", this);
+    QStringList choices;
+    choices << "Chat with an Agent" << "Change Name" << "Change Phone Number";
+    connect(setting, &QPushButton::clicked, this, [=]()
+            {   ListDialog *members = new ListDialog(choices, "Settings", this);
+                connect(members, &QInputDialog::finished, this, [=](int result)
+                            {   
+                                if(result == QDialog::Accepted)
+                                {
+                                    QString name = members->name_selected().first();
+                                    if (!name.compare("Chat with an Agent"))
+                                    {
+                                        QWidget *wid = _window_map.value("Server", this);
+                                        if (wid)
+                                            _stack->setCurrentIndex(_stack->indexOf(wid));
+                                    }
+                                    else if (!name.compare("Change Name"))
+                                    {
+
+                                    }
+                                    else 
+                                    {
+
+                                    }
+                                }
+                                    members->deleteLater(); });
+
+                members->open(); });
+
     QVBoxLayout *VBOX_2 = new QVBoxLayout(chat_widget);
     VBOX_2->addWidget(_overlay_widget);
-    VBOX_2->addLayout(hbox_2);
+    VBOX_2->addWidget(setting);
     VBOX_2->addLayout(hbox_3);
 
     VBOX_2->addWidget(chats_label);
@@ -904,7 +925,7 @@ void client_main_window::create_group()
                         for (int i = 0; i < _friend_list->count(); i++)
                             friends_name << _friend_list->itemText(i);
 
-                        group_member *members = new group_member(friends_name, this);
+                        ListDialog *members = new ListDialog(friends_name, "Select Group Members", this);
                         members->setFixedSize(300, 400);
 
                         connect(members, &QDialog::accepted, this, [=]()

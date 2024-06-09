@@ -343,7 +343,7 @@ void client_chat_window::set_up_window()
                     return;
                 else
                 {
-                    group_member *members = new group_member(_group_members, this);
+                    ListDialog *members = new ListDialog(_group_members, "Group Members", this);
                     connect(members, &QInputDialog::finished, this, [=](int result)
                             {   
                                 if(result == QDialog::Accepted)
