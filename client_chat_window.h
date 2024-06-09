@@ -301,7 +301,6 @@ public:
     void setText(const QString &text)
     {
         m_text = text;
-        show();
         update();
     }
 };

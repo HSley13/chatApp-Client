@@ -246,7 +246,10 @@ client_main_window::client_main_window(QWidget *parent)
     _overlay_widget = new OverlayWidget(this);
 
     connect(_search_phone_number, &CustomLineEdit::focusGained, this, [=]()
-            { _overlay_widget->setText(_search_phone_number->text()); });
+            { _overlay_widget->show(); });
+
+    connect(_search_phone_number, &CustomLineEdit::textChanged, this, [=](const QString &text)
+            { _overlay_widget->setText(text); });
 
     connect(_search_phone_number, &CustomLineEdit::focusLost, this, [=]()
             { _overlay_widget->hide(); });

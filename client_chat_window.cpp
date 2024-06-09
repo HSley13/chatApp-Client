@@ -373,8 +373,12 @@ void client_chat_window::set_up_window()
                  _client->send_group_is_typing(_group_ID, _group_name, my_name()); });
 
     _overlay_widget = new OverlayWidget(this);
+
     connect(_insert_message, &CustomLineEdit::focusGained, this, [=]()
-            { _overlay_widget->setText(_insert_message->text());; });
+            { _overlay_widget->show(); });
+
+    connect(_insert_message, &CustomLineEdit::textChanged, this, [=](const QString &text)
+            { _overlay_widget->setText(text); });
 
     connect(_insert_message, &CustomLineEdit::focusLost, this, [=]()
             { _overlay_widget->hide(); });
