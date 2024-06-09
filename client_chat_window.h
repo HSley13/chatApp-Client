@@ -282,7 +282,7 @@ protected:
     void paintEvent(QPaintEvent *event) override
     {
         QPainter painter(this);
-        painter.fillRect(rect(), QColor(255, 255, 255, 200));
+        painter.fillRect(rect(), QColor(135, 206, 235, 200));
         painter.drawText(rect(), Qt::AlignCenter, m_text);
     }
 
@@ -290,11 +290,7 @@ private:
     QString m_text;
 
 public:
-    OverlayWidget(QWidget *parent = nullptr) : QWidget(parent)
-    {
-        setAttribute(Qt::WA_TransparentForMouseEvents);
-        resize(200, 30);
-    }
+    OverlayWidget(QWidget *parent = nullptr) : QWidget(parent) { setAttribute(Qt::WA_TransparentForMouseEvents); }
 
     void setText(const QString &text)
     {

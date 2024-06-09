@@ -165,6 +165,7 @@ client_main_window::client_main_window(QWidget *parent)
     // hbox_2->addWidget(_name);
 
     QPushButton *settings = new QPushButton("...", this);
+    settings->setFixedSize(50, 20);
     QStringList choices;
     choices << "Chat with an Agent" << "Change Name" << "Change Phone Number";
     connect(settings, &QPushButton::clicked, this, [=]()
@@ -266,6 +267,7 @@ client_main_window::client_main_window(QWidget *parent)
             { _server_wid->add_friend(_search_phone_number->text()); });
 
     _overlay_widget = new OverlayWidget(this);
+    _overlay_widget->resize(200, 30);
     _overlay_widget->hide();
 
     connect(_search_phone_number, &CustomLineEdit::focusGained, this, [=]()
