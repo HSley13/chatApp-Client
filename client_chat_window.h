@@ -42,8 +42,6 @@ public:
     QStringList _group_members = QStringList();
     QString _group_name = QString();
 
-    DisplayWidget *_display_widget;
-
     QString my_name();
 
     void create_new_group(QStringList group_members, QString group_name);
@@ -164,7 +162,7 @@ private:
     QListWidget *m_parent;
 
 public:
-    separator_delegate(QListWidget *parent) : QStyledItemDelegate(parent), m_parent(parent) {}
+    explicit separator_delegate(QListWidget *parent) : QStyledItemDelegate(parent), m_parent(parent) {}
 
     void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const override
     {
@@ -188,7 +186,7 @@ private:
     client_chat_window *_window;
 
 public:
-    Swipeable_list_widget(client_chat_window *window, QWidget *parent = nullptr) : QListWidget(parent), _window(window) {}
+    explicit Swipeable_list_widget(client_chat_window *window, QWidget *parent = nullptr) : QListWidget(parent), _window(window) {}
 
 protected:
     void mousePressEvent(QMouseEvent *event) override
@@ -285,7 +283,7 @@ private:
     QLabel *label;
 
 public:
-    DisplayWidget(QWidget *parent = nullptr) : QWidget(parent)
+    explicit DisplayWidget(QWidget *parent = nullptr) : QWidget(parent)
     {
         QHBoxLayout *layout = new QHBoxLayout(this);
         label = new QLabel(this);
@@ -302,6 +300,7 @@ public:
 class CustomLineEdit : public QLineEdit
 {
     Q_OBJECT
+
 signals:
     void focusGained();
     void focusLost();
