@@ -7,6 +7,7 @@
     <file alias="group_icon.png">/Users/test/Documents/client_app/group_icon.png</file>
     <file alias="friends_list_icon.png">/Users/test/Documents/client_app/friends_list_icon.png</file>
     <file alias="create_group_icon.png">/Users/test/Documents/client_app/create_group_icon.png</file>
+    <file alias="chat_icon.png">/Users/test/Documents/client_app/chat_icon.png</file>
   </qresource>
 </RCC>
 

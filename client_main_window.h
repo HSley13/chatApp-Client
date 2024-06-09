@@ -5,26 +5,6 @@
 #include <QtCore>
 #include <QtMultimedia>
 #include <QWebSocket>
-
-class AutoScrollLineEdit : public QLineEdit
-{
-    Q_OBJECT
-private:
-    QScrollArea *scrollArea;
-
-public:
-    explicit AutoScrollLineEdit(QScrollArea *scrollArea, QWidget *parent = nullptr)
-        : QLineEdit(parent), scrollArea(scrollArea) {}
-
-protected:
-    void focusInEvent(QFocusEvent *event) override
-    {
-        QLineEdit::focusInEvent(event);
-
-        if (scrollArea)
-            scrollArea->ensureWidgetVisible(this);
-    }
-};
 class client_main_window : public QMainWindow
 {
     Q_OBJECT
@@ -48,7 +28,7 @@ private:
     QLineEdit *_name;
     QLineEdit *_user_phone_number;
     QLineEdit *_user_password;
-    AutoScrollLineEdit *_search_phone_number;
+    QLineEdit *_search_phone_number;
 
     QLineEdit *_insert_first_name;
     QLineEdit *_insert_last_name;
