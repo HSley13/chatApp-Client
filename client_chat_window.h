@@ -2,29 +2,12 @@
 
 #include "client_manager.h"
 #include "chat_line.h"
-class separator_delegate : public QStyledItemDelegate
-{
-private:
-    QListWidget *m_parent;
 
-public:
-    separator_delegate(QListWidget *parent) : QStyledItemDelegate(parent), m_parent(parent) {}
-
-    void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const override
-    {
-        QStyledItemDelegate::paint(painter, option, index);
-
-        if (index.row() != m_parent->count() - 1)
-        {
-            painter->save();
-            painter->setPen(Qt::green);
-            painter->drawLine(option.rect.bottomLeft(), option.rect.bottomRight());
-            painter->restore();
-        }
-    }
-};
+class separator_delegate;
 
 class Swipeable_list_widget;
+
+class OverlayWidget;
 class client_chat_window : public QMainWindow
 {
     Q_OBJECT
@@ -55,6 +38,9 @@ public:
 
     QStringList _group_members = QStringList();
     QString _group_name = QString();
+
+    OverlayWidget *_overlay_widget;
+    static void adjust_overlay(OverlayWidget *overlay, QWidget *widget);
 
     QString my_name();
 
@@ -170,6 +156,28 @@ private slots:
     void play_audio(const QUrl &source, QPushButton *audio, QSlider *slider);
 };
 
+class separator_delegate : public QStyledItemDelegate
+{
+private:
+    QListWidget *m_parent;
+
+public:
+    separator_delegate(QListWidget *parent) : QStyledItemDelegate(parent), m_parent(parent) {}
+
+    void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const override
+    {
+        QStyledItemDelegate::paint(painter, option, index);
+
+        if (index.row() != m_parent->count() - 1)
+        {
+            painter->save();
+            painter->setPen(Qt::green);
+            painter->drawLine(option.rect.bottomLeft(), option.rect.bottomRight());
+            painter->restore();
+        }
+    }
+};
+
 class Swipeable_list_widget : public QListWidget
 {
 
@@ -263,5 +271,35 @@ public:
             selected << item->text();
 
         return selected;
+    }
+};
+
+class OverlayWidget : public QWidget
+{
+protected:
+    void paintEvent(QPaintEvent *event) override
+    {
+        QPainter painter(this);
+        painter.fillRect(rect(), QColor(255, 255, 255, 200));
+        painter.drawText(rect(), Qt::AlignCenter, m_text);
+    }
+
+private:
+    QString m_text;
+
+public:
+    OverlayWidget(QWidget *parent = nullptr) : QWidget(parent)
+    {
+        setAttribute(Qt::WA_TransparentForMouseEvents);
+        resize(200, 30);
+        move(10, 10);
+        hide();
+    }
+
+    void setText(const QString &text)
+    {
+        m_text = text;
+        show();
+        update();
     }
 };

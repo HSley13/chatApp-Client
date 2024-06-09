@@ -4,32 +4,6 @@ QHash<QString, QWidget *> client_main_window::_window_map = QHash<QString, QWidg
 
 client_chat_window *client_main_window::_server_wid = nullptr;
 
-class OverlayWidget : public QWidget
-{
-public:
-    OverlayWidget(QWidget *parent = nullptr) : QWidget(parent)
-    {
-        setAttribute(Qt::WA_TransparentForMouseEvents); // Make the overlay transparent to mouse events
-    }
-
-    void setText(const QString &text)
-    {
-        m_text = text;
-        update(); // Schedule a repaint to display the updated text
-    }
-
-protected:
-    void paintEvent(QPaintEvent *event) override
-    {
-        QPainter painter(this);
-        painter.fillRect(rect(), QColor(255, 255, 255, 200)); // Semi-transparent white background
-        painter.drawText(rect(), Qt::AlignCenter, m_text);    // Display the text in the center
-    }
-
-private:
-    QString m_text;
-};
-
 client_main_window::client_main_window(QWidget *parent)
     : QMainWindow(parent)
 {
@@ -47,6 +21,8 @@ client_main_window::client_main_window(QWidget *parent)
     style_file.open(QFile::ReadOnly);
     QString style_sheet = QLatin1String(style_file.readAll());
     setStyleSheet(style_sheet);
+
+    _overlay_widget = new OverlayWidget(this);
 
     /*-----------------------------------¬------------------------------------------------------------------------------------------------------------------------------------*/
 
@@ -269,17 +245,15 @@ client_main_window::client_main_window(QWidget *parent)
     connect(_search_phone_number, &QLineEdit::returnPressed, this, [=]()
             { _server_wid->add_friend(_search_phone_number->text()); });
 
-    OverlayWidget *overlayWidget = new OverlayWidget(this);
-    overlayWidget->resize(200, 30);
-    overlayWidget->move(10, 10); // Adjust position as needed
+    client_chat_window::adjust_overlay(_overlay_widget, chat_widget);
 
-    // Connect QLineEdit's textChanged signal to update the overlay text
     connect(_search_phone_number, &QLineEdit::textChanged, this, [=](const QString &text)
-            { overlayWidget->setText(text); });
+            { _overlay_widget->setText(text); });
 
     QVBoxLayout *VBOX_2 = new QVBoxLayout(chat_widget);
     VBOX_2->addLayout(hbox_2);
     VBOX_2->addLayout(hbox_3);
+
     VBOX_2->addWidget(chats_label);
     VBOX_2->addWidget(_list);
     VBOX_2->addWidget(_search_phone_number);

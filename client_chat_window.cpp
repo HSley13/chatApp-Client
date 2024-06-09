@@ -365,6 +365,8 @@ void client_chat_window::set_up_window()
 
     _insert_message = new QLineEdit(this);
     _insert_message->setPlaceholderText("Insert New Message");
+    _overlay_widget = new OverlayWidget(this);
+    adjust_overlay(_overlay_widget, central_widget);
 
     connect(_insert_message, &QLineEdit::textChanged, this, [=]()
             { if(_group_name.isEmpty()) 
@@ -778,4 +780,14 @@ void client_chat_window::create_new_group(QStringList group_members, QString gro
     group_members << _client->my_ID();
 
     _client->send_create_new_group(my_name(), group_members, group_name);
+}
+
+void client_chat_window::adjust_overlay(OverlayWidget *overlay, QWidget *widget)
+{
+    QSize window_size = widget->size();
+
+    int overlayX = (window_size.width() - overlay->width()) / 2;
+    int overlayY = (window_size.height() - overlay->height()) / 2;
+
+    overlay->move(overlayX, overlayY);
 }

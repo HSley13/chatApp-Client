@@ -48,12 +48,13 @@ private:
     QComboBox *_friend_list;
     QDialog *_friend_dialog;
 
-    void
-    add_on_top(const QString &client_name);
+    void add_on_top(const QString &client_name);
     QIcon create_dot_icon(const QColor &color, int size);
 
     void mousePressEvent(QMouseEvent *event) override;
     void mouseMoveEvent(QMouseEvent *event) override;
+
+    OverlayWidget *_overlay_widget;
 
 signals:
     void swipe_right();
