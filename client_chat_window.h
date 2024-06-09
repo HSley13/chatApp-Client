@@ -294,8 +294,6 @@ public:
     {
         setAttribute(Qt::WA_TransparentForMouseEvents);
         resize(200, 30);
-        move(10, 10);
-        hide();
     }
 
     void setText(const QString &text)

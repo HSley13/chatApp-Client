@@ -164,6 +164,35 @@ client_main_window::client_main_window(QWidget *parent)
     // hbox_2->addWidget(name);
     // hbox_2->addWidget(_name);
 
+    QPushButton *settings = new QPushButton("...", this);
+    QStringList choices;
+    choices << "Chat with an Agent" << "Change Name" << "Change Phone Number";
+    connect(settings, &QPushButton::clicked, this, [=]()
+            {   ListDialog *members = new ListDialog(choices, "Settings", this);
+                connect(members, &QInputDialog::finished, this, [=](int result)
+                            {   
+                                if(result == QDialog::Accepted)
+                                {
+                                    QString name = members->name_selected().first();
+                                    if (!name.compare("Chat with an Agent"))
+                                    {
+                                        QWidget *wid = _window_map.value("Server", this);
+                                        if (wid)
+                                            _stack->setCurrentIndex(_stack->indexOf(wid));
+                                    }
+                                    else if (!name.compare("Change Name"))
+                                    {
+
+                                    }
+                                    else 
+                                    {
+
+                                    }
+                                }
+                                    members->deleteLater(); });
+
+                members->open(); });
+
     QPixmap create_group_icon(":/images/create_group_icon.png");
     if (!create_group_icon)
         qDebug() << "Image Send Button is NULL";
@@ -229,6 +258,7 @@ client_main_window::client_main_window(QWidget *parent)
     hbox_3->addWidget(friend_button);
     hbox_3->addWidget(group_button);
     hbox_3->addWidget(create_group);
+    hbox_3->addWidget(settings);
 
     _search_phone_number = new CustomLineEdit(this);
     _search_phone_number->setPlaceholderText("ADD PEOPLE VIA PHONE NUMBER, THEN PRESS ENTER");
@@ -236,6 +266,7 @@ client_main_window::client_main_window(QWidget *parent)
             { _server_wid->add_friend(_search_phone_number->text()); });
 
     _overlay_widget = new OverlayWidget(this);
+    _overlay_widget->hide();
 
     connect(_search_phone_number, &CustomLineEdit::focusGained, this, [=]()
             { _overlay_widget->show(); });
@@ -246,38 +277,8 @@ client_main_window::client_main_window(QWidget *parent)
     connect(_search_phone_number, &CustomLineEdit::focusLost, this, [=]()
             { _overlay_widget->hide(); });
 
-    QPushButton *setting = new QPushButton("...", this);
-    QStringList choices;
-    choices << "Chat with an Agent" << "Change Name" << "Change Phone Number";
-    connect(setting, &QPushButton::clicked, this, [=]()
-            {   ListDialog *members = new ListDialog(choices, "Settings", this);
-                connect(members, &QInputDialog::finished, this, [=](int result)
-                            {   
-                                if(result == QDialog::Accepted)
-                                {
-                                    QString name = members->name_selected().first();
-                                    if (!name.compare("Chat with an Agent"))
-                                    {
-                                        QWidget *wid = _window_map.value("Server", this);
-                                        if (wid)
-                                            _stack->setCurrentIndex(_stack->indexOf(wid));
-                                    }
-                                    else if (!name.compare("Change Name"))
-                                    {
-
-                                    }
-                                    else 
-                                    {
-
-                                    }
-                                }
-                                    members->deleteLater(); });
-
-                members->open(); });
-
     QVBoxLayout *VBOX_2 = new QVBoxLayout(chat_widget);
     VBOX_2->addWidget(_overlay_widget);
-    VBOX_2->addWidget(setting);
     VBOX_2->addLayout(hbox_3);
 
     VBOX_2->addWidget(chats_label);
