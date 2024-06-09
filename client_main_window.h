@@ -5,6 +5,31 @@
 #include <QtCore>
 #include <QtMultimedia>
 #include <QWebSocket>
+
+class CustomLineEdit : public QLineEdit
+{
+    Q_OBJECT
+public:
+    explicit CustomLineEdit(QWidget *parent = nullptr) : QLineEdit(parent) {}
+
+protected:
+    void focusInEvent(QFocusEvent *event) override
+    {
+        QLineEdit::focusInEvent(event); // Call the base class implementation
+        emit focusGained();             // Emit a custom signal when focus is gained
+    }
+
+    void focusOutEvent(QFocusEvent *event) override
+    {
+        QLineEdit::focusOutEvent(event); // Call the base class implementation
+        emit focusLost();                // Emit a custom signal when focus is lost
+    }
+
+signals:
+    void focusGained();
+    void focusLost();
+};
+
 class client_main_window : public QMainWindow
 {
     Q_OBJECT
@@ -28,7 +53,7 @@ private:
     QLineEdit *_name;
     QLineEdit *_user_phone_number;
     QLineEdit *_user_password;
-    QLineEdit *_search_phone_number;
+    CustomLineEdit *_search_phone_number;
 
     QLineEdit *_insert_first_name;
     QLineEdit *_insert_last_name;

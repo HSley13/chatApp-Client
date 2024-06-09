@@ -22,8 +22,6 @@ client_main_window::client_main_window(QWidget *parent)
     QString style_sheet = QLatin1String(style_file.readAll());
     setStyleSheet(style_sheet);
 
-    _overlay_widget = new OverlayWidget(this);
-
     /*-----------------------------------¬------------------------------------------------------------------------------------------------------------------------------------*/
 
     QWidget *login_widget = new QWidget();
@@ -240,15 +238,20 @@ client_main_window::client_main_window(QWidget *parent)
     hbox_3->addWidget(create_group);
     hbox_3->addWidget(server);
 
-    _search_phone_number = new QLineEdit(this);
+    _search_phone_number = new CustomLineEdit(this);
     _search_phone_number->setPlaceholderText("ADD PEOPLE VIA PHONE NUMBER, THEN PRESS ENTER");
-    connect(_search_phone_number, &QLineEdit::returnPressed, this, [=]()
+    connect(_search_phone_number, &CustomLineEdit::returnPressed, this, [=]()
             { _server_wid->add_friend(_search_phone_number->text()); });
 
-    client_chat_window::adjust_overlay(_overlay_widget, chat_widget);
+    _overlay_widget = new OverlayWidget(this);
 
-    connect(_search_phone_number, &QLineEdit::textChanged, this, [=](const QString &text)
-            { _overlay_widget->setText(text); });
+    connect(_search_phone_number, &CustomLineEdit::focusGained, this, [=]()
+            {
+                _overlay_widget->setText(_search_phone_number->text());
+                client_chat_window::adjust_overlay(_overlay_widget, chat_widget); });
+
+    connect(_search_phone_number, &CustomLineEdit::focusLost, this, [=]()
+            { _overlay_widget->hide(); });
 
     QVBoxLayout *VBOX_2 = new QVBoxLayout(chat_widget);
     VBOX_2->addLayout(hbox_2);
