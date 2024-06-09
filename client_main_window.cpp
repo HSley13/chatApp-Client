@@ -268,16 +268,9 @@ client_main_window::client_main_window(QWidget *parent)
 
     _overlay_widget = new OverlayWidget(this);
     _overlay_widget->resize(200, 30);
-    _overlay_widget->hide();
-
-    connect(_search_phone_number, &CustomLineEdit::focusGained, this, [=]()
-            { _overlay_widget->show(); });
 
     connect(_search_phone_number, &CustomLineEdit::textChanged, this, [=](const QString &text)
             { _overlay_widget->setText(text); });
-
-    connect(_search_phone_number, &CustomLineEdit::focusLost, this, [=]()
-            { _overlay_widget->hide(); });
 
     QVBoxLayout *VBOX_2 = new QVBoxLayout(chat_widget);
     VBOX_2->addWidget(_overlay_widget);

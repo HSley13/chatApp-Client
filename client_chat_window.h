@@ -248,6 +248,7 @@ public:
         : QDialog(parent)
     {
         setWindowTitle(title);
+        resize(100, 100);
 
         QVBoxLayout *layout = new QVBoxLayout(this);
 

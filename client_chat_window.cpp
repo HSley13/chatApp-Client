@@ -373,17 +373,10 @@ void client_chat_window::set_up_window()
                  _client->send_group_is_typing(_group_ID, _group_name, my_name()); });
 
     _overlay_widget = new OverlayWidget(this);
-    _overlay_widget->resize(200, 30);
-    _overlay_widget->hide();
-
-    connect(_insert_message, &CustomLineEdit::focusGained, this, [=]()
-            { _overlay_widget->show(); });
+    _overlay_widget->resize(100, 30);
 
     connect(_insert_message, &CustomLineEdit::textChanged, this, [=](const QString &text)
             { _overlay_widget->setText(text); });
-
-    connect(_insert_message, &CustomLineEdit::focusLost, this, [=]()
-            { _overlay_widget->hide(); });
 
     QPixmap image_send(":/images/send_icon.png");
     if (!image_send)
