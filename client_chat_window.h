@@ -191,13 +191,12 @@ public:
         : QDialog(parent)
     {
         setWindowTitle(title);
-        resize(200, 200);
+        resize(300, 400);
 
         QVBoxLayout *layout = new QVBoxLayout(this);
 
         name_list = new QListWidget();
         name_list->addItems(names);
-        name_list->setItemDelegate(new separator_delegate(name_list));
         name_list->setSelectionMode(QAbstractItemView::MultiSelection);
 
         button_box = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
@@ -208,15 +207,56 @@ public:
         layout->addWidget(button_box);
 
         setLayout(layout);
+
+        QString styleSheet = R"(
+            QDialog {
+                background-color: white;
+            }
+            QListWidget {
+                border: 2px solid #4A90E2;
+                background-color: #EAF4FE;
+                color: black;
+                font-size: 14px;
+                border-radius: 10px;
+                padding: 5px;
+            }
+            QListWidget::item {
+                border: none;
+                background-color: #EAF4FE;
+                padding: 5px;
+            }
+            QListWidget::item:selected {
+                background-color: #4A90E2;
+                color: white;
+            }
+            QDialogButtonBox {
+                background-color: #F5F5F5;
+            }
+            QPushButton {
+                background-color: #4A90E2;
+                color: white;
+                border: 1px solid #4A90E2;
+                padding: 5px 10px;
+                border-radius: 5px;
+            }
+            QPushButton:hover {
+                background-color: #357ABD;
+                border: 1px solid #357ABD;
+            }
+            QPushButton:pressed {
+                background-color: #2C5AA0;
+                border: 1px solid #2C5AA0;
+            }
+        )";
+
+        setStyleSheet(styleSheet);
     }
 
     QStringList name_selected() const
     {
         QStringList selected;
-
         for (QListWidgetItem *item : name_list->selectedItems())
             selected << item->text();
-
         return selected;
     }
 };

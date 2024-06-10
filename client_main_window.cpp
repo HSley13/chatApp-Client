@@ -18,9 +18,13 @@ client_main_window::client_main_window(QWidget *parent)
     connect(this, &client_main_window::swipe_right, this, &client_main_window::on_swipe_right);
 
     QFile style_file(":/images/style.css");
-    style_file.open(QFile::ReadOnly);
-    QString style_sheet = QLatin1String(style_file.readAll());
-    setStyleSheet(style_sheet);
+    if (style_file.open(QIODevice::ReadOnly | QIODevice::Text))
+    {
+        QString style_sheet = QString::fromUtf8(style_file.readAll());
+        setStyleSheet(style_sheet);
+
+        style_file.close();
+    }
 
     /*-----------------------------------¬------------------------------------------------------------------------------------------------------------------------------------*/
 
@@ -41,26 +45,18 @@ client_main_window::client_main_window(QWidget *parent)
     hbox_1->addWidget(password_label);
     hbox_1->addWidget(_user_password);
 
-    QPushButton *log_in = new QPushButton("Log In", this);
-    log_in->setStyleSheet("background-color: #0077CC;"
-                          "color: white;"
-                          "border: 1px solid #0055AA;"
-                          "border-radius: 5px;"
-                          "padding: 5px 10px;");
-    connect(log_in, &QPushButton::clicked, this, [=]()
-            {  
-                log_in->setDisabled(true);
-                   if (!_server_wid)
-                _server_wid = new client_chat_window(this);
-                connect(_server_wid, &client_chat_window::login_request, this, &client_main_window::on_login_request);
-                _status_bar->showMessage("LOADING YOUR DATA, WAIT!!!!!! ...", 30000);
-                QTimer::singleShot(2000, this, [=]() { _server_wid->_client->send_login_request(_user_phone_number->text(), _user_password->text());});
-                QTimer::singleShot(10000, this, [=](){log_in->setEnabled(true); }); });
+    _login_button = new QPushButton("Log In", this);
+    _login_button->setStyleSheet("background-color: #0077CC;"
+                                 "color: white;"
+                                 "border: 1px solid #0055AA;"
+                                 "border-radius: 5px;"
+                                 "padding: 5px 10px;");
+    connect(_login_button, &QPushButton::clicked, this, &client_main_window::on_login);
 
     QVBoxLayout *VBOX = new QVBoxLayout();
     VBOX->addLayout(hbox);
     VBOX->addLayout(hbox_1);
-    VBOX->addWidget(log_in);
+    VBOX->addWidget(_login_button);
 
     QGroupBox *group_box = new QGroupBox();
     group_box->setLayout(VBOX);
@@ -157,40 +153,7 @@ client_main_window::client_main_window(QWidget *parent)
 
     QPushButton *settings = new QPushButton("...", this);
     settings->setFixedSize(50, 20);
-    QStringList choices;
-    choices << "Chat with an Agent" << "Change Name";
-    connect(settings, &QPushButton::clicked, this, [=]()
-            {   ListDialog *settings_info = new ListDialog(choices, "Settings", this);
-                connect(settings_info, &QInputDialog::finished, this, [=](int result)
-                {   
-                                if(result == QDialog::Accepted)
-                                {
-                                    QString name = settings_info->name_selected().first();
-                                    if (!name.compare("Chat with an Agent"))
-                                    {
-                                        QWidget *wid = _window_map.value("Server", this);
-                                        if (wid)
-                                            _stack->setCurrentIndex(_stack->indexOf(wid));
-                                    }
-                                    else if (!name.compare("Change Name"))
-                                    {
-                                        QInputDialog *new_name = new QInputDialog(this);
-                                        new_name->setWindowTitle("Change Name");
-                                        new_name->setLabelText("Enter Desired New Name: ");
-
-                                        connect(new_name, &QInputDialog::finished, this, [=](int result)
-                                                {
-                                                    if(result == QDialog::Accepted)
-                                                        name_changed(new_name->textValue());
-
-                                                    new_name->deleteLater(); });
-
-                                        new_name->open();
-                                    }
-                                }
-                                settings_info->deleteLater(); });
-
-        settings_info->open(); });
+    connect(settings, &QPushButton::clicked, this, &client_main_window::on_settings);
 
     QPixmap group_icon(":/images/create_group_icon.png");
     if (!group_icon)
@@ -335,36 +298,48 @@ void client_main_window::on_sign_up()
 
     _insert_secret_question->setStyleSheet("border: 1px solid gray;");
 
-    QString info = QString("First Name : %1\nLast Name : %2\nPhone Number : %3\nSecret Question : %4\nSecret Answer : %5")
-                       .arg(_insert_first_name->text())
-                       .arg(_insert_last_name->text())
-                       .arg(_insert_phone_number->text())
-                       .arg(_insert_secret_question->text())
-                       .arg(_insert_secret_answer->text());
+    QStringList info;
+    info << QString("First Name:  %1").arg(_insert_first_name->text())
+         << QString(" Last Name: %1").arg(_insert_last_name->text())
+         << QString("Phone Number : %1").arg(_insert_phone_number->text())
+         << QString("Secret Question : %1").arg(_insert_secret_question->text())
+         << QString("Secret Answer : %1").arg(_insert_secret_answer->text());
 
-    QInputDialog *input_dialog = new QInputDialog(this);
-    input_dialog->setWindowTitle("Information Review");
-    input_dialog->setLabelText("Please Review the Information below carefully:");
-    input_dialog->setOptions(QInputDialog::UsePlainTextEditForTextInput);
-    input_dialog->setTextValue(info);
+    ListDialog *input_dialog = new ListDialog(info, "Information Review", this);
+    input_dialog->setFixedSize(300, 400);
 
-    connect(input_dialog, &QInputDialog::finished, this, [=](int result)
+    connect(input_dialog, &QDialog::accepted, this, [=]()
             {
-                if (result == QDialog::Accepted)
+                if (!_server_wid)
                 {
-                    if (!_server_wid)
-                    {
-                        _server_wid = new client_chat_window(this);
-                        QTimer::singleShot(2000, this, [=]()
-                                           { _server_wid->_client->send_sign_up(_insert_phone_number->text(), _insert_first_name->text(), _insert_last_name->text(), _insert_password->text(), _insert_secret_question->text(), _insert_secret_answer->text()); });
-                    }
-                    _status_bar->showMessage(QString("Account Created Successfully"), 10000);
-                    _stack->setCurrentIndex(1);
+                    _server_wid = new client_chat_window(this);
+                    QTimer::singleShot(2000, this, [=]()
+                                       { _server_wid->_client->send_sign_up(_insert_phone_number->text(), _insert_first_name->text(), _insert_last_name->text(), _insert_password->text(), _insert_secret_question->text(), _insert_secret_answer->text()); });
                 }
+                _status_bar->showMessage(QString("Account Created Successfully"), 10000);
+                _stack->setCurrentIndex(1);
+                
 
                 input_dialog->deleteLater(); });
 
     input_dialog->open();
+}
+void client_main_window::on_login()
+{
+    _login_button->setDisabled(true);
+
+    if (!_server_wid)
+        _server_wid = new client_chat_window(this);
+
+    connect(_server_wid, &client_chat_window::login_request, this, &client_main_window::on_login_request);
+
+    _status_bar->showMessage("LOADING YOUR DATA, WAIT!!!!!! ...", 30000);
+
+    QTimer::singleShot(2000, this, [=]()
+                       { _server_wid->_client->send_login_request(_user_phone_number->text(), _user_password->text()); });
+
+    QTimer::singleShot(10000, this, [=]()
+                       { _login_button->setEnabled(true); });
 }
 
 void client_main_window::on_login_request(const QString &hashed_password, bool true_or_false, const QHash<int, QHash<QString, int>> &friend_lists, const QStringList &online_friends, const QHash<int, QStringList> &messages, const QHash<int, QHash<QString, QByteArray>> &binary_datas, const QHash<int, QString> &group_lists, const QHash<int, QStringList> &group_messages, const QHash<int, QHash<QString, QByteArray>> &group_binary_datas, const QHash<int, QStringList> &groups_members)
@@ -561,6 +536,51 @@ void client_main_window::on_login_request(const QString &hashed_password, bool t
     }
 
     _user_password->setStyleSheet("border: 1px solid gray");
+}
+
+void client_main_window::on_settings()
+{
+    QStringList choices;
+    choices << "Chat with an Agent" << "Change Name";
+
+    ListDialog *settings_info = new ListDialog(choices, "Settings", this);
+    connect(settings_info, &QDialog::accepted, this, [=]()
+            {   
+                                
+                QString name = settings_info->name_selected().first();
+                if (!name.compare("Chat with an Agent"))
+                {
+                    QWidget *wid = _window_map.value("Server", this);
+                    if (wid)
+                        _stack->setCurrentIndex(_stack->indexOf(wid));
+                }
+                else if (!name.compare("Change Name"))
+                {
+                    QInputDialog *new_name = new QInputDialog(this);
+                    new_name->setWindowTitle("Change Name");
+                    new_name->setLabelText("Enter Desired New Name: ");
+
+                    QLabel *label = new_name->findChild<QLabel *>("qt_msgbox_label");
+                    if (label)
+                        label->setStyleSheet("color: #4A90E2; font-size: 14px;");
+
+                    QLineEdit *lineEdit = new_name->findChild<QLineEdit *>("qt_msgbox_lineedit");
+                    if (lineEdit)
+                        lineEdit->setStyleSheet("border: 2px solid #4A90E2; border-radius: 5px; background-color: #EAF4FE; color: black; font-size: 14px;");
+
+                    connect(new_name, &QInputDialog::finished, this, [=](int result)
+                            {
+                                if(result == QDialog::Accepted)
+                                    name_changed(new_name->textValue());
+
+                                new_name->deleteLater(); });
+                                
+                    new_name->open();
+                }
+                
+                settings_info->deleteLater(); });
+
+    settings_info->open();
 }
 
 void client_main_window::name_changed(const QString &name)
@@ -909,6 +929,14 @@ void client_main_window::create_group()
     QInputDialog *input_dialog = new QInputDialog(this);
     input_dialog->setWindowTitle("Group Name");
     input_dialog->setLabelText("Enter Group Name");
+
+    QLabel *label = input_dialog->findChild<QLabel *>("qt_msgbox_label");
+    if (label)
+        label->setStyleSheet("color: #4A90E2; font-size: 14px;");
+
+    QLineEdit *lineEdit = input_dialog->findChild<QLineEdit *>("qt_msgbox_lineedit");
+    if (lineEdit)
+        lineEdit->setStyleSheet("border: 2px solid #4A90E2; border-radius: 5px; background-color: #EAF4FE; color: black; font-size: 14px;");
 
     connect(input_dialog, &QInputDialog::finished, this, [=](int result)
             {

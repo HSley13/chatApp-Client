@@ -49,6 +49,8 @@ private:
     QComboBox *_friend_list;
     QDialog *_friend_dialog;
 
+    QPushButton *_login_button;
+
     void add_on_top(const QString &client_name);
     QIcon create_dot_icon(const QColor &color, int size);
     void name_changed(const QString &name);
@@ -63,7 +65,10 @@ private slots:
     void on_swipe_right();
 
     void on_sign_up();
+    void on_login();
     void on_login_request(const QString &hashed_password, bool true_or_false, const QHash<int, QHash<QString, int>> &friend_list, const QStringList &online_friends, const QHash<int, QStringList> &messages, const QHash<int, QHash<QString, QByteArray>> &binary_data, const QHash<int, QString> &group_list, const QHash<int, QStringList> &group_messages, const QHash<int, QHash<QString, QByteArray>> &group_binary_data, const QHash<int, QStringList> &groups_members);
+
+    void on_settings();
 
     void on_client_name_changed(const QString &old_name, const QString &client_name);
     void on_client_disconnected(const QString &client_name);
