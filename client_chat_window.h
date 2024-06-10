@@ -211,10 +211,12 @@ public:
         QString styleSheet = R"(
             QDialog {
                 background-color: white;
+                border: 1px solid #4A90E2;
+                padding: 5px 10px;
+                border-radius: 5px;
             }
             QListWidget {
                 border: 2px solid #4A90E2;
-                background-color: #EAF4FE;
                 color: black;
                 font-size: 14px;
                 border-radius: 10px;
