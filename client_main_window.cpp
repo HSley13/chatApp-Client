@@ -173,6 +173,10 @@ client_main_window::client_main_window(QWidget *parent)
     _friend_dialog->resize(150, 150);
     _friend_dialog->setWindowTitle("Friend List...");
     _friend_dialog->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    _friend_dialog->setStyleSheet("background-color: white;"
+                                  " border: 1px solid #4A90E2;"
+                                  " padding: 5px 10px;"
+                                  " border-radius: 5px;");
     QVBoxLayout *layout = new QVBoxLayout(_friend_dialog);
     layout->addWidget(_friend_list);
 
@@ -194,6 +198,10 @@ client_main_window::client_main_window(QWidget *parent)
     _group_dialog->resize(150, 150);
     _group_dialog->setWindowTitle("Group List...");
     _group_dialog->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    _group_dialog->setStyleSheet("background-color: white;"
+                                 " border: 1px solid #4A90E2;"
+                                 " padding: 5px 10px;"
+                                 " border-radius: 5px;");
     QVBoxLayout *layout_2 = new QVBoxLayout(_group_dialog);
     layout_2->addWidget(_group_list);
 
@@ -559,6 +567,10 @@ void client_main_window::on_settings()
                     QInputDialog *new_name = new QInputDialog(this);
                     new_name->setWindowTitle("Change Name");
                     new_name->setLabelText("Enter Desired New Name: ");
+                    new_name->setStyleSheet("background-color: white;"
+                                            " border: 1px solid #4A90E2;"
+                                            " padding: 5px 10px;"
+                                            " border-radius: 5px;");
 
                     QLabel *label = new_name->findChild<QLabel *>("qt_msgbox_label");
                     if (label)

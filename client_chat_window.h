@@ -192,6 +192,10 @@ public:
     {
         setWindowTitle(title);
         resize(300, 400);
+        setStyleSheet("background-color: white;"
+                      " border: 1px solid #4A90E2;"
+                      " padding: 5px 10px;"
+                      " border-radius: 5px;");
 
         QVBoxLayout *layout = new QVBoxLayout(this);
 
@@ -209,12 +213,6 @@ public:
         setLayout(layout);
 
         QString styleSheet = R"(
-            QDialog {
-                background-color: white;
-                border: 1px solid #4A90E2;
-                padding: 5px 10px;
-                border-radius: 5px;
-            }
             QListWidget {
                 border: 2px solid #4A90E2;
                 color: black;
