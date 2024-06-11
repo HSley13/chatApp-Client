@@ -534,9 +534,9 @@ void client_main_window::settings_choice()
 
         connect(new_name, &QInputDialog::finished, this, [=](int result)
                 {
-                    if(result == QDialog::Accepted)
+                    if (result == QDialog::Accepted)
                         name_changed(new_name->textValue());
-                        
+
                     new_name->deleteLater(); });
 
         new_name->open();
@@ -546,18 +546,40 @@ void client_main_window::settings_choice()
     { create_group(); };
 }
 
+void client_main_window::handleSettingsChoice(const QString &choice)
+{
+    qDebug() << "Selected choice: " << choice;
+
+    if (_settings_choice.contains(choice))
+    {
+        qDebug() << "Executing choice function";
+        _settings_choice[choice](); // Call the function
+    }
+    else
+    {
+        qDebug() << "Choice not found in settings map.";
+    }
+}
+
 void client_main_window::on_settings()
 {
     QStringList choices;
     choices << "Chat with an Agent" << "Change Name" << "Create New Group";
 
     ListDialog *settings_info = new ListDialog(choices, "Settings", this);
-    connect(settings_info, &QDialog::accepted, this, [=]()
-            {   
-                QString choice = settings_info->name_selected().first();
-                _settings_choice[choice]();
 
-                settings_info->deleteLater(); });
+    // Create a signal mapper
+    QSignalMapper *signalMapper = new QSignalMapper(this);
+
+    // Connect the ListDialog accepted signal to a lambda that maps the selected choice
+    connect(settings_info, &QDialog::accepted, this, [=]()
+            {
+        QString choice = settings_info->name_selected().first();
+        signalMapper->setMapping(settings_info, choice);
+        signalMapper->map(); });
+
+    // Connect the signal mapper to the handleSettingsChoice slot
+    connect(signalMapper, SIGNAL(mapped(QString)), this, SLOT(handleSettingsChoice(QString)));
 
     settings_info->open();
 }
