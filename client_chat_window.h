@@ -296,7 +296,7 @@ protected:
                         QVBoxLayout *layout = widget->findChild<QVBoxLayout *>();
                         if (layout)
                         {
-                            QLabel *message = layout->findChild<QLabel *>();
+                            QLabel *message = qobject_cast<QLabel *>(layout->itemAt(0)->widget());
 
                             if (message)
                                 info << "Do you really want to delete this Message: " << message->text() << " Press OK to confirm";
