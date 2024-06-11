@@ -664,6 +664,27 @@ void client_main_window::on_client_name_changed(const QString &old_name, const Q
         if (wind)
             wind->window_name(client_name);
     }
+
+    QStringList group_names;
+    for (int i = 0; i < _group_list->count(); i++)
+        group_names << _group_list->itemText(i);
+
+    for (QString name : group_names)
+    {
+        win = _window_map.value(name);
+        if (win)
+        {
+            client_chat_window *wind = qobject_cast<client_chat_window *>(win);
+            if (wind)
+            {
+                if (wind->_group_members.contains(old_name))
+                {
+                    wind->_group_members.removeAll(old_name);
+                    wind->_group_members << client_name;
+                }
+            }
+        }
+    }
 }
 
 void client_main_window::on_swipe_right()
