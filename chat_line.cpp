@@ -50,8 +50,6 @@ void chat_line::set_message(const QString &message, bool is_mine, const QString 
     time_label->setAlignment(alignment);
 
     VBOX->addWidget(time_label);
-
-    setLayout(VBOX);
 }
 
 void chat_line::set_group_message(const QString &message, const QString &sender, bool is_mine, const QString &date_time)
@@ -73,6 +71,4 @@ void chat_line::set_group_message(const QString &message, const QString &sender,
 
     VBOX->addWidget(msg_label);
     VBOX->addWidget(time_label);
-
-    setLayout(VBOX);
 }
