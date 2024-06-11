@@ -289,24 +289,36 @@ protected:
                 if (item)
                 {
                     QStringList info;
-                    info << "Do you really want to delete this Message: " << item->text() << " Press OK to confirm";
 
-                    ListDialog *dialog = new ListDialog(info, "Delete Message", this);
-                    connect(dialog, &QInputDialog::finished, this, [=](int result)
-                            {
-                                if(result == QDialog::Accepted)
-                                {
-                                    _window->message_deleted(item->data(Qt::UserRole).toString());
-                                    delete _window->_list->takeItem(_window->_list->row(item));
-                                }  
+                    QWidget *widget = item->listWidget()->itemWidget(item);
+                    if (widget)
+                    {
+                        QVBoxLayout *layout = widget->findChild<QVBoxLayout *>();
+                        if (layout)
+                        {
+                            QLabel *message = layout->findChild<QLabel *>();
 
-                                dialog->deleteLater(); });
+                            if (message)
+                                info << "Do you really want to delete this Message: " << message->text() << " Press OK to confirm";
 
-                    dialog->open();
+                            ListDialog *dialog = new ListDialog(info, "Delete Message", this);
+                            connect(dialog, &QInputDialog::finished, this, [=](int result)
+                                    {
+                                        if(result == QDialog::Accepted)
+                                        {
+                                            _window->message_deleted(item->data(Qt::UserRole).toString());
+                                            delete _window->_list->takeItem(_window->_list->row(item));
+                                        }  
+
+                                        dialog->deleteLater(); });
+
+                            dialog->open();
+                        }
+                    }
                 }
             }
+            QListWidget::mouseReleaseEvent(event);
         }
-        QListWidget::mouseReleaseEvent(event);
     }
 };
 

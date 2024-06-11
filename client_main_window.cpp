@@ -923,7 +923,7 @@ void client_main_window::on_group_is_typing_received(const int &group_ID, const 
     {
         client_chat_window *wid = qobject_cast<client_chat_window *>(win);
         if (wid)
-            _status_bar->showMessage(QString("Group>: %1,  %2 is typing...").arg(group_name, sender), 1000);
+            _status_bar->showMessage(QString("Group: %1,  %2 is typing...").arg(group_name, sender), 1000);
     }
 }
 
