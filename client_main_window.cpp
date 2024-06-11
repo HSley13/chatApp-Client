@@ -511,41 +511,6 @@ void client_main_window::on_login_request(const QString &hashed_password, bool t
     _user_password->setStyleSheet("border: 1px solid gray");
 }
 
-void client_main_window::settings_choice()
-{
-    _settings_choice["Chat with an Agent"] = [this]()
-    {
-        QWidget *wid = _window_map.value("Server", this);
-        if (wid)
-            _stack->setCurrentIndex(_stack->indexOf(wid));
-    };
-
-    _settings_choice["Change Name"] = [this]()
-    {
-        qDebug() << "Inside Settings_choice() ---> Change Name";
-
-        QInputDialog *new_name = new QInputDialog(this);
-        new_name->setWindowTitle("Change Name");
-        new_name->setLabelText("Enter Desired New Name: ");
-        new_name->setStyleSheet("background-color: white;"
-                                " border: 1px solid #4A90E2;"
-                                " padding: 5px 10px;"
-                                " border-radius: 5px;");
-
-        connect(new_name, &QInputDialog::finished, this, [=](int result)
-                {
-                    if(result == QDialog::Accepted)
-                        name_changed(new_name->textValue());
-                        
-                    new_name->deleteLater(); });
-
-        new_name->open();
-    };
-
-    _settings_choice["Create New Group"] = [this]()
-    { create_group(); };
-}
-
 void client_main_window::on_settings()
 {
     QStringList choices;
@@ -556,10 +521,34 @@ void client_main_window::on_settings()
             {   
                 QString choice = settings_info->name_selected().first();
 
-                auto it = _settings_choice.find(choice);
+                if (!choice.compare("Chat with an Agent"))
+                {
+                    QWidget *wid = _window_map.value("Server", this);
+                    if (wid)
+                        _stack->setCurrentIndex(_stack->indexOf(wid));
+                }
+                else if (!choice.compare("Change Name"))
+                {
+                    QInputDialog *new_name = new QInputDialog(this);
+                    new_name->setWindowTitle("Change Name");
+                    new_name->setLabelText("Enter Desired New Name: ");
+                    new_name->setStyleSheet("background-color: white;"
+                                            " border: 1px solid #4A90E2;"
+                                            " padding: 5px 10px;"
+                                            " border-radius: 5px;");
 
-                if (it != _settings_choice.end())
-                    (*it)(); 
+                    connect(new_name, &QInputDialog::finished, this, [=](int result)
+                            {
+                    if(result == QDialog::Accepted)
+                        name_changed(new_name->textValue());
+                        
+                    new_name->deleteLater(); });
+
+                    new_name->open();
+                }
+                else if ("Create New Group")
+                    create_group();
+                
 
                 settings_info->deleteLater(); });
 
