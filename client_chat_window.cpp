@@ -544,7 +544,6 @@ void client_chat_window::message_widget(bool true_or_false, const QString &conte
     wid->setStyleSheet("color: black;");
 
     QListWidgetItem *line = new QListWidgetItem(_list);
-    line->setSizeHint(wid->sizeHint());
     line->setData(Qt::UserRole, date_time);
 
     if (sender.isEmpty())
@@ -575,6 +574,7 @@ void client_chat_window::message_widget(bool true_or_false, const QString &conte
         }
     }
 
+    line->setSizeHint(wid->sizeHint());
     _list->setItemWidget(line, wid);
 }
 
