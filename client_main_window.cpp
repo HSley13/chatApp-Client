@@ -4,6 +4,8 @@ QHash<QString, QWidget *> client_main_window::_window_map = QHash<QString, QWidg
 
 client_chat_window *client_main_window::_server_wid = nullptr;
 
+QHash<QString, std::function<void()>> client_main_window::_settings_choices = QHash<QString, std::function<void()>>();
+
 client_main_window::client_main_window(QWidget *parent)
     : QMainWindow(parent)
 {
@@ -151,6 +153,7 @@ client_main_window::client_main_window(QWidget *parent)
 
     QWidget *chat_widget = new QWidget();
 
+    configure_settings_choice();
     QPushButton *settings = new QPushButton("...", this);
     settings->setFixedSize(50, 20);
     connect(settings, &QPushButton::clicked, this, &client_main_window::on_settings);
@@ -162,10 +165,6 @@ client_main_window::client_main_window(QWidget *parent)
     _friend_dialog->resize(150, 150);
     _friend_dialog->setWindowTitle("Friend List...");
     _friend_dialog->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-    _friend_dialog->setStyleSheet("background-color: white;"
-                                  " border: 1px solid #4A90E2;"
-                                  " padding: 5px 10px;"
-                                  " border-radius: 5px;");
     QVBoxLayout *layout = new QVBoxLayout(_friend_dialog);
     layout->addWidget(_friend_list);
 
@@ -187,10 +186,6 @@ client_main_window::client_main_window(QWidget *parent)
     _group_dialog->resize(150, 150);
     _group_dialog->setWindowTitle("Group List...");
     _group_dialog->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-    _group_dialog->setStyleSheet("background-color: white;"
-                                 " border: 1px solid #4A90E2;"
-                                 " padding: 5px 10px;"
-                                 " border-radius: 5px;");
     QVBoxLayout *layout_2 = new QVBoxLayout(_group_dialog);
     layout_2->addWidget(_group_list);
 
@@ -509,22 +504,16 @@ void client_main_window::on_login_request(const QString &hashed_password, bool t
     _user_password->setStyleSheet("border: 1px solid gray");
 }
 
-void client_main_window::on_settings()
+void client_main_window::configure_settings_choice()
 {
-    QStringList choices = {"Chat with an Agent", "Change Name", "Create New Group"};
-
-    ListDialog *settings_dialog = new ListDialog(choices, "Settings", this);
-
-    QHash<QString, std::function<void()>> choice_actions;
-
-    choice_actions["Chat with an Agent"] = [=]
+    _settings_choices["Chat with an Agent"] = [=]
     {
         QWidget *wid = _window_map.value("Server", this);
         if (wid)
             _stack->setCurrentIndex(_stack->indexOf(wid));
     };
 
-    choice_actions["Change Name"] = [=]
+    _settings_choices["Change Name"] = [=]
     {
         QInputDialog *new_name = new QInputDialog(this);
         new_name->setWindowTitle("Change Name");
@@ -540,15 +529,20 @@ void client_main_window::on_settings()
         new_name->open();
     };
 
-    choice_actions["Create New Group"] = [=]
+    _settings_choices["Create New Group"] = [=]
     { create_group(); };
+}
+
+void client_main_window::on_settings()
+{
+    QStringList choices = {"Chat with an Agent", "Change Name", "Create New Group"};
+
+    ListDialog *settings_dialog = new ListDialog(choices, "Settings", this);
 
     connect(settings_dialog, &QDialog::accepted, this, [=]()
             {
                 QString choice = settings_dialog->name_selected().first();
-
-                if (choice_actions.contains(choice))
-                    choice_actions.value(choice)();
+                _settings_choices.value(choice)();
 
                     settings_dialog->deleteLater(); });
 

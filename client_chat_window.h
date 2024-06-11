@@ -241,10 +241,6 @@ public:
                 padding: 5px 10px;
                 border-radius: 5px;
             }
-            QPushButton:hover {
-                background-color: #357ABD;
-                border: 1px solid #357ABD;
-            }
             QPushButton:pressed {
                 background-color: #2C5AA0;
                 border: 1px solid #2C5AA0;

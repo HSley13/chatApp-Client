@@ -51,6 +51,8 @@ private:
 
     QPushButton *_login_button;
 
+    static QHash<QString, std::function<void()>> _settings_choices;
+
     void add_on_top(const QString &client_name);
 
     QIcon create_dot_icon(const QColor &color, int size);
@@ -65,7 +67,7 @@ private:
     void mousePressEvent(QMouseEvent *event) override;
     void mouseMoveEvent(QMouseEvent *event) override;
 
-    void settings_choice();
+    void configure_settings_choice();
 
 signals:
     void swipe_right();

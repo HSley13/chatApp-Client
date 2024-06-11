@@ -2,6 +2,9 @@
     "C_Cpp.errorSquiggles": "disabled",
     "files.associations": {
         "new": "cpp",
-        "functional": "cpp"
+        "functional": "cpp",
+        "__config": "cpp",
+        "fstream": "cpp",
+        "sstream": "cpp"
     }
 }
