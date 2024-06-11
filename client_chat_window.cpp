@@ -253,41 +253,10 @@ void client_chat_window::send_message()
 
 void client_chat_window::message_received(const QString &message, const QString &time, const QString &sender)
 {
-    chat_line *wid = new chat_line(this);
-    wid->setStyleSheet("color: black;");
+    if (_destinator.compare("Server"))
+        _client->send_save_conversation(_conversation_ID, _destinator, _client->my_ID(), message, time);
 
-    QListWidgetItem *line = new QListWidgetItem();
-    line->setSizeHint(QSize(0, 60));
-    line->setData(Qt::UserRole, time);
-
-    if (sender.isEmpty())
-    {
-        wid->set_message(message, false, time);
-
-        if (_destinator.compare("Server"))
-            _client->send_save_conversation(_conversation_ID, _destinator, _client->my_ID(), message, time);
-
-        line->setBackground(QBrush(QColorConstants::Svg::lightgray));
-    }
-    else
-    {
-        wid->set_group_message(message, sender, false, time);
-
-        if (!_last_sender.compare(sender))
-            line->setBackground(QBrush(_last_color));
-        else
-        {
-            line->setBackground(QBrush(_colors[_color_counter % 5]));
-            _last_color = _colors[_color_counter % 5];
-
-            _color_counter++;
-        }
-
-        _last_sender = sender;
-    }
-
-    _list->addItem(line);
-    _list->setItemWidget(line, wid);
+    message_widget(true, message, time, sender);
 }
 
 void client_chat_window::delete_message_received(const QString &time)
@@ -518,44 +487,15 @@ void client_chat_window::mouseMoveEvent(QMouseEvent *event)
         }
     }
 }
-void client_chat_window::add_file(const QString &file_name, bool is_mine, const QString &time, const QString &sender)
+
+void client_chat_window::configure_message_color(const QString &sender, bool is_mine, const QString &time, QWidget *wid, QVBoxLayout *vbox, QSlider *slider)
 {
-    QWidget *wid = new QWidget();
-    wid->setStyleSheet("color: black;");
-
-    QPixmap image(":/images/file_icon.webp");
-    if (image.isNull())
-        qDebug() << "File Image is NULL";
-
-    QLabel *time_label = new QLabel(time, this);
-
-    QPushButton *file = new QPushButton(this);
-    file->setIcon(image);
-    file->setIconSize(QSize(30, 30));
-    file->setFixedSize(QSize(30, 30));
-    file->setStyleSheet("border: none");
-    connect(file, &QPushButton::clicked, this, [=]()
-            { QDesktopServices::openUrl(_client->get_file_url(file_name)); });
+    QHBoxLayout *hbox = new QHBoxLayout(wid);
 
     QListWidgetItem *line = new QListWidgetItem(_list);
     line->setSizeHint(QSize(0, 68));
     line->setData(Qt::UserRole, time);
 
-    QVBoxLayout *vbox = new QVBoxLayout();
-    vbox->addWidget(file);
-    vbox->addWidget(time_label, 0, Qt::AlignHCenter);
-
-    QHBoxLayout *hbox = new QHBoxLayout(wid);
-
-    configure_message_color(sender, hbox, vbox, is_mine, line);
-
-    _list->setItemWidget(line, wid);
-
-    emit saving_file("file saved");
-}
-
-void client_chat_window::configure_message_color(const QString &sender, QHBoxLayout *hbox, QVBoxLayout *vbox, bool is_mine, QListWidgetItem *line, QSlider *slider)
-{
     if (sender.isEmpty())
     {
         hbox->addSpacerItem(new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Minimum));
@@ -594,60 +534,12 @@ void client_chat_window::configure_message_color(const QString &sender, QHBoxLay
             _last_sender = sender;
         }
     }
-}
-
-void client_chat_window::add_audio(const QString &audio_name, bool is_mine, const QString &time, const QString &sender)
-{
-    QWidget *wid = new QWidget();
-    wid->setStyleSheet("color: black;");
-
-    QLabel *time_label = new QLabel(time, this);
-
-    QSlider *slider = new QSlider(Qt::Horizontal, this);
-    slider->hide();
-
-    QPushButton *audio = new QPushButton("▶️", this);
-    connect(audio, &QPushButton::clicked, this, [=]()
-            { play_audio(_client->get_audio_url(audio_name), audio, slider); });
-
-    QListWidgetItem *line = new QListWidgetItem(_list);
-    line->setSizeHint(QSize(0, 80));
-    line->setData(Qt::UserRole, time);
-
-    QVBoxLayout *vbox = new QVBoxLayout();
-    vbox->addWidget(audio);
-    vbox->addWidget(time_label, 0, Qt::AlignHCenter);
-
-    QHBoxLayout *hbox = new QHBoxLayout(wid);
-
-    configure_message_color(sender, hbox, vbox, is_mine, line, slider);
 
     _list->setItemWidget(line, wid);
 }
 
-void client_chat_window::set_retrieve_message_window(const QString &type, const QString &content, const QByteArray &file_data, const QString &date_time, bool true_or_false, const QString &sender)
+void client_chat_window::message_widget(bool true_or_false, const QString &content, const QString &date_time, const QString &sender)
 {
-    if (!type.compare("file"))
-    {
-        QString file_name = QString("%1_%2").arg(date_time, content);
-
-        _client->IDBFS_save_file(file_name, file_data, static_cast<int>(file_data.size()));
-
-        (sender.isEmpty()) ? add_file(file_name, true_or_false, date_time) : add_file(file_name, true_or_false, date_time, sender);
-
-        return;
-    }
-    else if (!type.compare("audio"))
-    {
-        QString audio_name = QString("%1_%2").arg(date_time, content);
-
-        _client->IDBFS_save_audio(audio_name, file_data, static_cast<int>(file_data.size()));
-
-        (sender.isEmpty()) ? add_audio(audio_name, true_or_false, date_time) : add_audio(audio_name, true_or_false, date_time, sender);
-
-        return;
-    }
-
     chat_line *wid = new chat_line(this);
     wid->setStyleSheet("color: black;");
 
@@ -684,6 +576,83 @@ void client_chat_window::set_retrieve_message_window(const QString &type, const 
     }
 
     _list->setItemWidget(line, wid);
+}
+
+void client_chat_window::add_file(const QString &file_name, bool is_mine, const QString &time, const QString &sender)
+{
+    QWidget *wid = new QWidget();
+    wid->setStyleSheet("color: black;");
+
+    QPixmap image(":/images/file_icon.webp");
+    if (image.isNull())
+        qDebug() << "File Image is NULL";
+
+    QLabel *time_label = new QLabel(time, this);
+
+    QPushButton *file = new QPushButton(this);
+    file->setIcon(image);
+    file->setIconSize(QSize(30, 30));
+    file->setFixedSize(QSize(30, 30));
+    file->setStyleSheet("border: none");
+    connect(file, &QPushButton::clicked, this, [=]()
+            { QDesktopServices::openUrl(_client->get_file_url(file_name)); });
+
+    QVBoxLayout *vbox = new QVBoxLayout();
+    vbox->addWidget(file);
+    vbox->addWidget(time_label, 0, Qt::AlignHCenter);
+
+    QHBoxLayout *hbox = new QHBoxLayout(wid);
+
+    configure_message_color(sender, is_mine, time, wid, vbox);
+
+    emit saving_file("file saved");
+}
+
+void client_chat_window::add_audio(const QString &audio_name, bool is_mine, const QString &time, const QString &sender)
+{
+    QWidget *wid = new QWidget();
+    wid->setStyleSheet("color: black;");
+
+    QLabel *time_label = new QLabel(time, this);
+
+    QSlider *slider = new QSlider(Qt::Horizontal, this);
+    slider->hide();
+
+    QPushButton *audio = new QPushButton("▶️", this);
+    connect(audio, &QPushButton::clicked, this, [=]()
+            { play_audio(_client->get_audio_url(audio_name), audio, slider); });
+
+    QVBoxLayout *vbox = new QVBoxLayout();
+    vbox->addWidget(audio);
+    vbox->addWidget(time_label, 0, Qt::AlignHCenter);
+
+    configure_message_color(sender, is_mine, time, wid, vbox, slider);
+}
+
+void client_chat_window::set_retrieve_message_window(const QString &type, const QString &content, const QByteArray &file_data, const QString &date_time, bool true_or_false, const QString &sender)
+{
+    if (!type.compare("file"))
+    {
+        QString file_name = QString("%1_%2").arg(date_time, content);
+
+        _client->IDBFS_save_file(file_name, file_data, static_cast<int>(file_data.size()));
+
+        (sender.isEmpty()) ? add_file(file_name, true_or_false, date_time) : add_file(file_name, true_or_false, date_time, sender);
+
+        return;
+    }
+    else if (!type.compare("audio"))
+    {
+        QString audio_name = QString("%1_%2").arg(date_time, content);
+
+        _client->IDBFS_save_audio(audio_name, file_data, static_cast<int>(file_data.size()));
+
+        (sender.isEmpty()) ? add_audio(audio_name, true_or_false, date_time) : add_audio(audio_name, true_or_false, date_time, sender);
+
+        return;
+    }
+
+    message_widget(true_or_false, content, date_time, sender);
 }
 
 void client_chat_window::retrieve_conversation(const QStringList &messages, const QHash<QString, QByteArray> &binary_data)

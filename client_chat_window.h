@@ -32,10 +32,10 @@ public:
     void add_friend(const QString &ID);
 
     void delete_message_received(const QString &time);
+    void message_deleted(const QString &time);
+    void message_widget(bool true_or_false, const QString &content, const QString &date_time, const QString &sender);
 
     static client_manager *_client;
-
-    void message_deleted(const QString &time);
 
     Swipeable_list_widget *_list;
 
@@ -105,7 +105,7 @@ private:
 
     void set_retrieve_message_window(const QString &type, const QString &content, const QByteArray &file_data, const QString &date_time, bool true_or_false, const QString &sender = QString());
 
-    void configure_message_color(const QString &sender, QHBoxLayout *hbox, QVBoxLayout *vbox, bool is_mine, QListWidgetItem *line, QSlider *slider = nullptr);
+    void configure_message_color(const QString &sender, bool is_mine, const QString &time, QWidget *wid, QVBoxLayout *vbox, QSlider *slider = nullptr);
 
 signals:
     void swipe_right();

@@ -32,7 +32,7 @@ void chat_line::set_message(const QString &message, bool is_mine, const QString 
         delete child;
     }
 
-    QStringList lines = split_message(message, 100);
+    QStringList lines = split_message(message, 30);
 
     Qt::Alignment alignment = is_mine ? Qt::AlignRight : Qt::AlignLeft;
 
