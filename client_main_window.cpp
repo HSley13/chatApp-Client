@@ -513,15 +513,21 @@ void client_main_window::on_login_request(const QString &hashed_password, bool t
 
 void client_main_window::settings_choice()
 {
+    qDebug() << "Inside Settings_choice";
+
     _settings_choice["Chat with an Agent"] = [this]()
     {
         QWidget *wid = _window_map.value("Server", this);
         if (wid)
             _stack->setCurrentIndex(_stack->indexOf(wid));
+
+        qDebug() << "Inside Settings_choice() ---> Chat wih an Agent";
     };
 
     _settings_choice["Change Name"] = [this]()
     {
+        qDebug() << "Inside Settings_choice() ---> Change Name";
+
         QInputDialog *new_name = new QInputDialog(this);
         new_name->setWindowTitle("Change Name");
         new_name->setLabelText("Enter Desired New Name: ");
@@ -541,7 +547,10 @@ void client_main_window::settings_choice()
     };
 
     _settings_choice["Create New Group"] = [this]()
-    { create_group(); };
+    {
+        create_group();
+        qDebug() << "Inside Settings_choice() ---> Create New Group";
+    };
 }
 
 void client_main_window::on_settings()
@@ -551,7 +560,9 @@ void client_main_window::on_settings()
 
     ListDialog *settings_info = new ListDialog(choices, "Settings", this);
     connect(settings_info, &QDialog::accepted, this, [=]()
-            {   QString choice = settings_info->name_selected().first();
+            {   
+                qDebug() << "on_settings";
+                QString choice = settings_info->name_selected().first();
                 _settings_choice[choice];
 
                 settings_info->deleteLater(); });
