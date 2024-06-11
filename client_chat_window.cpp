@@ -57,8 +57,6 @@ void client_chat_window::ask_microphone_permission()
         break;
 
     case Qt::PermissionStatus::Denied:
-        qDebug() << "Denied: Microphone permission is Denied!";
-
         break;
 
     case Qt::PermissionStatus::Granted:
@@ -88,10 +86,7 @@ void client_chat_window::start_recording()
         if (QFile::exists(audio_path))
         {
             if (!QFile::remove(audio_path))
-            {
-                qDebug() << "client_chat_window ---> start_recording() ---> Error: Unable to delete the existing audio file!";
                 return;
-            }
         }
 
         _recorder->record();
@@ -112,8 +107,6 @@ void client_chat_window::start_recording()
             audio_data = audio.readAll();
             audio.close();
         }
-        else
-            qDebug() << "client_chat_window ---> start_recording() ---> Failed to open audio for reading:" << audio_path;
 
         QString audio_name = QDateTime::currentDateTime().toString("yyyyMMdd_HHmmss") + "_audio.m4a";
 

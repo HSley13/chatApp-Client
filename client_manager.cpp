@@ -286,8 +286,6 @@ void client_manager::IDBFS_save_audio(const QString &audio_name, const QByteArra
         fwrite(audio_data, 1, size, file);
         fclose(file);
     }
-    else
-        qDebug() << "Failed to open audio for writing:" << QString::fromStdString(audio_path);
 }
 
 void client_manager::IDBFS_save_file(const QString &file_name, const QByteArray &file_data, const int &size)
@@ -301,8 +299,6 @@ void client_manager::IDBFS_save_file(const QString &file_name, const QByteArray 
         fwrite(file_data, 1, size, file);
         fclose(file);
     }
-    else
-        qDebug() << "Failed to open file for writing:" << QString::fromStdString(file_path);
 }
 
 QUrl client_manager::get_audio_url(const QString &audio_name)
@@ -336,10 +332,7 @@ QUrl client_manager::get_audio_url(const QString &audio_name)
         c_audio_name);
 
     if (!url)
-    {
-        qDebug() << "client_manager ---> get_audio_url() ---> url empty";
         return QUrl();
-    }
 
     QString qUrl = QString::fromUtf8(url);
     free(url);
