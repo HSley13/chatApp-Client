@@ -90,10 +90,10 @@ private:
 
     int _group_ID;
 
-    static int color_counter;
-    static QString last_sender;
-    static QColor last_color;
-    static QColor colors[];
+    static int _color_counter;
+    static QString _last_sender;
+    static QColor _last_color;
+    static QColor _colors[];
 
     void ask_microphone_permission();
 
@@ -104,6 +104,8 @@ private:
     void set_up_window_2();
 
     void set_retrieve_message_window(const QString &type, const QString &content, const QByteArray &file_data, const QString &date_time, bool true_or_false, const QString &sender = QString());
+
+    void configure_message_color(const QString &sender, QHBoxLayout *hbox, QVBoxLayout *vbox, bool is_mine, QListWidgetItem *line, QSlider *slider = nullptr);
 
 signals:
     void swipe_right();
@@ -326,6 +328,7 @@ public:
         label = new QLabel(this);
         layout->addWidget(label);
         setLayout(layout);
+        setStyleSheet("border: 2px solid #4A90E2;");
     }
 
     void setText(const QString &text)

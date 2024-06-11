@@ -51,21 +51,35 @@ private:
 
     QPushButton *_login_button;
 
+    static QHash<QString, std::function<void()>> _settings_choice;
+
     void add_on_top(const QString &client_name);
+
     QIcon create_dot_icon(const QColor &color, int size);
+    void set_icon(const QIcon &icon, const QString &client_name);
+
     void name_changed(const QString &name);
+
+    QStringList authenticate_group_members(const QStringList &group_members_ID);
+
+    void configure_group(const int &group_ID, const QString &group_name, const QStringList &names);
 
     void mousePressEvent(QMouseEvent *event) override;
     void mouseMoveEvent(QMouseEvent *event) override;
+
+    void settings_choice();
 
 signals:
     void swipe_right();
 
 private slots:
+    void sign_up();
+    void login();
+
+    void create_group();
+
     void on_swipe_right();
 
-    void on_sign_up();
-    void on_login();
     void on_login_request(const QString &hashed_password, bool true_or_false, const QHash<int, QHash<QString, int>> &friend_list, const QStringList &online_friends, const QHash<int, QStringList> &messages, const QHash<int, QHash<QString, QByteArray>> &binary_data, const QHash<int, QString> &group_list, const QHash<int, QStringList> &group_messages, const QHash<int, QHash<QString, QByteArray>> &group_binary_data, const QHash<int, QStringList> &groups_members);
 
     void on_settings();
@@ -87,10 +101,6 @@ private slots:
     void on_file_received(const QString &sender, const QString &file_name, const QString &time);
 
     void on_delete_message(const QString &sender, const QString &time);
-
-    void create_group();
-
-    void on_new_group(const int &group_ID);
 
     void on_added_to_group(const int &group_ID, const QString &adm, const QStringList &group_members, const QString &group_name);
 

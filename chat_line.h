@@ -8,6 +8,8 @@ class chat_line : public QMainWindow
 public:
     chat_line(QWidget *parent = nullptr);
 
+    QStringList split_message(const QString &message, const int &chunk_size);
+
     void set_message(const QString &message, bool true_or_false, const QString &date_time);
 
     void set_group_message(const QString &message, const QString &sender, bool is_mine, const QString &date_time);

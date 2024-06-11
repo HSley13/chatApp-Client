@@ -4,6 +4,8 @@ QHash<QString, QWidget *> client_main_window::_window_map = QHash<QString, QWidg
 
 client_chat_window *client_main_window::_server_wid = nullptr;
 
+QHash<QString, std::function<void()>> client_main_window::_settings_choice;
+
 client_main_window::client_main_window(QWidget *parent)
     : QMainWindow(parent)
 {
@@ -51,7 +53,7 @@ client_main_window::client_main_window(QWidget *parent)
                                  "border: 1px solid #0055AA;"
                                  "border-radius: 5px;"
                                  "padding: 5px 10px;");
-    connect(_login_button, &QPushButton::clicked, this, &client_main_window::on_login);
+    connect(_login_button, &QPushButton::clicked, this, &client_main_window::login);
 
     QVBoxLayout *VBOX = new QVBoxLayout();
     VBOX->addLayout(hbox);
@@ -129,7 +131,7 @@ client_main_window::client_main_window(QWidget *parent)
                                   "border: 1px solid #0055AA;"
                                   "border-radius: 5px;"
                                   "padding: 5px 10px;");
-    connect(sign_up_button, &QPushButton::clicked, this, &client_main_window::on_sign_up);
+    connect(sign_up_button, &QPushButton::clicked, this, &client_main_window::sign_up);
 
     QVBoxLayout *sign_up_layout = new QVBoxLayout();
     sign_up_layout->addLayout(first_name_layout);
@@ -154,17 +156,6 @@ client_main_window::client_main_window(QWidget *parent)
     QPushButton *settings = new QPushButton("...", this);
     settings->setFixedSize(50, 20);
     connect(settings, &QPushButton::clicked, this, &client_main_window::on_settings);
-
-    QPixmap group_icon(":/images/create_group_icon.png");
-    if (!group_icon)
-        qDebug() << "Image Send Button is NULL";
-
-    QPushButton *group_button = new QPushButton(this);
-    group_button->setIcon(group_icon);
-    group_button->setIconSize(QSize(50, 50));
-    group_button->setFixedSize(50, 50);
-    group_button->setStyleSheet("border: none");
-    connect(group_button, &QPushButton::clicked, this, &client_main_window::create_group);
 
     _friend_list = new QComboBox(this);
     connect(_friend_list, &QComboBox::textActivated, this, &client_main_window::new_conversation);
@@ -227,7 +218,6 @@ client_main_window::client_main_window(QWidget *parent)
 
     QHBoxLayout *hbox_3 = new QHBoxLayout();
     hbox_3->addWidget(friend_button);
-    hbox_3->addWidget(group_button);
     hbox_3->addWidget(groups);
     hbox_3->addWidget(settings);
 
@@ -265,7 +255,7 @@ client_main_window::~client_main_window()
 
 /*-------------------------------------------------------------------- Slots --------------------------------------------------------------*/
 
-void client_main_window::on_sign_up()
+void client_main_window::sign_up()
 {
     if (_insert_phone_number->text().toInt() == 0)
     {
@@ -332,19 +322,20 @@ void client_main_window::on_sign_up()
 
     input_dialog->open();
 }
-void client_main_window::on_login()
+
+void client_main_window::login()
 {
     _login_button->setDisabled(true);
 
     if (!_server_wid)
         _server_wid = new client_chat_window(this);
 
-    connect(_server_wid, &client_chat_window::login_request, this, &client_main_window::on_login_request);
+    QTimer::singleShot(2000, this, [=]()
+                       { _server_wid->_client->send_login_request(_user_phone_number->text(), _user_password->text()); });
 
     _status_bar->showMessage("LOADING YOUR DATA, WAIT!!!!!! ...", 30000);
 
-    QTimer::singleShot(2000, this, [=]()
-                       { _server_wid->_client->send_login_request(_user_phone_number->text(), _user_password->text()); });
+    connect(_server_wid, &client_chat_window::login_request, this, &client_main_window::on_login_request);
 
     QTimer::singleShot(10000, this, [=]()
                        { _login_button->setEnabled(true); });
@@ -385,12 +376,14 @@ void client_main_window::on_login_request(const QString &hashed_password, bool t
         connect(_server_wid, &client_chat_window::audio_received, this, &client_main_window::on_audio_received);
         connect(_server_wid, &client_chat_window::file_received, this, &client_main_window::on_file_received);
         connect(_server_wid, &client_chat_window::delete_message, this, &client_main_window::on_delete_message);
-        connect(_server_wid, &client_chat_window::new_group_ID, this, &client_main_window::on_new_group);
         connect(_server_wid, &client_chat_window::added_to_group, this, &client_main_window::on_added_to_group);
         connect(_server_wid, &client_chat_window::group_is_typing_received, this, &client_main_window::on_group_is_typing_received);
         connect(_server_wid, &client_chat_window::group_text_received, this, &client_main_window::on_group_text_received);
         connect(_server_wid, &client_chat_window::group_file_received, this, &client_main_window::on_group_file_received);
         connect(_server_wid, &client_chat_window::group_audio_received, this, &client_main_window::on_group_audio_received);
+
+        connect(_server_wid, &client_chat_window::new_group_ID, this, [=](const int &group_ID)
+                { configure_group(group_ID, _group_name, _group_members); });
 
         connect(_server_wid, &client_chat_window::is_typing_received, this, [=](const QString &sender)
                 { _status_bar->showMessage(QString("%1 is typing...").arg(sender), 1000); });
@@ -456,6 +449,7 @@ void client_main_window::on_login_request(const QString &hashed_password, bool t
                 }
             }
         }
+
         _user_phone_number->clear();
         _user_password->clear();
 
@@ -476,32 +470,7 @@ void client_main_window::on_login_request(const QString &hashed_password, bool t
                 if (_window_map.contains(group_name))
                     continue;
 
-                QStringList names;
-                for (const QString &ID : group_members)
-                {
-                    bool found = false;
-
-                    if (!_server_wid->_client->my_ID().compare(ID))
-                    {
-                        names << "You";
-                        continue;
-                    }
-
-                    for (int i = 0; i < _friend_list->count(); i++)
-                    {
-                        QString ID_2 = _friend_list->itemData(i).toString();
-                        if (!ID.compare(ID_2))
-                        {
-                            names << _friend_list->itemText(i);
-                            found = true;
-
-                            break;
-                        }
-                    }
-
-                    if (!found)
-                        names << ID;
-                }
+                QStringList names = authenticate_group_members(group_members);
 
                 client_chat_window *win = new client_chat_window(group_ID, group_name, names, this);
                 win->retrieve_group_conversation(group_message, group_binary_data);
@@ -511,11 +480,7 @@ void client_main_window::on_login_request(const QString &hashed_password, bool t
                         {
                             int index = _friend_list->findText(name, Qt::MatchExactly);
                             if (index != -1)
-                            {
-                                QWidget *wid = _window_map.value(name, this);
-                                if (wid)
-                                    _stack->setCurrentIndex(_stack->indexOf(wid));
-                            }
+                                new_conversation(name);
                             else
                                 win->add_friend(name); });
 
@@ -546,50 +511,49 @@ void client_main_window::on_login_request(const QString &hashed_password, bool t
     _user_password->setStyleSheet("border: 1px solid gray");
 }
 
-void client_main_window::on_settings()
+void client_main_window::settings_choice()
 {
-    QStringList choices;
-    choices << "Chat with an Agent" << "Change Name";
+    _settings_choice["Chat with an Agent"] = [this]()
+    {
+        QWidget *wid = _window_map.value("Server", this);
+        if (wid)
+            _stack->setCurrentIndex(_stack->indexOf(wid));
+    };
 
-    ListDialog *settings_info = new ListDialog(choices, "Settings", this);
-    connect(settings_info, &QDialog::accepted, this, [=]()
-            {   
-                                
-                QString name = settings_info->name_selected().first();
-                if (!name.compare("Chat with an Agent"))
+    _settings_choice["Change Name"] = [this]()
+    {
+        QInputDialog *new_name = new QInputDialog(this);
+        new_name->setWindowTitle("Change Name");
+        new_name->setLabelText("Enter Desired New Name: ");
+        new_name->setStyleSheet("background-color: white;"
+                                " border: 1px solid #4A90E2;"
+                                " padding: 5px 10px;"
+                                " border-radius: 5px;");
+
+        connect(new_name, &QInputDialog::finished, this, [=](int result)
                 {
-                    QWidget *wid = _window_map.value("Server", this);
-                    if (wid)
-                        _stack->setCurrentIndex(_stack->indexOf(wid));
-                }
-                else if (!name.compare("Change Name"))
-                {
-                    QInputDialog *new_name = new QInputDialog(this);
-                    new_name->setWindowTitle("Change Name");
-                    new_name->setLabelText("Enter Desired New Name: ");
-                    new_name->setStyleSheet("background-color: white;"
-                                            " border: 1px solid #4A90E2;"
-                                            " padding: 5px 10px;"
-                                            " border-radius: 5px;");
-
-                    QLabel *label = new_name->findChild<QLabel *>("qt_msgbox_label");
-                    if (label)
-                        label->setStyleSheet("color: #4A90E2; font-size: 14px;");
-
-                    QLineEdit *lineEdit = new_name->findChild<QLineEdit *>("qt_msgbox_lineedit");
-                    if (lineEdit)
-                        lineEdit->setStyleSheet("border: 2px solid #4A90E2; border-radius: 5px; background-color: #EAF4FE; color: black; font-size: 14px;");
-
-                    connect(new_name, &QInputDialog::finished, this, [=](int result)
-                            {
                                 if(result == QDialog::Accepted)
                                     name_changed(new_name->textValue());
 
                                 new_name->deleteLater(); });
-                                
-                    new_name->open();
-                }
-                
+
+        new_name->open();
+    };
+
+    _settings_choice["Create New Group"] = [this]()
+    { create_group(); };
+}
+
+void client_main_window::on_settings()
+{
+    QStringList choices;
+    choices << "Chat with an Agent" << "Change Name" << "Create New Group";
+
+    ListDialog *settings_info = new ListDialog(choices, "Settings", this);
+    connect(settings_info, &QDialog::accepted, this, [=]()
+            {   QString choice = settings_info->name_selected().first();
+                _settings_choice[choice];
+
                 settings_info->deleteLater(); });
 
     settings_info->open();
@@ -626,40 +590,35 @@ QIcon client_main_window::create_dot_icon(const QColor &color, int size)
 
 void client_main_window::on_client_disconnected(const QString &client_name)
 {
+    QIcon offline_icon = create_dot_icon(Qt::red, 10);
+
+    set_icon(offline_icon, client_name);
+
+    _status_bar->showMessage(QString("%1 is Disconnected").arg(client_name), 5000);
+}
+
+void client_main_window::set_icon(const QIcon &icon, const QString &client_name)
+{
     QWidget *win = _window_map.value(client_name);
     if (win)
     {
-        QIcon offline_icon = create_dot_icon(Qt::red, 10);
-
         int index = _friend_list->findText(client_name);
         if (index != -1)
-            _friend_list->setItemIcon(index, offline_icon);
+            _friend_list->setItemIcon(index, icon);
 
         QList<QListWidgetItem *> items = _list->findItems(client_name, Qt::MatchExactly);
         if (!items.isEmpty())
-            items.first()->setIcon(offline_icon);
-
-        _status_bar->showMessage(QString("%1 is Disconnected").arg(client_name), 5000);
+            items.first()->setIcon(icon);
     }
 }
 
 void client_main_window::on_client_connected(const QString &client_name)
 {
-    QWidget *win = _window_map.value(client_name);
-    if (win)
-    {
-        QIcon online_icon = create_dot_icon(Qt::green, 10);
+    QIcon online_icon = create_dot_icon(Qt::green, 10);
 
-        int index = _friend_list->findText(client_name);
-        if (index != -1)
-            _friend_list->setItemIcon(index, online_icon);
+    set_icon(online_icon, client_name);
 
-        QList<QListWidgetItem *> items = _list->findItems(client_name, Qt::MatchExactly);
-        if (!items.isEmpty())
-            items.first()->setIcon(online_icon);
-
-        _status_bar->showMessage(QString("%1 is Connected").arg(client_name), 5000);
-    }
+    _status_bar->showMessage(QString("%1 is Connected").arg(client_name), 5000);
 }
 
 void client_main_window::on_text_message_received(const QString &sender, const QString &text, const QString &time)
@@ -681,8 +640,6 @@ void client_main_window::on_text_message_received(const QString &sender, const Q
 
             add_on_top(sender);
         }
-        else
-            qDebug() << "client_main_window ---> on_text_message_received() --> ERROR CASTING THE WIDGET:";
     }
 }
 
@@ -691,8 +648,6 @@ void client_main_window::on_item_clicked(QListWidgetItem *item)
     QWidget *wid = _window_map.value(item->text(), this);
     if (wid)
         _stack->setCurrentIndex(_stack->indexOf(wid));
-    else
-        qDebug() << "client_main_window--> on_item_clicked()--> Widget not found in _window_map for name:" << item->text();
 }
 
 void client_main_window::on_client_name_changed(const QString &old_name, const QString &client_name)
@@ -706,8 +661,6 @@ void client_main_window::on_client_name_changed(const QString &old_name, const Q
         QList<QListWidgetItem *> items = _list->findItems(old_name, Qt::MatchExactly);
         if (!items.empty())
             items.first()->setText(client_name);
-        else
-            qDebug() << "client_main_window ---> on_client_name_changed() ---> Client Name not Found in the _list: " << old_name;
 
         int index = _friend_list->findText(old_name);
         if (index != -1)
@@ -720,8 +673,6 @@ void client_main_window::on_client_name_changed(const QString &old_name, const Q
         client_chat_window *wind = qobject_cast<client_chat_window *>(win);
         if (wind)
             wind->window_name(client_name);
-        else
-            qDebug() << "client_main_window ---> on_client_name_changed() ---> ERROR CASTING THE WIDGET:";
     }
 }
 
@@ -774,8 +725,6 @@ void client_main_window::new_conversation(const QString &name)
     QWidget *wid = _window_map.value(name, this);
     if (wid)
         _stack->setCurrentIndex(_stack->indexOf(wid));
-    else
-        qDebug() << "client_main_window--> new_conversation()--> Widget not found in _window_map for name:" << name;
 
     _group_dialog->close();
     _friend_dialog->close();
@@ -791,23 +740,20 @@ void client_main_window::on_client_added_you(const int &conversation_ID, const Q
         _friend_list->setItemData(_friend_list->count() - 1, ID);
 
         client_chat_window *wid = new client_chat_window(conversation_ID, ID, name, this);
-        if (!wid)
+        if (wid)
         {
-            qDebug() << "couldn't create a chat for the seach number";
-            return;
+            connect(wid, &client_chat_window::swipe_right, this, &client_main_window::on_swipe_right);
+            connect(wid, &client_chat_window::data_received_sent, this, [=](const QString &first_name)
+                    { add_on_top(first_name); });
+
+            wid->window_name(name);
+
+            _stack->addWidget(wid);
+
+            _window_map.insert(name, wid);
+
+            _status_bar->showMessage(QString("%1 added You").arg(name), 5000);
         }
-
-        connect(wid, &client_chat_window::swipe_right, this, &client_main_window::on_swipe_right);
-        connect(wid, &client_chat_window::data_received_sent, this, [=](const QString &first_name)
-                { add_on_top(first_name); });
-
-        wid->window_name(name);
-
-        _stack->addWidget(wid);
-
-        _window_map.insert(name, wid);
-
-        _status_bar->showMessage(QString("%1 added You").arg(name), 5000);
     }
 }
 
@@ -822,8 +768,6 @@ void client_main_window::on_audio_received(const QString &sender, const QString 
             wid->add_audio(audio_name, false, time);
             add_on_top(sender);
         }
-        else
-            qDebug() << "client_main_window ---> on_text_message_received() --> ERROR CASTING THE WIDGET:";
     }
 }
 
@@ -838,8 +782,6 @@ void client_main_window::on_file_received(const QString &sender, const QString &
             wid->add_file(file_name, false, time);
             add_on_top(sender);
         }
-        else
-            qDebug() << "client_main_window ---> on_text_message_received() --> ERROR CASTING THE WIDGET:";
     }
 }
 
@@ -851,15 +793,13 @@ void client_main_window::on_delete_message(const QString &sender, const QString 
         client_chat_window *wid = qobject_cast<client_chat_window *>(win);
         if (wid)
             wid->delete_message_received(time);
-        else
-            qDebug() << "client_main_window ---> on_delete_message() --> ERROR CASTING THE WIDGET:";
     }
 }
 
-void client_main_window::on_added_to_group(const int &group_ID, const QString &adm, const QStringList &group_members, const QString &group_name)
+QStringList client_main_window::authenticate_group_members(const QStringList &group_members_ID)
 {
     QStringList names;
-    for (QString ID : group_members)
+    for (QString ID : group_members_ID)
     {
         bool found = false;
 
@@ -886,17 +826,18 @@ void client_main_window::on_added_to_group(const int &group_ID, const QString &a
             names << ID;
     }
 
+    return names;
+}
+
+void client_main_window::configure_group(const int &group_ID, const QString &group_name, const QStringList &names)
+{
     client_chat_window *win = new client_chat_window(group_ID, group_name, names, this);
     connect(win, &client_chat_window::swipe_right, this, &client_main_window::on_swipe_right);
     connect(win, &client_chat_window::item_clicked, this, [=](const QString &name)
             {
                 int index = _friend_list->findText(name, Qt::MatchExactly);
                 if (index != -1)
-                {
-                    QWidget *wid = _window_map.value(name, this);
-                    if (wid)
-                        _stack->setCurrentIndex(_stack->indexOf(wid));
-                }
+                    new_conversation(name);
                 else
                     win->add_friend(name); });
 
@@ -907,33 +848,15 @@ void client_main_window::on_added_to_group(const int &group_ID, const QString &a
     _stack->addWidget(win);
 
     _group_list->addItem(group_name);
-
-    _status_bar->showMessage(QString("%1 Added you do to a new Group called: %2").arg(adm, group_name), 5000);
 }
 
-void client_main_window::on_new_group(const int &group_ID)
+void client_main_window::on_added_to_group(const int &group_ID, const QString &adm, const QStringList &group_members, const QString &group_name)
 {
-    client_chat_window *win = new client_chat_window(group_ID, _group_name, _group_members, this);
-    connect(win, &client_chat_window::swipe_right, this, &client_main_window::on_swipe_right);
-    connect(win, &client_chat_window::item_clicked, this, [=](const QString &name)
-            {
-                int index = _friend_list->findText(name, Qt::MatchExactly);
-                if (index != -1)
-                {
-                    QWidget *wid = _window_map.value(name, this);
-                    if (wid)
-                        _stack->setCurrentIndex(_stack->indexOf(wid));
-                }
-                else
-                    win->add_friend(name); });
+    QStringList names = authenticate_group_members(group_members);
 
-    win->window_name(_group_name);
+    configure_group(group_ID, group_name, names);
 
-    _window_map.insert(_group_name, win);
-
-    _stack->addWidget(win);
-
-    _group_list->addItem(_group_name);
+    _status_bar->showMessage(QString("%1 Added you do to a new Group called: %2").arg(adm, group_name), 5000);
 }
 
 void client_main_window::create_group()
@@ -941,14 +864,6 @@ void client_main_window::create_group()
     QInputDialog *input_dialog = new QInputDialog(this);
     input_dialog->setWindowTitle("Group Name");
     input_dialog->setLabelText("Enter Group Name");
-
-    QLabel *label = input_dialog->findChild<QLabel *>("qt_msgbox_label");
-    if (label)
-        label->setStyleSheet("color: #4A90E2; font-size: 14px;");
-
-    QLineEdit *lineEdit = input_dialog->findChild<QLineEdit *>("qt_msgbox_lineedit");
-    if (lineEdit)
-        lineEdit->setStyleSheet("border: 2px solid #4A90E2; border-radius: 5px; background-color: #EAF4FE; color: black; font-size: 14px;");
 
     connect(input_dialog, &QInputDialog::finished, this, [=](int result)
             {
@@ -998,8 +913,6 @@ void client_main_window::on_group_is_typing_received(const int &group_ID, const 
         client_chat_window *wid = qobject_cast<client_chat_window *>(win);
         if (wid)
             _status_bar->showMessage(QString("Group>: %1,  %2 is typing...").arg(group_name, sender), 1000);
-        else
-            qDebug() << "client_main_window ---> on_group_is_typing_received() --> ERROR CASTING THE WIDGET:";
     }
 }
 
@@ -1018,8 +931,6 @@ void client_main_window::on_group_text_received(const int &group_ID, const QStri
             wid->message_received(message, time, sender);
             add_on_top(group_name);
         }
-        else
-            qDebug() << "client_main_window ---> on_group_text_received() --> ERROR CASTING THE WIDGET:";
     }
 }
 
@@ -1034,8 +945,6 @@ void client_main_window::on_group_audio_received(const int &group_ID, const QStr
             wid->add_audio(audio_name, false, time, sender);
             add_on_top(group_name);
         }
-        else
-            qDebug() << "client_main_window ---> on_group_audio_received() --> ERROR CASTING THE WIDGET:";
     }
 }
 
@@ -1050,8 +959,6 @@ void client_main_window::on_group_file_received(const int &group_ID, const QStri
             wid->add_file(file_name, false, time, sender);
             add_on_top(group_name);
         }
-        else
-            qDebug() << "client_main_window ---> on_group_file_received() --> ERROR CASTING THE WIDGET:";
     }
 }
 

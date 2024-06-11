@@ -12,52 +12,67 @@ chat_line::chat_line(QWidget *parent)
     VBOX = new QVBoxLayout(central_widget);
 }
 
+QStringList chat_line::split_message(const QString &message, const int &chunk_size)
+{
+    QStringList chunks;
+    int length = message.length();
+
+    for (int i = 0; i < length; i += chunk_size)
+        chunks.append(message.mid(i, chunk_size));
+
+    return chunks;
+}
+
 void chat_line::set_message(const QString &message, bool is_mine, const QString &time)
 {
-    QLabel *msg_label = new QLabel(message, this);
+    QLayoutItem *child;
+    while ((child = VBOX->takeAt(0)) != 0)
+    {
+        delete child->widget();
+        delete child;
+    }
+
+    QStringList lines = split_message(message, 100);
+
+    Qt::Alignment alignment = is_mine ? Qt::AlignRight : Qt::AlignLeft;
+
+    for (const QString &line : lines)
+    {
+        QLabel *msg_label = new QLabel(line, this);
+
+        msg_label->setWordWrap(true);
+        msg_label->setAlignment(alignment);
+
+        VBOX->addWidget(msg_label);
+    }
+
     QLabel *time_label = new QLabel(time, this);
+    time_label->setAlignment(alignment);
 
-    if (is_mine)
-    {
-        msg_label->setAlignment(Qt::AlignRight);
-        time_label->setAlignment(Qt::AlignRight);
+    VBOX->addWidget(time_label);
 
-        message_layout->addWidget(msg_label);
-        message_layout->addWidget(time_label);
-    }
-    else
-    {
-        msg_label->setAlignment(Qt::AlignLeft);
-        time_label->setAlignment(Qt::AlignLeft);
-
-        message_layout->addWidget(msg_label);
-        message_layout->addWidget(time_label);
-    }
-
-    VBOX->addLayout(message_layout);
+    setLayout(VBOX);
 }
 
 void chat_line::set_group_message(const QString &message, const QString &sender, bool is_mine, const QString &date_time)
 {
+    QLayoutItem *child;
+    while ((child = VBOX->takeAt(0)) != 0)
+    {
+        delete child->widget();
+        delete child;
+    }
+
     QLabel *msg_label = new QLabel(QString("%1: %2").arg(sender, message), this);
     QLabel *time_label = new QLabel(date_time, this);
 
-    if (is_mine)
-    {
-        msg_label->setAlignment(Qt::AlignRight);
-        time_label->setAlignment(Qt::AlignRight);
+    Qt::Alignment alignment = is_mine ? Qt::AlignRight : Qt::AlignLeft;
 
-        message_layout->addWidget(msg_label);
-        message_layout->addWidget(time_label);
-    }
-    else
-    {
-        msg_label->setAlignment(Qt::AlignLeft);
-        time_label->setAlignment(Qt::AlignLeft);
+    msg_label->setAlignment(alignment);
+    time_label->setAlignment(alignment);
 
-        message_layout->addWidget(msg_label);
-        message_layout->addWidget(time_label);
-    }
+    VBOX->addWidget(msg_label);
+    VBOX->addWidget(time_label);
 
-    VBOX->addLayout(message_layout);
+    setLayout(VBOX);
 }
