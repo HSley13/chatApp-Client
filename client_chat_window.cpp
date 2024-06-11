@@ -256,7 +256,7 @@ void client_chat_window::message_received(const QString &message, const QString 
     if (_destinator.compare("Server"))
         _client->send_save_conversation(_conversation_ID, _destinator, _client->my_ID(), message, time);
 
-    message_widget(true, message, time, sender);
+    message_widget(false, message, time, sender);
 }
 
 void client_chat_window::delete_message_received(const QString &time)
@@ -544,7 +544,7 @@ void client_chat_window::message_widget(bool true_or_false, const QString &conte
     wid->setStyleSheet("color: black;");
 
     QListWidgetItem *line = new QListWidgetItem(_list);
-    line->setSizeHint(QSize(0, 60));
+    line->setSizeHint(wid->sizeHint());
     line->setData(Qt::UserRole, date_time);
 
     if (sender.isEmpty())

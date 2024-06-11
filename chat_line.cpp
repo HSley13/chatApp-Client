@@ -6,6 +6,7 @@ chat_line::chat_line(QWidget *parent)
 {
     central_widget = new QWidget();
     setCentralWidget(central_widget);
+    setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
     message_layout = new QVBoxLayout();
 
