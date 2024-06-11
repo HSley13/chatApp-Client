@@ -51,8 +51,6 @@ private:
 
     QPushButton *_login_button;
 
-    static QHash<QString, std::function<void()>> _settings_choice;
-
     void add_on_top(const QString &client_name);
 
     QIcon create_dot_icon(const QColor &color, int size);
