@@ -39,7 +39,7 @@ public:
 
     void send_delete_message(const int &conversation_ID, const QString &sender, const QString &receiver, const QString &time);
 
-    void send_create_new_group(const QString &adm, const QStringList &members, const QString &group_name);
+    void send_create_new_group(const QString &adm, QStringList &members, const QString &group_name);
 
     void mount_audio_IDBFS();
     void mount_file_IDBFS();

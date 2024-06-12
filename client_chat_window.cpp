@@ -30,8 +30,8 @@ client_chat_window::client_chat_window(const int &conversation_ID, const QString
     _client->send_create_conversation(_conversation_ID, my_name(), _client->my_ID().toInt(), _destinator_name, _destinator.toInt());
 }
 
-client_chat_window::client_chat_window(const int &group_ID, const QString &group_name, const QStringList &group_members, QWidget *parent)
-    : QMainWindow(parent), _group_ID(group_ID), _group_name(group_name), _group_members(group_members)
+client_chat_window::client_chat_window(const int &group_ID, const QString &group_name, const QStringList &group_members, const QString &adm, QWidget *parent)
+    : QMainWindow(parent), _group_ID(group_ID), _group_name(group_name), _group_members(group_members), _adm(adm)
 {
     set_up_window();
 
@@ -292,9 +292,9 @@ void client_chat_window::set_up_window()
     QWidget *central_widget = new QWidget();
     setCentralWidget(central_widget);
 
-    QPushButton *button_file = new QPushButton("Server's Conversation", this);
-    button_file->setStyleSheet("border: none;");
-    connect(button_file, &QPushButton::clicked, this, [=]()
+    QPushButton *member_list = new QPushButton("Server's Conversation", this);
+    member_list->setStyleSheet("border: none;");
+    connect(member_list, &QPushButton::clicked, this, [=]()
             {
                 if (_group_name.isEmpty())
                     return;
@@ -311,7 +311,7 @@ void client_chat_window::set_up_window()
                 } });
 
     connect(this, &client_chat_window::update_button_file, this, [=]()
-            { button_file->setText(QString("%1's Conversation").arg(_window_name)); });
+            { member_list->setText(QString("%1's Conversation").arg(_window_name)); });
 
     _list = new Swipeable_list_widget(this, this);
     _list->setItemDelegate(new separator_delegate(_list));
@@ -348,9 +348,36 @@ void client_chat_window::set_up_window()
     _hbox->addWidget(_insert_message);
     _hbox->addWidget(_send_button);
 
+    QHBoxLayout *buttons = new QHBoxLayout(this);
+    buttons->addWidget(member_list);
+
+    if (!_group_name.isEmpty())
+    {
+        QPushButton *add_button = new QPushButton("Add New Member", this);
+        connect(add_button, &QPushButton::clicked, this, [=]()
+                {
+                    QInputDialog *add_dialog = new QInputDialog(this);
+                    add_dialog->setWindowTitle("Add New Member");
+                    add_dialog->setLabelText("Enter Phone Number");
+
+                    connect(add_dialog, &QInputDialog::finished, this, [=](int result) {}); });
+
+        QPushButton *remove_button = new QPushButton("Remove Member", this);
+        connect(remove_button, &QPushButton::clicked, this, [=]()
+                {
+                    QInputDialog *remove_dialog = new QInputDialog(this);
+                    remove_dialog->setWindowTitle("Remove Member");
+                    remove_dialog->setLabelText("Enter Member Phone Number");
+
+                    connect(remove_dialog, &QInputDialog::finished, this, [=](int result) {}); });
+
+        buttons->addWidget(add_button);
+        buttons->addWidget(remove_button);
+    }
+
     QVBoxLayout *VBOX = new QVBoxLayout(central_widget);
     VBOX->addWidget(display_widget);
-    VBOX->addWidget(button_file);
+    VBOX->addLayout(buttons);
     VBOX->addWidget(_list);
     VBOX->addLayout(_hbox);
 
@@ -703,18 +730,4 @@ void client_chat_window::retrieve_group_conversation(const QStringList &messages
             console.log('Audio & File saved and synced');
         });
     });
-}
-
-void client_chat_window::add_friend(const QString &ID)
-{
-    if (!_client->my_ID().compare(ID))
-        return;
-    _client->send_lookup_friend(ID);
-}
-
-void client_chat_window::create_new_group(QStringList group_members, QString group_name)
-{
-    group_members << _client->my_ID();
-
-    _client->send_create_new_group(my_name(), group_members, group_name);
 }

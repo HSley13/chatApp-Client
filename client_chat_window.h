@@ -17,7 +17,7 @@ class client_chat_window : public QMainWindow
 public:
     client_chat_window(QWidget *parent = nullptr);
     client_chat_window(const int &conversation_ID, const QString &destinator, const QString &name, QWidget *parent = nullptr);
-    client_chat_window(const int &group_ID, const QString &group_name, const QStringList &group_members, QWidget *parent = nullptr);
+    client_chat_window(const int &group_ID, const QString &group_name, const QStringList &group_members, const QString &adm, QWidget *parent = nullptr);
 
     void set_name(const QString &insert_name);
 
@@ -29,7 +29,6 @@ public:
 
     void add_file(const QString &path, bool is_mine, const QString &time, const QString &sender = QString());
     void add_audio(const QString &audio_name, bool is_mine, const QString &time, const QString &sender = QString());
-    void add_friend(const QString &ID);
 
     void delete_message_received(const QString &time);
     void message_deleted(const QString &time);
@@ -43,8 +42,6 @@ public:
     QString _group_name = QString();
 
     QString my_name();
-
-    void create_new_group(QStringList group_members, QString group_name);
 
 private:
     QStatusBar *_status_bar;
@@ -94,6 +91,8 @@ private:
     static QString _last_sender;
     static QColor _last_color;
     static QColor _colors[];
+
+    QString _adm;
 
     void ask_microphone_permission();
 

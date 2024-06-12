@@ -217,7 +217,7 @@ client_main_window::client_main_window(QWidget *parent)
     _search_phone_number = new CustomLineEdit(this);
     _search_phone_number->setPlaceholderText("ADD PEOPLE VIA PHONE NUMBER, THEN PRESS ENTER");
     connect(_search_phone_number, &CustomLineEdit::returnPressed, this, [=]()
-            { _server_wid->add_friend(_search_phone_number->text()); });
+            { _server_wid->_client->send_lookup_friend(_search_phone_number->text()); });
 
     DisplayWidget *display_widget = new DisplayWidget(this);
     display_widget->hide();
@@ -376,7 +376,7 @@ void client_main_window::on_login_request(const QString &hashed_password, bool t
         connect(_server_wid, &client_chat_window::group_audio_received, this, &client_main_window::on_group_audio_received);
 
         connect(_server_wid, &client_chat_window::new_group_ID, this, [=](const int &group_ID)
-                { configure_group(group_ID, _group_name, _group_members); });
+                { configure_group(group_ID, _group_name, _group_members, _server_wid->my_name()); });
 
         connect(_server_wid, &client_chat_window::is_typing_received, this, [=](const QString &sender)
                 { _status_bar->showMessage(QString("%1 is typing...").arg(sender), 1000); });
@@ -465,7 +465,8 @@ void client_main_window::on_login_request(const QString &hashed_password, bool t
 
                 QStringList names = authenticate_group_members(group_members);
 
-                client_chat_window *win = new client_chat_window(group_ID, group_name, names, this);
+                // Fix the adm_name
+                client_chat_window *win = new client_chat_window(group_ID, group_name, names, "adm_name", this);
                 win->retrieve_group_conversation(group_message, group_binary_data);
 
                 connect(win, &client_chat_window::swipe_right, this, &client_main_window::on_swipe_right);
@@ -475,7 +476,7 @@ void client_main_window::on_login_request(const QString &hashed_password, bool t
                             if (index != -1)
                                 new_conversation(name);
                             else
-                                win->add_friend(name); });
+                                win->_client->send_lookup_friend(name); });
 
                 win->window_name(group_name);
 
@@ -840,9 +841,9 @@ QStringList client_main_window::authenticate_group_members(const QStringList &gr
     return names;
 }
 
-void client_main_window::configure_group(const int &group_ID, const QString &group_name, const QStringList &names)
+void client_main_window::configure_group(const int &group_ID, const QString &group_name, const QStringList &names, const QString &adm)
 {
-    client_chat_window *win = new client_chat_window(group_ID, group_name, names, this);
+    client_chat_window *win = new client_chat_window(group_ID, group_name, names, adm, this);
     connect(win, &client_chat_window::swipe_right, this, &client_main_window::on_swipe_right);
     connect(win, &client_chat_window::item_clicked, this, [=](const QString &name)
             {
@@ -850,7 +851,7 @@ void client_main_window::configure_group(const int &group_ID, const QString &gro
                 if (index != -1)
                     new_conversation(name);
                 else
-                    win->add_friend(name); });
+                    win->_client->send_lookup_friend(name); });
 
     win->window_name(group_name);
 
@@ -865,7 +866,7 @@ void client_main_window::on_added_to_group(const int &group_ID, const QString &a
 {
     QStringList names = authenticate_group_members(group_members);
 
-    configure_group(group_ID, group_name, names);
+    configure_group(group_ID, group_name, names, adm);
 
     _status_bar->showMessage(QString("%1 Added you do to a new Group called: %2").arg(adm, group_name), 5000);
 }
@@ -905,7 +906,7 @@ void client_main_window::create_group()
                                          }
                                      }
 
-                                         _server_wid->create_new_group(IDs, _group_name);
+                                         _server_wid->_client->send_create_new_group(_server_wid->my_name(), IDs, _group_name);
                                          members->deleteLater();
                                 });
 

@@ -62,7 +62,7 @@ private:
 
     QStringList authenticate_group_members(const QStringList &group_members_ID);
 
-    void configure_group(const int &group_ID, const QString &group_name, const QStringList &names);
+    void configure_group(const int &group_ID, const QString &group_name, const QStringList &names, const QString &adm);
 
     void mousePressEvent(QMouseEvent *event) override;
     void mouseMoveEvent(QMouseEvent *event) override;

@@ -211,7 +211,8 @@ void client_manager::send_audio(const QString &sender, const QString &receiver, 
 
 void client_manager::send_lookup_friend(const QString &ID)
 {
-    _socket->sendBinaryMessage(_protocol->set_lookup_friend_message(ID));
+    if (my_ID().compare(ID))
+        _socket->sendBinaryMessage(_protocol->set_lookup_friend_message(ID));
 }
 
 void client_manager::send_create_conversation(const int &conversation_ID, const QString &participant1, const int &participant1_ID, const QString &participant2, const int &participant2_ID)
@@ -248,8 +249,10 @@ void client_manager::send_delete_message(const int &conversation_ID, const QStri
     _socket->sendBinaryMessage(_protocol->set_delete_message(conversation_ID, sender, receiver, time));
 }
 
-void client_manager::send_create_new_group(const QString &adm, const QStringList &members, const QString &group_name)
+void client_manager::send_create_new_group(const QString &adm, QStringList &members, const QString &group_name)
 {
+    members << my_ID();
+
     _socket->sendBinaryMessage(_protocol->set_new_group_message(adm, members, group_name));
 }
 
