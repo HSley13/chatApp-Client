@@ -35,6 +35,8 @@ client_chat_window::client_chat_window(const int &group_ID, const QString &group
 {
     set_up_window();
 
+    qDebug() << "adm ID is: " << _adm;
+
     set_up_window_2();
 }
 
@@ -351,7 +353,7 @@ void client_chat_window::set_up_window()
     QHBoxLayout *buttons = new QHBoxLayout(this);
     buttons->addWidget(member_list);
 
-    if (!_group_name.isEmpty())
+    if (!_group_name.isEmpty() && !_adm.compare(_client->my_ID()))
     {
         QPushButton *add_button = new QPushButton("Add New Member", this);
         add_button->setStyleSheet("border: none;");
