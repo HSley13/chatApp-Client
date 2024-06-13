@@ -906,8 +906,10 @@ void client_main_window::create_group()
                                          }
                                      }
 
-                                         _server_wid->_client->send_create_new_group(_server_wid->my_name(), IDs, _group_name);
-                                         members->deleteLater();
+                                     _group_members << _server_wid->_client->my_ID();
+
+                                     _server_wid->_client->send_create_new_group(_server_wid->my_name(), IDs, _group_name);
+                                     members->deleteLater();
                                 });
 
                         members->open();
