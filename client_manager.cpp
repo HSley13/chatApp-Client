@@ -249,10 +249,8 @@ void client_manager::send_delete_message(const int &conversation_ID, const QStri
     _socket->sendBinaryMessage(_protocol->set_delete_message(conversation_ID, sender, receiver, time));
 }
 
-void client_manager::send_create_new_group(const QString &adm, QStringList &members, const QString &group_name)
+void client_manager::send_create_new_group(const QString &adm, const QStringList &members, const QString &group_name)
 {
-    members << my_ID();
-
     _socket->sendBinaryMessage(_protocol->set_new_group_message(adm, members, group_name));
 }
 

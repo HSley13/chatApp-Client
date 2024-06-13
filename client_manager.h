@@ -39,7 +39,7 @@ public:
 
     void send_delete_message(const int &conversation_ID, const QString &sender, const QString &receiver, const QString &time);
 
-    void send_create_new_group(const QString &adm, QStringList &members, const QString &group_name);
+    void send_create_new_group(const QString &adm, const QStringList &members, const QString &group_name);
 
     void mount_audio_IDBFS();
     void mount_file_IDBFS();
@@ -91,7 +91,7 @@ signals:
     void client_added_you(const int &conversation_ID, const QString &name, const QString &ID);
     void lookup_friend_result(const int &conversation_ID, const QString &name, bool true_or_false);
 
-    void login_request(const QString &hashed_password, bool true_or_false, const QHash<int, QHash<QString, int>> &friend_list, const QStringList &online_friends, const QHash<int, QStringList> &messages, const QHash<int, QHash<QString, QByteArray>> &binary_data, const QHash<int, QString> &group_list, const QHash<int, QStringList> &group_messages, const QHash<int, QHash<QString, QByteArray>> &group_binary_data, const QHash<int, QStringList> &groups_members);
+    void login_request(const QString &hashed_password, bool true_or_false, const QHash<int, QHash<QString, int>> &friend_list, const QStringList &online_friends, const QHash<int, QStringList> &messages, const QHash<int, QHash<QString, QByteArray>> &binary_data, const QHash<int, QHash<int, QString>> &group_list, const QHash<int, QStringList> &group_messages, const QHash<int, QHash<QString, QByteArray>> &group_binary_data, const QHash<int, QStringList> &groups_members);
 
     void delete_message(const QString &sender, const QString &time);
 

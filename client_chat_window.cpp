@@ -354,22 +354,26 @@ void client_chat_window::set_up_window()
     if (!_group_name.isEmpty())
     {
         QPushButton *add_button = new QPushButton("Add New Member", this);
+        add_button->setStyleSheet("border: none;");
         connect(add_button, &QPushButton::clicked, this, [=]()
                 {
                     QInputDialog *add_dialog = new QInputDialog(this);
                     add_dialog->setWindowTitle("Add New Member");
                     add_dialog->setLabelText("Enter Phone Number");
 
-                    connect(add_dialog, &QInputDialog::finished, this, [=](int result) {}); });
+                    connect(add_dialog, &QInputDialog::finished, this, [=](int result) {}); 
+                    add_dialog->open(); });
 
         QPushButton *remove_button = new QPushButton("Remove Member", this);
+        remove_button->setStyleSheet("border: none;");
         connect(remove_button, &QPushButton::clicked, this, [=]()
                 {
                     QInputDialog *remove_dialog = new QInputDialog(this);
                     remove_dialog->setWindowTitle("Remove Member");
                     remove_dialog->setLabelText("Enter Member Phone Number");
 
-                    connect(remove_dialog, &QInputDialog::finished, this, [=](int result) {}); });
+                    connect(remove_dialog, &QInputDialog::finished, this, [=](int result) {}); 
+                    remove_dialog->open(); });
 
         buttons->addWidget(add_button);
         buttons->addWidget(remove_button);
@@ -414,7 +418,7 @@ void client_chat_window::set_up_window()
         connect(_client, &client_manager::file_received, this, [=](const QString &sender, const QString &file_name, const QString &time)
                 { emit file_received(sender, file_name, time); });
 
-        connect(_client, &client_manager::login_request, this, [=](const QString &hashed_password, bool true_or_false, const QHash<int, QHash<QString, int>> &friend_list, const QStringList &online_friends, const QHash<int, QStringList> &messages, const QHash<int, QHash<QString, QByteArray>> &binary_data, const QHash<int, QString> &group_list, const QHash<int, QStringList> &group_messages, const QHash<int, QHash<QString, QByteArray>> &group_binary_data, const QHash<int, QStringList> &groups_members)
+        connect(_client, &client_manager::login_request, this, [=](const QString &hashed_password, bool true_or_false, const QHash<int, QHash<QString, int>> &friend_list, const QStringList &online_friends, const QHash<int, QStringList> &messages, const QHash<int, QHash<QString, QByteArray>> &binary_data, const QHash<int, QHash<int, QString>> &group_list, const QHash<int, QStringList> &group_messages, const QHash<int, QHash<QString, QByteArray>> &group_binary_data, const QHash<int, QStringList> &groups_members)
                 { emit login_request(hashed_password, true_or_false, friend_list, online_friends, messages, binary_data, group_list, group_messages, group_binary_data, groups_members); });
 
         connect(_client, &client_manager::delete_message, this, [=](const QString &sender, const QString &time)

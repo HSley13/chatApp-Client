@@ -557,7 +557,7 @@ const QString &chat_protocol::group_time() const
     return _group_time;
 }
 
-const QHash<int, QString> &chat_protocol::group_list() const
+const QHash<int, QHash<int, QString>> &chat_protocol::group_list() const
 {
     return _group_list;
 }

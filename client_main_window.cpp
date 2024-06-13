@@ -334,7 +334,7 @@ void client_main_window::login()
                        { _login_button->setEnabled(true); });
 }
 
-void client_main_window::on_login_request(const QString &hashed_password, bool true_or_false, const QHash<int, QHash<QString, int>> &friend_lists, const QStringList &online_friends, const QHash<int, QStringList> &messages, const QHash<int, QHash<QString, QByteArray>> &binary_datas, const QHash<int, QString> &group_lists, const QHash<int, QStringList> &group_messages, const QHash<int, QHash<QString, QByteArray>> &group_binary_datas, const QHash<int, QStringList> &groups_members)
+void client_main_window::on_login_request(const QString &hashed_password, bool true_or_false, const QHash<int, QHash<QString, int>> &friend_lists, const QStringList &online_friends, const QHash<int, QStringList> &messages, const QHash<int, QHash<QString, QByteArray>> &binary_datas, const QHash<int, QHash<int, QString>> &group_lists, const QHash<int, QStringList> &group_messages, const QHash<int, QHash<QString, QByteArray>> &group_binary_datas, const QHash<int, QStringList> &groups_members)
 {
     if (hashed_password.isEmpty())
     {
@@ -450,7 +450,7 @@ void client_main_window::on_login_request(const QString &hashed_password, bool t
         {
             for (const int &group_ID : group_lists.keys())
             {
-                const QString &group_name = group_lists[group_ID];
+                const QHash<int, QString> &group_name_and_adm = group_lists[group_ID];
 
                 const QStringList &group_message = group_messages[group_ID];
 
@@ -458,15 +458,15 @@ void client_main_window::on_login_request(const QString &hashed_password, bool t
 
                 const QStringList group_members = groups_members[group_ID];
 
-                _group_list->addItem(group_name);
+                _group_list->addItem(group_name_and_adm.values().first());
 
-                if (_window_map.contains(group_name))
+                if (_window_map.contains(group_name_and_adm.values().first()))
                     continue;
 
                 QStringList names = authenticate_group_members(group_members);
 
                 // Fix the adm_name
-                client_chat_window *win = new client_chat_window(group_ID, group_name, names, "adm_name", this);
+                client_chat_window *win = new client_chat_window(group_ID, group_name_and_adm.values().first(), names, QString::number(group_name_and_adm.keys().first()), this);
                 win->retrieve_group_conversation(group_message, group_binary_data);
 
                 connect(win, &client_chat_window::swipe_right, this, &client_main_window::on_swipe_right);
@@ -478,15 +478,15 @@ void client_main_window::on_login_request(const QString &hashed_password, bool t
                             else
                                 win->_client->send_lookup_friend(name); });
 
-                win->window_name(group_name);
+                win->window_name(group_name_and_adm.values().first());
 
-                _window_map.insert(group_name, win);
+                _window_map.insert(group_name_and_adm.values().first(), win);
 
                 _stack->addWidget(win);
 
                 if (!group_message.isEmpty())
                 {
-                    QListWidgetItem *item = new QListWidgetItem(group_name);
+                    QListWidgetItem *item = new QListWidgetItem(group_name_and_adm.values().first());
 
                     _list->addItem(item);
                 }
