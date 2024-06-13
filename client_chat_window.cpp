@@ -35,8 +35,6 @@ client_chat_window::client_chat_window(const int &group_ID, const QString &group
 {
     set_up_window();
 
-    qDebug() << "adm ID is: " << _adm;
-
     set_up_window_2();
 }
 
@@ -350,7 +348,7 @@ void client_chat_window::set_up_window()
     _hbox->addWidget(_insert_message);
     _hbox->addWidget(_send_button);
 
-    QHBoxLayout *buttons = new QHBoxLayout(this);
+    QHBoxLayout *buttons = new QHBoxLayout();
     buttons->addWidget(member_list);
 
     if (!_group_name.isEmpty() && !_adm.compare(_client->my_ID()))

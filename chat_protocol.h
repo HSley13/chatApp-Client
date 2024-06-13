@@ -43,6 +43,9 @@ public:
         group_text,
         group_file,
         group_audio,
+
+        new_group_member,
+        remove_group_member
     };
 
     QByteArray set_text_message(const QString &sender, const QString &receiver, const QString &message, const QString &time);

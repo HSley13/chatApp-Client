@@ -253,6 +253,9 @@ void client_main_window::sign_up()
     if (_insert_phone_number->text().toInt() == 0)
     {
         _insert_phone_number->setStyleSheet("border: 1px solid red;");
+
+        _status_bar->showMessage(QString("The Inserted Phone Number is Invalid, Verify it and try again"), 5000);
+
         return;
     }
 
@@ -260,6 +263,9 @@ void client_main_window::sign_up()
     if (_insert_password->text().isEmpty())
     {
         _insert_password->setStyleSheet("border: 1px solid red;");
+
+        _status_bar->showMessage(QString("The Password can't be left empty, Verify it and try again"), 5000);
+
         return;
     }
 
@@ -268,6 +274,9 @@ void client_main_window::sign_up()
     if (_insert_password->text().compare(_insert_password_confirmation->text()))
     {
         _insert_password_confirmation->setStyleSheet("border: 1px solid red;");
+
+        _status_bar->showMessage(QString("The Password Confirmation is incorrect, Verify it and try again"), 5000);
+
         return;
     }
 
@@ -276,6 +285,9 @@ void client_main_window::sign_up()
     if (_insert_secret_question->text().isEmpty())
     {
         _insert_secret_question->setStyleSheet("border: 1px solid red;");
+
+        _status_bar->showMessage(QString("The Secret Question can't be left Empty, Verify it and try again"), 5000);
+
         return;
     }
 
@@ -284,6 +296,9 @@ void client_main_window::sign_up()
     if (_insert_secret_answer->text().isEmpty())
     {
         _insert_secret_question->setStyleSheet("border: 1px solid red;");
+
+        _status_bar->showMessage(QString("The Secret Answer can't be left Empty, Verify it and try again"), 5000);
+
         return;
     }
 
@@ -339,6 +354,8 @@ void client_main_window::on_login_request(const QString &hashed_password, bool t
     if (hashed_password.isEmpty())
     {
         _user_phone_number->setStyleSheet("border: 1px solid red");
+
+        _status_bar->showMessage(QString("The entered Phone Number is not registered in our System, Verify it and try again"), 5000);
 
         return;
     }
@@ -543,7 +560,11 @@ void client_main_window::on_settings()
     connect(settings_dialog, &QDialog::accepted, this, [=]()
             {
                 QString choice = settings_dialog->name_selected().first();
-                _settings_choices.value(choice)();
+
+                if(_settings_choices.contains(choice))
+                    _settings_choices.value(choice)();
+                else
+                    _status_bar->showMessage(QString("Choose 1 Option at a time and not 2"), 5000);
 
                     settings_dialog->deleteLater(); });
 
@@ -868,7 +889,7 @@ void client_main_window::on_added_to_group(const int &group_ID, const QString &a
 
     configure_group(group_ID, group_name, names, adm);
 
-    _status_bar->showMessage(QString("%1 Added you do to a new Group called: %2").arg(adm, group_name), 5000);
+    _status_bar->showMessage(QString("%1 Added you do to a Group called: %2").arg(adm, group_name), 5000);
 }
 
 void client_main_window::create_group()
