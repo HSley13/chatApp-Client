@@ -21,7 +21,6 @@
     ------
 
     TO DO
-    --- Remove/Add people from/to groups
     --- Message read/unread
     --- Make the GUI more appealing.
     --- Upload Preview here once Finished.
