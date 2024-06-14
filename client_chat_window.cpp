@@ -364,7 +364,7 @@ void client_chat_window::set_up_window()
                     connect(add_dialog, &QInputDialog::finished, this, [=](int result)
                             { 
                                 if(result == QDialog::Accepted)
-                                    _client->send_remove_group_member_message(_group_ID, _group_name, my_name(), add_dialog->textValue());
+                                    _client->send_new_group_member_message(_group_ID, _group_name, my_name(), add_dialog->textValue());
 
                                 add_dialog->deleteLater(); });
 
@@ -757,4 +757,12 @@ void client_chat_window::group_removed()
     _send_button->setDisabled(true);
     _send_file_button->setDisabled(true);
     _record_button->setDisabled(true);
+}
+
+void client_chat_window::group_restored()
+{
+    _insert_message->setEnabled(true);
+    _send_button->setEnabled(true);
+    _send_file_button->setEnabled(true);
+    _record_button->setEnabled(true);
 }

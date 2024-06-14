@@ -865,6 +865,20 @@ QStringList client_main_window::authenticate_group_members(const QStringList &gr
 
 void client_main_window::configure_group(const int &group_ID, const QString &group_name, const QStringList &names, const QString &adm)
 {
+    if (_window_map.contains(group_name))
+    {
+        QWidget *win = _window_map.value(group_name);
+        if (win)
+        {
+            client_chat_window *wid = qobject_cast<client_chat_window *>(win);
+            if (wid)
+                wid->group_restored();
+
+            _status_bar->showMessage(QString("You were reAdded to the Group: %1 by %2").arg(group_name, adm), 5000);
+        }
+        return;
+    }
+
     client_chat_window *win = new client_chat_window(group_ID, group_name, names, adm, this);
     connect(win, &client_chat_window::swipe_right, this, &client_main_window::on_swipe_right);
     connect(win, &client_chat_window::item_clicked, this, [=](const QString &name)

@@ -35,6 +35,7 @@ public:
     void message_widget(bool true_or_false, const QString &content, const QString &date_time, const QString &sender);
 
     void group_removed();
+    void group_restored();
 
     static client_manager *_client;
 
