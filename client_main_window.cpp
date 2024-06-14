@@ -391,6 +391,7 @@ void client_main_window::on_login_request(const QString &hashed_password, bool t
         connect(_server_wid, &client_chat_window::group_text_received, this, &client_main_window::on_group_text_received);
         connect(_server_wid, &client_chat_window::group_file_received, this, &client_main_window::on_group_file_received);
         connect(_server_wid, &client_chat_window::group_audio_received, this, &client_main_window::on_group_audio_received);
+        connect(_server_wid, &client_chat_window::removed_from_group, this, &client_main_window::on_removed_from_group);
 
         connect(_server_wid, &client_chat_window::new_group_ID, this, [=](const int &group_ID)
                 { configure_group(group_ID, _group_name, _group_members, _server_wid->my_name()); });
@@ -994,6 +995,19 @@ void client_main_window::on_group_file_received(const int &group_ID, const QStri
             wid->add_file(file_name, false, time, sender);
             add_on_top(group_name);
         }
+    }
+}
+
+void client_main_window::on_removed_from_group(const int &group_ID, const QString &group_name, const QString &adm)
+{
+    QWidget *win = _window_map.value(group_name);
+    if (win)
+    {
+        client_chat_window *wid = qobject_cast<client_chat_window *>(win);
+        if (wid)
+            wid->group_removed();
+
+        _status_bar->showMessage(QString("You were removed from the Group: %1 by %2").arg(group_name, adm), 5000);
     }
 }
 

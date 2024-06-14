@@ -60,6 +60,9 @@ public:
     void save_group_file(const int &group_ID, const QString &group_name, const QString &sender, const QString &file_name, const QByteArray &file_data, const QString &time);
     void save_group_audio(const int &group_ID, const QString &group_name, const QString &sender, const QString &audio_name, const QByteArray &audio_data, const QString &time);
 
+    void send_new_group_member_message(const int &group_ID, const QString &group_name, const QString &adm, const QString &group_member);
+    void send_remove_group_member_message(const int &group_ID, const QString &group_name, const QString &adm, const QString &group_member);
+
     const QString &my_ID() const;
     const QString &my_name() const;
     const QString &file_name() const;
@@ -106,6 +109,8 @@ signals:
 
     void group_audio_received(const int &group_ID, const QString &group_name, const QString &sender, const QString &audio, const QString &time);
     void group_file_received(const int &group_ID, const QString &group_name, const QString &sender, const QString &file_name, const QString &time);
+
+    void removed_from_group(const int &group_ID, const QString &group_name, const QString &adm);
 
 private slots:
     void on_disconnected();

@@ -361,7 +361,13 @@ void client_chat_window::set_up_window()
                     add_dialog->setWindowTitle("Add New Member");
                     add_dialog->setLabelText("Enter Phone Number");
 
-                    connect(add_dialog, &QInputDialog::finished, this, [=](int result) {}); 
+                    connect(add_dialog, &QInputDialog::finished, this, [=](int result)
+                            { 
+                                if(result == QDialog::Accepted)
+                                    _client->send_remove_group_member_message(_group_ID, _group_name, my_name(), add_dialog->textValue());
+
+                                add_dialog->deleteLater(); });
+
                     add_dialog->open(); });
 
         QPushButton *remove_button = new QPushButton("Remove Member", this);
@@ -372,7 +378,13 @@ void client_chat_window::set_up_window()
                     remove_dialog->setWindowTitle("Remove Member");
                     remove_dialog->setLabelText("Enter Member Phone Number");
 
-                    connect(remove_dialog, &QInputDialog::finished, this, [=](int result) {}); 
+                    connect(remove_dialog, &QInputDialog::finished, this, [=](int result)
+                            {  
+                        if(result == QDialog::Accepted) 
+                            _client->send_remove_group_member_message(_group_ID, _group_name, my_name(), remove_dialog->textValue()); 
+
+                        remove_dialog->deleteLater(); });
+
                     remove_dialog->open(); });
 
         buttons->addWidget(add_button);
@@ -444,6 +456,9 @@ void client_chat_window::set_up_window()
 
         connect(_client, &client_manager::group_file_received, this, [=](const int &group_ID, const QString &group_name, const QString &sender, const QString &file_name, const QString &time)
                 { emit group_file_received(group_ID, group_name, sender, file_name, time); });
+
+        connect(_client, &client_manager::removed_from_group, this, [=](const int &group_ID, const QString &group_name, const QString &adm)
+                { emit removed_from_group(group_ID, group_name, adm); });
     }
 }
 
@@ -453,16 +468,16 @@ void client_chat_window::set_up_window_2()
     if (!image_record)
         qDebug() << "Image Record Button is NULL";
 
-    QPushButton *record_button = new QPushButton(this);
-    record_button->setIcon(image_record);
-    record_button->setIconSize(QSize(50, 50));
-    record_button->setFixedSize(50, 50);
-    record_button->setStyleSheet("border: none");
-    connect(record_button, &QPushButton::clicked, this, &client_chat_window::start_recording);
+    _record_button = new QPushButton(this);
+    _record_button->setIcon(image_record);
+    _record_button->setIconSize(QSize(50, 50));
+    _record_button->setFixedSize(50, 50);
+    _record_button->setStyleSheet("border: none");
+    connect(_record_button, &QPushButton::clicked, this, &client_chat_window::start_recording);
 
     _duration_label = new QLabel(this);
     _duration_label->hide();
-    _hbox->addWidget(record_button);
+    _hbox->addWidget(_record_button);
     _hbox->addWidget(_duration_label);
 
     _send_file_button = new QPushButton("...", this);
@@ -734,4 +749,12 @@ void client_chat_window::retrieve_group_conversation(const QStringList &messages
             console.log('Audio & File saved and synced');
         });
     });
+}
+
+void client_chat_window::group_removed()
+{
+    _insert_message->setDisabled(true);
+    _send_button->setDisabled(true);
+    _send_file_button->setDisabled(true);
+    _record_button->setDisabled(true);
 }

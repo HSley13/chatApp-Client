@@ -125,6 +125,11 @@ void client_manager::on_binary_message_received(const QByteArray &message)
 
         break;
 
+    case chat_protocol::remove_group_member:
+        removed_from_group(_protocol->group_ID(), _protocol->group_name(), _protocol->adm());
+
+        break;
+
     default:
         break;
     }
@@ -603,4 +608,14 @@ void client_manager::send_group_file(const int &group_ID, const QString &group_n
 void client_manager::send_group_audio(const int &group_ID, const QString &group_name, const QString &sender, const QString &audio_name, const QString &time)
 {
     _socket->sendBinaryMessage(_protocol->set_group_audio_message(group_ID, group_name, sender, audio_name, time));
+}
+
+void client_manager::send_new_group_member_message(const int &group_ID, const QString &group_name, const QString &adm, const QString &group_member)
+{
+    _socket->sendBinaryMessage(_protocol->set_new_group_member_message(group_ID, group_name, adm, group_member));
+}
+
+void client_manager::send_remove_group_member_message(const int &group_ID, const QString &group_name, const QString &adm, const QString &group_member)
+{
+    _socket->sendBinaryMessage(_protocol->set_remove_group_member_message(group_ID, group_name, adm, group_member));
 }

@@ -106,6 +106,11 @@ void chat_protocol::load_data(const QByteArray &data)
 
         break;
 
+    case remove_group_member:
+        in >> _group_ID >> _group_name >> _adm;
+
+        break;
+
     default:
         break;
     }
@@ -358,6 +363,30 @@ QByteArray chat_protocol::set_group_audio_message(const int &group_ID, const QSt
     }
     else
         qDebug() << "chat_protocol ---> set_group_audio_message() ---> Can't open the file you wanna send";
+
+    return byte;
+}
+
+QByteArray chat_protocol::set_new_group_member_message(const int &group_ID, const QString &group_name, const QString &adm, const QString &group_member)
+{
+    QByteArray byte;
+
+    QDataStream out(&byte, QIODevice::WriteOnly);
+    out.setVersion(QDataStream::Qt_6_7);
+
+    out << new_group_member << group_ID << group_name << adm << group_member;
+
+    return byte;
+}
+
+QByteArray chat_protocol::set_remove_group_member_message(const int &group_ID, const QString &group_name, const QString &adm, const QString &group_member)
+{
+    QByteArray byte;
+
+    QDataStream out(&byte, QIODevice::WriteOnly);
+    out.setVersion(QDataStream::Qt_6_7);
+
+    out << remove_group_member << group_ID << group_name << adm << group_member;
 
     return byte;
 }
