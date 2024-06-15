@@ -21,7 +21,7 @@ client_manager::client_manager(QWidget *parent)
         connect(_socket, &QWebSocket::errorOccurred, this, [=]()
                 {
                     if (_socket->state() == QAbstractSocket::UnconnectedState)
-                        QTimer::singleShot(5000, this, [=]() { _socket->open(url); }); });
+                        QTimer::singleShot(3000, this, [=]() { _socket->open(url); }); });
 
         _socket->open(url);
 

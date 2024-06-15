@@ -67,7 +67,6 @@ client_chat_window::client_chat_window(const int &group_ID, const QString &group
                                 }
                                 else 
                                 {
-
                                     QInputDialog *remove_dialog = new QInputDialog(this);
                                     remove_dialog->setWindowTitle("Remove Member");
                                     remove_dialog->setLabelText("Enter Member Phone Number");

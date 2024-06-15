@@ -343,8 +343,6 @@ public:
         layout->addWidget(lineEdit);
         setLayout(layout);
         setStyleSheet("border: 2px solid #4A90E2;");
-
-        lineEdit->setReadOnly(true);
     }
 
     void setText(const QString &text)
