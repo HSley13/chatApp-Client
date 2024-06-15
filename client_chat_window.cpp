@@ -35,6 +35,57 @@ client_chat_window::client_chat_window(const int &group_ID, const QString &group
 {
     set_up_window();
 
+    QPushButton *settings = new QPushButton("...", this);
+    connect(settings, &QPushButton::clicked, this, [=]()
+            {
+                    QStringList choices;
+                    choices << "Add New Member" << "Remove Member";
+
+                    ListDialog *add_remove_dialog = new ListDialog(choices, "Add/Remove Member", this);
+                    connect(add_remove_dialog, &QDialog::accepted, this, [=]()
+                            { 
+                                QString option = add_remove_dialog->name_selected().first();
+                                
+                                if (option.compare("Add New Member"))
+                                {
+                                    QInputDialog *add_dialog = new QInputDialog(this);
+                                    add_dialog->setWindowTitle("Add New Member");
+                                    add_dialog->setLabelText("Enter Phone Number");
+
+                                    connect(add_dialog, &QInputDialog::finished, this, [=](int result)
+                                            { 
+                                                if(result == QDialog::Accepted)
+                                                    _client->send_new_group_member_message(_group_ID, _group_name, my_name(), add_dialog->textValue());
+
+                                                add_dialog->deleteLater(); 
+                                            });
+
+                                                add_dialog->open();
+                                }
+                                else 
+                                {
+
+                                    QInputDialog *remove_dialog = new QInputDialog(this);
+                                    remove_dialog->setWindowTitle("Remove Member");
+                                    remove_dialog->setLabelText("Enter Member Phone Number");
+
+                                    connect(remove_dialog, &QInputDialog::finished, this, [=](int result)
+                                            {  
+                                                if(result == QDialog::Accepted) 
+                                                    _client->send_remove_group_member_message(_group_ID, _group_name, my_name(), remove_dialog->textValue()); 
+
+                                                remove_dialog->deleteLater(); 
+                                            });
+
+                                                remove_dialog->open();
+                                } 
+                                add_remove_dialog->deleteLater(); 
+                            });
+
+            add_remove_dialog->open(); });
+
+    _buttons->addWidget(settings);
+
     set_up_window_2();
 }
 
@@ -348,52 +399,12 @@ void client_chat_window::set_up_window()
     _hbox->addWidget(_insert_message);
     _hbox->addWidget(_send_button);
 
-    QHBoxLayout *buttons = new QHBoxLayout();
-    buttons->addWidget(member_list);
-
-    if (!_group_name.isEmpty() && !_adm.compare(_client->my_ID()))
-    {
-        QPushButton *add_button = new QPushButton("Add New Member", this);
-        add_button->setStyleSheet("border: none;");
-        connect(add_button, &QPushButton::clicked, this, [=]()
-                {
-                    QInputDialog *add_dialog = new QInputDialog(this);
-                    add_dialog->setWindowTitle("Add New Member");
-                    add_dialog->setLabelText("Enter Phone Number");
-
-                    connect(add_dialog, &QInputDialog::finished, this, [=](int result)
-                            { 
-                                if(result == QDialog::Accepted)
-                                    _client->send_new_group_member_message(_group_ID, _group_name, my_name(), add_dialog->textValue());
-
-                                add_dialog->deleteLater(); });
-
-                    add_dialog->open(); });
-
-        QPushButton *remove_button = new QPushButton("Remove Member", this);
-        remove_button->setStyleSheet("border: none;");
-        connect(remove_button, &QPushButton::clicked, this, [=]()
-                {
-                    QInputDialog *remove_dialog = new QInputDialog(this);
-                    remove_dialog->setWindowTitle("Remove Member");
-                    remove_dialog->setLabelText("Enter Member Phone Number");
-
-                    connect(remove_dialog, &QInputDialog::finished, this, [=](int result)
-                            {  
-                        if(result == QDialog::Accepted) 
-                            _client->send_remove_group_member_message(_group_ID, _group_name, my_name(), remove_dialog->textValue()); 
-
-                        remove_dialog->deleteLater(); });
-
-                    remove_dialog->open(); });
-
-        buttons->addWidget(add_button);
-        buttons->addWidget(remove_button);
-    }
+    _buttons = new QHBoxLayout();
+    _buttons->addWidget(member_list);
 
     QVBoxLayout *VBOX = new QVBoxLayout(central_widget);
     VBOX->addWidget(display_widget);
-    VBOX->addLayout(buttons);
+    VBOX->addLayout(_buttons);
     VBOX->addWidget(_list);
     VBOX->addLayout(_hbox);
 

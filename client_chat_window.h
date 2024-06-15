@@ -65,6 +65,7 @@ private:
     QPushButton *_send_file_button;
     QPushButton *_send_button;
     QPushButton *_record_button;
+    QHBoxLayout *_buttons;
 
     QLabel *_duration_label;
 
@@ -332,21 +333,24 @@ class DisplayWidget : public QWidget
     Q_OBJECT
 
 private:
-    QLabel *label;
+    QLineEdit *lineEdit;
 
 public:
     explicit DisplayWidget(QWidget *parent = nullptr) : QWidget(parent)
     {
         QHBoxLayout *layout = new QHBoxLayout(this);
-        label = new QLabel(this);
-        layout->addWidget(label);
+        lineEdit = new QLineEdit(this);
+        layout->addWidget(lineEdit);
         setLayout(layout);
         setStyleSheet("border: 2px solid #4A90E2;");
+
+        lineEdit->setReadOnly(true);
     }
 
     void setText(const QString &text)
     {
-        label->setText(text);
+        lineEdit->setText(text);
+        lineEdit->setCursorPosition(lineEdit->text().length());
     }
 };
 
