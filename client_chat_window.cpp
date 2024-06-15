@@ -35,11 +35,12 @@ client_chat_window::client_chat_window(const int &group_ID, const QString &group
 {
     set_up_window();
 
-    QPushButton *settings = new QPushButton("...", this);
-    settings->setFixedSize(50, 20);
-    settings->setStyleSheet("border: none");
-    connect(settings, &QPushButton::clicked, this, [=]()
-            {
+    if (!_adm.compare(_client->my_ID()))
+    {
+        QPushButton *settings = new QPushButton("...", this);
+        settings->setFixedSize(50, 20);
+        connect(settings, &QPushButton::clicked, this, [=]()
+                {
                     QStringList choices;
                     choices << "Add New Member" << "Remove Member";
 
@@ -86,7 +87,8 @@ client_chat_window::client_chat_window(const int &group_ID, const QString &group
 
             add_remove_dialog->open(); });
 
-    _buttons->addWidget(settings);
+        _buttons->addWidget(settings);
+    }
 
     set_up_window_2();
 }

@@ -156,7 +156,6 @@ client_main_window::client_main_window(QWidget *parent)
     configure_settings_choice();
     QPushButton *settings = new QPushButton("...", this);
     settings->setFixedSize(50, 20);
-    settings->setStyleSheet("border: none");
     connect(settings, &QPushButton::clicked, this, &client_main_window::on_settings);
 
     _friend_list = new QComboBox(this);
