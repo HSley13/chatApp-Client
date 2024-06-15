@@ -36,6 +36,8 @@ client_chat_window::client_chat_window(const int &group_ID, const QString &group
     set_up_window();
 
     QPushButton *settings = new QPushButton("...", this);
+    settings->setFixedSize(50, 20);
+    settings->setStyleSheet("border: none");
     connect(settings, &QPushButton::clicked, this, [=]()
             {
                     QStringList choices;
@@ -45,8 +47,8 @@ client_chat_window::client_chat_window(const int &group_ID, const QString &group
                     connect(add_remove_dialog, &QDialog::accepted, this, [=]()
                             { 
                                 QString option = add_remove_dialog->name_selected().first();
-                                
-                                if (option.compare("Add New Member"))
+
+                                if (!option.compare("Add New Member"))
                                 {
                                     QInputDialog *add_dialog = new QInputDialog(this);
                                     add_dialog->setWindowTitle("Add New Member");
@@ -60,7 +62,7 @@ client_chat_window::client_chat_window(const int &group_ID, const QString &group
                                                 add_dialog->deleteLater(); 
                                             });
 
-                                                add_dialog->open();
+                                    add_dialog->open();
                                 }
                                 else 
                                 {
@@ -77,7 +79,7 @@ client_chat_window::client_chat_window(const int &group_ID, const QString &group
                                                 remove_dialog->deleteLater(); 
                                             });
 
-                                                remove_dialog->open();
+                                    remove_dialog->open();
                                 } 
                                 add_remove_dialog->deleteLater(); 
                             });
