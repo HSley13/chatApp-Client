@@ -14,12 +14,16 @@ client_manager::client_manager(QWidget *parent)
     if (!_socket && !_protocol)
     {
         _socket = new QWebSocket(QString(), QWebSocketProtocol::VersionLatest, this);
-
         QUrl url = QUrl(QString("wss://chatapp.hslay13.online"));
-        _socket->open(url);
 
         connect(_socket, &QWebSocket::disconnected, this, &client_manager::on_disconnected);
         connect(_socket, &QWebSocket::binaryMessageReceived, this, &client_manager::on_binary_message_received);
+        connect(_socket, &QWebSocket::errorOccurred, this, [=]()
+                {
+                    if (_socket->state() == QAbstractSocket::UnconnectedState)
+                        QTimer::singleShot(5000, this, [=]() { _socket->open(url); }); });
+
+        _socket->open(url);
 
         _protocol = new chat_protocol(this);
 
