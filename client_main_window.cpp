@@ -483,7 +483,6 @@ void client_main_window::on_login_request(const QString &hashed_password, bool t
 
                 QStringList names = authenticate_group_members(group_members);
 
-                // Fix the adm_name
                 client_chat_window *win = new client_chat_window(group_ID, group_name_and_adm.values().first(), names, QString::number(group_name_and_adm.keys().first()), this);
                 win->retrieve_group_conversation(group_message, group_binary_data);
 
