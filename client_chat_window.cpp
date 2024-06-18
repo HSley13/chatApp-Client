@@ -354,7 +354,7 @@ void client_chat_window::send_file()
             if (_group_name.isEmpty())
             {
                 _client->send_file(my_name(), _destinator, QFileInfo(file_name).fileName(), file_data, current_time);
-                _client->send_save_file(_conversation_ID, _destinator, _client->my_ID(), QFileInfo(file_name).fileName(), file_data, "file", current_time);
+                _client->send_save_file(_conversation_ID, _client->my_ID(), _destinator, QFileInfo(file_name).fileName(), file_data, "file", current_time);
             }
             else
                 _client->send_group_file(_group_ID, _group_name, my_name(), QFileInfo(file_name).fileName(), file_data, current_time);
