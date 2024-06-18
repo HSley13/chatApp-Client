@@ -467,8 +467,8 @@ void client_chat_window::set_up_window()
         connect(_client, &client_manager::file_received, this, [=](const QString &sender, const QString &file_name, const QString &time)
                 { emit file_received(sender, file_name, time); });
 
-        connect(_client, &client_manager::login_request, this, [=](const QString &hashed_password, bool true_or_false, const QHash<int, QHash<QString, int>> &friend_list, const QStringList &online_friends, const QHash<int, QStringList> &messages, const QHash<int, QHash<QString, QByteArray>> &binary_data, const QHash<int, QHash<int, QString>> &group_list, const QHash<int, QStringList> &group_messages, const QHash<int, QHash<QString, QByteArray>> &group_binary_data, const QHash<int, QStringList> &groups_members)
-                { emit login_request(hashed_password, true_or_false, friend_list, online_friends, messages, binary_data, group_list, group_messages, group_binary_data, groups_members); });
+        connect(_client, &client_manager::login_request, this, [=](const QString &hashed_password, bool true_or_false, const QHash<int, QHash<QString, int>> &friend_list, const QStringList &online_friends, const QHash<int, QStringList> &messages, const QHash<int, QHash<int, QString>> &group_list, const QHash<int, QStringList> &group_messages, const QHash<int, QStringList> &groups_members)
+                { emit login_request(hashed_password, true_or_false, friend_list, online_friends, messages, group_list, group_messages, groups_members); });
 
         connect(_client, &client_manager::delete_message, this, [=](const QString &sender, const QString &time)
                 { emit delete_message(sender, time); });
@@ -570,13 +570,16 @@ void client_chat_window::add_file(const QString &file_name, bool is_mine, const 
 
     QLabel *time_label = new QLabel(time, this);
 
+    const QString &type = (_group_name.isEmpty()) ? "normal" : "group";
+    const int &ID = (_group_name.isEmpty()) ? _conversation_ID : _group_ID;
+
     QPushButton *file = new QPushButton(this);
     file->setIcon(image);
     file->setIconSize(QSize(30, 30));
     file->setFixedSize(QSize(30, 30));
     file->setStyleSheet("border: none");
     connect(file, &QPushButton::clicked, this, [=]()
-            { QDesktopServices::openUrl(_client->get_file_url(file_name)); });
+            { QDesktopServices::openUrl(_client->get_file_url(file_name, ID, type)); });
 
     QListWidgetItem *line = new QListWidgetItem(_list);
     line->setSizeHint(QSize(0, 68));
@@ -647,9 +650,12 @@ void client_chat_window::add_audio(const QString &audio_name, bool is_mine, cons
     QSlider *slider = new QSlider(Qt::Horizontal, this);
     slider->hide();
 
+    const QString &type = (_group_name.isEmpty()) ? "normal" : "group";
+    const int &ID = (_group_name.isEmpty()) ? _conversation_ID : _group_ID;
+
     QPushButton *audio = new QPushButton("▶️", this);
     connect(audio, &QPushButton::clicked, this, [=]()
-            { play_audio(_client->get_audio_url(audio_name), audio, slider); });
+            { play_audio(_client->get_audio_url(audio_name, ID, type), audio, slider); });
 
     QListWidgetItem *line = new QListWidgetItem(_list);
     line->setSizeHint(QSize(0, 80));
@@ -713,13 +719,11 @@ void client_chat_window::add_audio(const QString &audio_name, bool is_mine, cons
     _list->setItemWidget(line, wid);
 }
 
-void client_chat_window::set_retrieve_message_window(const QString &type, const QString &content, const QByteArray &file_data, const QString &date_time, bool true_or_false, const QString &sender)
+void client_chat_window::set_retrieve_message_window(const QString &type, const QString &content, const QString &date_time, bool true_or_false, const QString &sender)
 {
     if (!type.compare("file"))
     {
         QString file_name = QString("%1_%2").arg(date_time, content);
-
-        // _client->IDBFS_save_file(file_name, file_data, static_cast<int>(file_data.size()));
 
         (sender.isEmpty()) ? add_file(file_name, true_or_false, date_time) : add_file(file_name, true_or_false, date_time, sender);
 
@@ -728,8 +732,6 @@ void client_chat_window::set_retrieve_message_window(const QString &type, const 
     else if (!type.compare("audio"))
     {
         QString audio_name = QString("%1_%2").arg(date_time, content);
-
-        // _client->IDBFS_save_audio(audio_name, file_data, static_cast<int>(file_data.size()));
 
         (sender.isEmpty()) ? add_audio(audio_name, true_or_false, date_time) : add_audio(audio_name, true_or_false, date_time, sender);
 
@@ -775,7 +777,7 @@ void client_chat_window::set_retrieve_message_window(const QString &type, const 
     _list->setItemWidget(line, wid);
 }
 
-void client_chat_window::retrieve_conversation(const QStringList &messages, const QHash<QString, QByteArray> &binary_data)
+void client_chat_window::retrieve_conversation(const QStringList &messages)
 {
     if (messages.isEmpty())
         return;
@@ -791,15 +793,13 @@ void client_chat_window::retrieve_conversation(const QStringList &messages, cons
         QString type = parts.last();
 
         if (!sender_ID.compare(_client->my_ID()))
-            set_retrieve_message_window(type, content, binary_data.value(date_time), date_time, true);
+            set_retrieve_message_window(type, content, date_time, true);
         else
-            set_retrieve_message_window(type, content, binary_data.value(date_time), date_time, false);
+            set_retrieve_message_window(type, content, date_time, false);
     }
-
-    EM_ASM({ FS.syncfs(); });
 }
 
-void client_chat_window::retrieve_group_conversation(const QStringList &messages, const QHash<QString, QByteArray> &binary_data)
+void client_chat_window::retrieve_group_conversation(const QStringList &messages)
 {
     if (messages.isEmpty())
         return;
@@ -814,12 +814,10 @@ void client_chat_window::retrieve_group_conversation(const QStringList &messages
         QString type = parts.last();
 
         if (!sender.compare(my_name()))
-            set_retrieve_message_window(type, content, binary_data.value(date_time), date_time, true);
+            set_retrieve_message_window(type, content, date_time, true);
         else
-            set_retrieve_message_window(type, content, binary_data.value(date_time), date_time, false, sender);
+            set_retrieve_message_window(type, content, date_time, false, sender);
     }
-
-    EM_ASM({ FS.syncfs(); });
 }
 
 void client_chat_window::group_removed()

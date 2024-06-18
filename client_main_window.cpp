@@ -345,7 +345,7 @@ void client_main_window::login()
                        { _login_button->setEnabled(true); });
 }
 
-void client_main_window::on_login_request(const QString &hashed_password, bool true_or_false, const QHash<int, QHash<QString, int>> &friend_lists, const QStringList &online_friends, const QHash<int, QStringList> &messages, const QHash<int, QHash<QString, QByteArray>> &binary_datas, const QHash<int, QHash<int, QString>> &group_lists, const QHash<int, QStringList> &group_messages, const QHash<int, QHash<QString, QByteArray>> &group_binary_datas, const QHash<int, QStringList> &groups_members)
+void client_main_window::on_login_request(const QString &hashed_password, bool true_or_false, const QHash<int, QHash<QString, int>> &friend_lists, const QStringList &online_friends, const QHash<int, QStringList> &messages, const QHash<int, QHash<int, QString>> &group_lists, const QHash<int, QStringList> &group_messages, const QHash<int, QStringList> &groups_members)
 {
     if (hashed_password.isEmpty())
     {
@@ -419,8 +419,6 @@ void client_main_window::on_login_request(const QString &hashed_password, bool t
 
                 const QStringList &message = messages[conversation_ID];
 
-                // const QHash<QString, QByteArray> &binary_data = binary_datas[conversation_ID];
-
                 for (const QString &name : friend_info.keys())
                 {
                     _friend_list->addItem(name);
@@ -434,7 +432,7 @@ void client_main_window::on_login_request(const QString &hashed_password, bool t
                         continue;
 
                     client_chat_window *wid = new client_chat_window(conversation_ID, QString::number(friend_info.value(name)), name, this);
-                    wid->retrieve_conversation(message, QHash<QString, QByteArray>());
+                    wid->retrieve_conversation(message);
 
                     connect(wid, &client_chat_window::swipe_right, this, &client_main_window::on_swipe_right);
                     connect(wid, &client_chat_window::data_sent, this, [=](QString first_name)
@@ -468,8 +466,6 @@ void client_main_window::on_login_request(const QString &hashed_password, bool t
 
                 const QStringList &group_message = group_messages[group_ID];
 
-                // const QHash<QString, QByteArray> &group_binary_data = group_binary_datas[group_ID];
-
                 const QStringList &group_members = groups_members[group_ID];
 
                 _group_list->addItem(group_name_and_adm.values().first());
@@ -480,7 +476,7 @@ void client_main_window::on_login_request(const QString &hashed_password, bool t
                 QStringList names = authenticate_group_members(group_members);
 
                 client_chat_window *win = new client_chat_window(group_ID, group_name_and_adm.values().first(), names, QString::number(group_name_and_adm.keys().first()), this);
-                win->retrieve_group_conversation(group_message, QHash<QString, QByteArray>());
+                win->retrieve_group_conversation(group_message);
 
                 connect(win, &client_chat_window::swipe_right, this, &client_main_window::on_swipe_right);
                 connect(win, &client_chat_window::data_sent, this, [=](QString first_name)

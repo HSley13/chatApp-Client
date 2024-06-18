@@ -7,6 +7,7 @@ QWebSocketServer *client_manager::_file_server = nullptr;
 
 QString client_manager::_my_ID;
 QString client_manager::_my_name;
+QString client_manager::_file_name;
 
 client_manager::client_manager(QWidget *parent)
     : QMainWindow(parent)
@@ -84,7 +85,7 @@ void client_manager::on_binary_message_received(const QByteArray &message)
     {
         _my_name = _protocol->my_name();
 
-        emit login_request(_protocol->hashed_password(), _protocol->true_or_false(), _protocol->friend_list(), _protocol->online_friends(), _protocol->messages(), _protocol->binary_data(), _protocol->group_list(), _protocol->group_messages(), _protocol->group_binary_data(), _protocol->groups_members());
+        emit login_request(_protocol->hashed_password(), _protocol->true_or_false(), _protocol->friend_list(), _protocol->online_friends(), _protocol->messages(), _protocol->group_list(), _protocol->group_messages(), _protocol->groups_members());
     }
 
     break;
@@ -131,6 +132,11 @@ void client_manager::on_binary_message_received(const QByteArray &message)
 
     case chat_protocol::remove_group_member:
         removed_from_group(_protocol->group_ID(), _protocol->group_name(), _protocol->adm());
+
+        break;
+
+    case chat_protocol::request_data:
+        (!_protocol->file_name().compare("file")) ? IDBFS_save_file(_file_name, _protocol->file_data(), _protocol->file_data().size()) : IDBFS_save_audio(_file_name, _protocol->file_data(), _protocol->file_data().size());
 
         break;
 
@@ -311,7 +317,7 @@ void client_manager::IDBFS_save_file(const QString &file_name, const QByteArray 
     }
 }
 
-QUrl client_manager::get_audio_url(const QString &audio_name)
+QUrl client_manager::get_audio_url(const QString &audio_name, const int &conversation_ID, const QString &type)
 {
     const QString full_audio_path = "/audio/" + audio_name;
 
@@ -343,7 +349,10 @@ QUrl client_manager::get_audio_url(const QString &audio_name)
 
     if (!url)
     {
-        qDebug() << "client_manager ---> get_audio_url() ---> url empty";
+        _file_name = audio_name;
+
+        _socket->sendBinaryMessage(_protocol->set_request_data_message(conversation_ID, audio_name.split("_").first(), type));
+
         return QUrl();
     }
 
@@ -353,7 +362,7 @@ QUrl client_manager::get_audio_url(const QString &audio_name)
     return QUrl(qUrl);
 }
 
-QUrl client_manager::get_file_url(const QString &file_name)
+QUrl client_manager::get_file_url(const QString &file_name, const int &conversation_ID, const QString &type)
 {
     const QString full_file_path = "/file/" + file_name;
 
@@ -527,7 +536,10 @@ QUrl client_manager::get_file_url(const QString &file_name)
 
     if (!url)
     {
-        qDebug() << "client_manager ---> get_file_url() ---> url empty";
+        _file_name = file_name;
+
+        _socket->sendBinaryMessage(_protocol->set_request_data_message(conversation_ID, file_name.split("_").first(), type));
+
         return QUrl();
     }
 

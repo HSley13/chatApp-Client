@@ -62,7 +62,7 @@ void chat_protocol::load_data(const QByteArray &data)
         break;
 
     case login_request:
-        in >> _hashed_password >> _true_or_false >> _my_name >> _friend_list >> _online_friends >> _messages >> _binary_data >> _group_list >> _group_messages >> _group_binary_data >> _groups_members;
+        in >> _hashed_password >> _true_or_false >> _my_name >> _friend_list >> _online_friends >> _messages >> _group_list >> _group_messages >> _groups_members;
 
         break;
 
@@ -108,6 +108,13 @@ void chat_protocol::load_data(const QByteArray &data)
 
     case remove_group_member:
         in >> _group_ID >> _group_name >> _adm;
+
+        break;
+
+    case request_data:
+        in >> _file_data >> _file_name;
+
+        break;
 
         break;
 
@@ -391,6 +398,18 @@ QByteArray chat_protocol::set_remove_group_member_message(const int &group_ID, c
     return byte;
 }
 
+QByteArray chat_protocol::set_request_data_message(const int &conversation_ID, const QString &date_time, const QString &type)
+{
+    QByteArray byte;
+
+    QDataStream out(&byte, QIODevice::WriteOnly);
+    out.setVersion(QDataStream::Qt_6_7);
+
+    out << request_data << conversation_ID << date_time << type;
+
+    return byte;
+}
+
 chat_protocol::message_type chat_protocol::type() const
 {
     return _type;
@@ -444,11 +463,6 @@ const QHash<int, QHash<QString, int>> &chat_protocol::friend_list() const
 const QHash<int, QStringList> &chat_protocol::messages() const
 {
     return _messages;
-}
-
-const QHash<int, QHash<QString, QByteArray>> &chat_protocol::binary_data() const
-{
-    return _binary_data;
 }
 
 const int &chat_protocol::conversation_ID() const
@@ -594,11 +608,6 @@ const QHash<int, QHash<int, QString>> &chat_protocol::group_list() const
 const QHash<int, QStringList> &chat_protocol::group_messages() const
 {
     return _group_messages;
-}
-
-const QHash<int, QHash<QString, QByteArray>> &chat_protocol::group_binary_data() const
-{
-    return _group_binary_data;
 }
 
 const QHash<int, QStringList> &chat_protocol::groups_members() const

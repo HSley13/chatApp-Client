@@ -45,7 +45,8 @@ public:
         group_audio,
 
         new_group_member,
-        remove_group_member
+        remove_group_member,
+        request_data
     };
 
     QByteArray set_text_message(const QString &sender, const QString &receiver, const QString &message, const QString &time);
@@ -75,6 +76,8 @@ public:
 
     QByteArray set_new_group_member_message(const int &group_ID, const QString &group_name, const QString &adm, const QString &group_member);
     QByteArray set_remove_group_member_message(const int &group_ID, const QString &group_name, const QString &adm, const QString &group_member);
+
+    QByteArray set_request_data_message(const int &conversation_ID, const QString &date_time, const QString &type);
 
     void load_data(const QByteArray &data);
 
@@ -115,7 +118,6 @@ public:
     const QHash<int, QHash<QString, int>> &friend_list() const;
     const int &conversation_ID() const;
     const QHash<int, QStringList> &messages() const;
-    const QHash<int, QHash<QString, QByteArray>> &binary_data() const;
 
     const QString &hashed_password() const;
     const bool &true_or_false() const;
@@ -132,12 +134,10 @@ public:
 
     const QHash<int, QHash<int, QString>> &group_list() const;
     const QHash<int, QStringList> &group_messages() const;
-    const QHash<int, QHash<QString, QByteArray>> &group_binary_data() const;
     const QHash<int, QStringList> &groups_members() const;
 
 private:
-    QByteArray
-    get_data(message_type type, const QString &data);
+    QByteArray get_data(message_type type, const QString &data);
 
     QString _my_name;
     QString _my_ID;
@@ -167,7 +167,6 @@ private:
     QStringList _online_friends;
     int _conversation_ID;
     QHash<int, QStringList> _messages;
-    QHash<int, QHash<QString, QByteArray>> _binary_data;
 
     QString _audio_name;
     QString _audio_sender;
@@ -192,6 +191,5 @@ private:
     QString _group_sender;
     QHash<int, QHash<int, QString>> _group_list;
     QHash<int, QStringList> _group_messages;
-    QHash<int, QHash<QString, QByteArray>> _group_binary_data;
     QHash<int, QStringList> _groups_members;
 };

@@ -45,11 +45,11 @@ public:
     void mount_file_IDBFS();
 
     void IDBFS_save_audio(const QString &audio_name, const QByteArray &audio_data, const int &size);
-    QUrl get_audio_url(const QString &audio_name);
+    QUrl get_audio_url(const QString &audio_name, const int &conversation_ID, const QString &type);
     void delete_audio_IDBFS(const QString &audio_name);
 
     void IDBFS_save_file(const QString &file_name, const QByteArray &file_data, const int &size);
-    QUrl get_file_url(const QString &file_name);
+    QUrl get_file_url(const QString &file_name, const int &conversation_ID, const QString &type);
     void delete_file_IDBFS(const QString &file_name);
 
     void send_group_is_typing(const int &group_ID, const QString &group_name, const QString &sender);
@@ -78,6 +78,8 @@ private:
     static QString _my_ID;
     static QString _my_name;
 
+    static QString _file_name;
+
 signals:
     void text_message_received(const QString &sender, const QString &message, const QString &time);
     void is_typing_received(const QString &sender);
@@ -94,7 +96,7 @@ signals:
     void client_added_you(const int &conversation_ID, const QString &name, const QString &ID);
     void lookup_friend_result(const int &conversation_ID, const QString &name, bool true_or_false);
 
-    void login_request(const QString &hashed_password, bool true_or_false, const QHash<int, QHash<QString, int>> &friend_list, const QStringList &online_friends, const QHash<int, QStringList> &messages, const QHash<int, QHash<QString, QByteArray>> &binary_data, const QHash<int, QHash<int, QString>> &group_list, const QHash<int, QStringList> &group_messages, const QHash<int, QHash<QString, QByteArray>> &group_binary_data, const QHash<int, QStringList> &groups_members);
+    void login_request(const QString &hashed_password, bool true_or_false, const QHash<int, QHash<QString, int>> &friend_list, const QStringList &online_friends, const QHash<int, QStringList> &messages, const QHash<int, QHash<int, QString>> &group_list, const QHash<int, QStringList> &group_messages, const QHash<int, QStringList> &groups_members);
 
     void delete_message(const QString &sender, const QString &time);
 
