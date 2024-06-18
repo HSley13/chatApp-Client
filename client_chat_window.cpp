@@ -13,12 +13,7 @@ QString client_chat_window::_last_sender = nullptr;
 QColor client_chat_window::_colors[] = {QColorConstants::Svg::lightsalmon, QColorConstants::Svg::lightgreen, QColorConstants::Svg::lightgray, QColorConstants::Svg::lightgoldenrodyellow, QColorConstants::Svg::lightpink};
 
 client_chat_window::client_chat_window(QWidget *parent)
-    : QMainWindow(parent)
-{
-    set_up_window();
-
-    ask_microphone_permission();
-}
+    : QMainWindow(parent) { set_up_window(); }
 
 client_chat_window::client_chat_window(const int &conversation_ID, const QString &destinator, const QString &name, QWidget *parent)
     : QMainWindow(parent), _conversation_ID(conversation_ID), _destinator(destinator), _destinator_name(name)
@@ -311,9 +306,6 @@ void client_chat_window::message_received(const QString &message, const QString 
     {
         wid->set_message(message, false, time);
 
-        if (_destinator.compare("Server"))
-            _client->send_save_conversation(_conversation_ID, _destinator, _client->my_ID(), message, time);
-
         line->setBackground(QBrush(QColorConstants::Svg::lightgray));
     }
     else
@@ -376,6 +368,8 @@ void client_chat_window::set_up_window()
 {
     QWidget *central_widget = new QWidget();
     setCentralWidget(central_widget);
+
+    ask_microphone_permission();
 
     QPushButton *member_list = new QPushButton("Server's Conversation", this);
     member_list->setStyleSheet("border: none;");
@@ -627,6 +621,7 @@ void client_chat_window::add_file(const QString &file_name, bool is_mine, const 
         }
     }
 
+    line->setSizeHint(wid->sizeHint());
     _list->setItemWidget(line, wid);
 
     emit saving_file("file saved");
@@ -692,6 +687,7 @@ void client_chat_window::add_audio(const QString &audio_name, bool is_mine, cons
         }
     }
 
+    line->setSizeHint(wid->sizeHint());
     _list->setItemWidget(line, wid);
 }
 
@@ -753,6 +749,7 @@ void client_chat_window::set_retrieve_message_window(const QString &type, const 
         }
     }
 
+    line->setSizeHint(wid->sizeHint());
     _list->setItemWidget(line, wid);
 }
 
