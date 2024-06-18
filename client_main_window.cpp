@@ -845,7 +845,6 @@ QStringList client_main_window::authenticate_group_members(const QStringList &gr
 
         for (int i = 0; i < _friend_list->count(); i++)
         {
-
             QString ID_2 = _friend_list->itemData(i).toString();
             if (!ID.compare(ID_2))
             {

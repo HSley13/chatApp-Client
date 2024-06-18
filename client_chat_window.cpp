@@ -590,10 +590,20 @@ void client_chat_window::add_file(const QString &file_name, bool is_mine, const 
 
     if (sender.isEmpty())
     {
-        hbox->addSpacerItem(new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Minimum));
-        hbox->addLayout(vbox);
+        if (is_mine)
+        {
+            hbox->addSpacerItem(new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Minimum));
 
-        (is_mine) ? line->setBackground(QBrush(QColorConstants::Svg::lightskyblue)) : line->setBackground(QBrush(QColorConstants::Svg::lightgray));
+            hbox->addLayout(vbox);
+            line->setBackground(QBrush(QColorConstants::Svg::lightskyblue));
+        }
+        else
+        {
+            line->setBackground(QBrush(QColorConstants::Svg::lightgray));
+            hbox->addLayout(vbox);
+
+            hbox->addSpacerItem(new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Minimum));
+        }
     }
     else
     {
@@ -653,12 +663,24 @@ void client_chat_window::add_audio(const QString &audio_name, bool is_mine, cons
 
     if (sender.isEmpty())
     {
-        hbox->addSpacerItem(new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Minimum));
+        if (is_mine)
+        {
+            hbox->addSpacerItem(new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Minimum));
 
-        hbox->addLayout(vbox_1);
-        hbox->addWidget(slider);
+            hbox->addLayout(vbox_1);
+            hbox->addWidget(slider);
 
-        (is_mine) ? line->setBackground(QBrush(QColorConstants::Svg::lightskyblue)) : line->setBackground(QBrush(QColorConstants::Svg::lightgray));
+            line->setBackground(QBrush(QColorConstants::Svg::lightskyblue));
+        }
+        else
+        {
+            line->setBackground(QBrush(QColorConstants::Svg::lightgray));
+
+            hbox->addLayout(vbox_1);
+            hbox->addWidget(slider);
+
+            hbox->addSpacerItem(new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Minimum));
+        }
     }
     else
     {
