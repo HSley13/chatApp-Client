@@ -169,8 +169,6 @@ client_main_window::client_main_window(QWidget *parent)
     layout->addWidget(_friend_list);
 
     QPixmap friend_icon(":/images/chat_icon.png");
-    if (!friend_icon)
-        qDebug() << "Image Send Button is NULL";
 
     QPushButton *friend_button = new QPushButton(this);
     friend_button->setIcon(friend_icon);
@@ -190,8 +188,6 @@ client_main_window::client_main_window(QWidget *parent)
     layout_2->addWidget(_group_list);
 
     QPixmap groups_icon(":/images/group_icon.png");
-    if (!groups_icon)
-        qDebug() << "Image Send Button is NULL";
 
     QPushButton *groups = new QPushButton(this);
     groups->setIcon(groups_icon);
@@ -487,13 +483,18 @@ void client_main_window::on_login_request(const QString &hashed_password, bool t
                 win->retrieve_group_conversation(group_message, group_binary_data);
 
                 connect(win, &client_chat_window::swipe_right, this, &client_main_window::on_swipe_right);
+                connect(win, &client_chat_window::data_received_sent, this, [=](QString first_name)
+                        { add_on_top(first_name); });
                 connect(win, &client_chat_window::item_clicked, this, [=](const QString &name)
                         {
                             int index = _friend_list->findText(name, Qt::MatchExactly);
                             if (index != -1)
                                 new_conversation(name);
                             else
-                                win->_client->send_lookup_friend(name); });
+                            {
+                                _search_phone_number->setText(name);
+                                win->_client->send_lookup_friend(name);
+                            } });
 
                 win->window_name(group_name_and_adm.values().first());
 

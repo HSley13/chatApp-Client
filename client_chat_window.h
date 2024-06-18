@@ -109,8 +109,6 @@ private:
 
     void set_retrieve_message_window(const QString &type, const QString &content, const QByteArray &file_data, const QString &date_time, bool true_or_false, const QString &sender = QString());
 
-    void configure_message_color(const QString &sender, bool is_mine, const QString &time, QWidget *wid, QVBoxLayout *vbox, QSlider *slider = nullptr);
-
 signals:
     void swipe_right();
 
@@ -159,6 +157,8 @@ private slots:
 
     void send_file();
 
+    void on_settings();
+
     void start_recording();
     void on_duration_changed(const qint64 &duration);
     void play_audio(const QUrl &source, QPushButton *audio, QSlider *slider);
@@ -188,8 +188,6 @@ public:
 
 class ListDialog : public QDialog
 {
-    Q_OBJECT
-
 private:
     QListWidget *name_list;
     QDialogButtonBox *button_box;
@@ -267,13 +265,9 @@ public:
 
 class Swipeable_list_widget : public QListWidget
 {
-
 private:
     QPoint drag_start_position;
     client_chat_window *_window;
-
-public:
-    explicit Swipeable_list_widget(client_chat_window *window, QWidget *parent = nullptr) : QListWidget(parent), _window(window) {}
 
 protected:
     void mousePressEvent(QMouseEvent *event) override
@@ -326,43 +320,38 @@ protected:
             QListWidget::mouseReleaseEvent(event);
         }
     }
+
+public:
+    explicit Swipeable_list_widget(client_chat_window *window, QWidget *parent = nullptr) : QListWidget(parent), _window(window) {}
 };
 
 class DisplayWidget : public QWidget
 {
-    Q_OBJECT
-
 private:
-    QLineEdit *lineEdit;
+    QLineEdit *_lineEdit;
 
 public:
     explicit DisplayWidget(QWidget *parent = nullptr) : QWidget(parent)
     {
         QHBoxLayout *layout = new QHBoxLayout(this);
-        lineEdit = new QLineEdit(this);
-        layout->addWidget(lineEdit);
+
+        _lineEdit = new QLineEdit(this);
+        layout->addWidget(_lineEdit);
+
         setLayout(layout);
         setStyleSheet("border: 2px solid #4A90E2;");
     }
 
     void setText(const QString &text)
     {
-        lineEdit->setText(text);
-        lineEdit->setCursorPosition(lineEdit->text().length());
+        _lineEdit->setText(text);
+        _lineEdit->setCursorPosition(_lineEdit->text().length());
     }
 };
 
 class CustomLineEdit : public QLineEdit
 {
     Q_OBJECT
-
-signals:
-    void focusGained();
-    void focusLost();
-
-public:
-    explicit CustomLineEdit(QWidget *parent = nullptr) : QLineEdit(parent) {}
-
 protected:
     void focusInEvent(QFocusEvent *event) override
     {
@@ -375,4 +364,11 @@ protected:
         QLineEdit::focusOutEvent(event);
         emit focusLost();
     }
+
+public:
+    explicit CustomLineEdit(QWidget *parent = nullptr) : QLineEdit(parent) {}
+
+signals:
+    void focusGained();
+    void focusLost();
 };

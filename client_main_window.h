@@ -112,3 +112,92 @@ private slots:
 
     void on_removed_from_group(const int &group_ID, const QString &group_name, const QString &adm);
 };
+
+class CustomListItem : public QListWidgetItem
+{
+private:
+    QString _client_name;
+    QString _last_message;
+    int _unread_messages;
+
+    QLabel *_name_label;
+    QLabel *_message_label;
+    QLabel *_unread_label;
+    QWidget *_widget;
+
+public:
+    CustomListItem(const QString &client_name, const QString &last_message, int unread_messages, QIcon icon = QIcon(), QListWidget *parent = nullptr)
+        : QListWidgetItem(parent), _client_name(client_name), _last_message(last_message), _unread_messages(unread_messages)
+    {
+        _name_label = new QLabel(_client_name);
+
+        _message_label = new QLabel(_last_message);
+        _message_label->setWordWrap(true);
+        _message_label->setToolTip(_last_message);
+
+        QFont font1 = _message_label->font();
+        font1.setPointSize(8);
+        _message_label->setFont(font1);
+
+        QVBoxLayout *vbox = new QVBoxLayout();
+        vbox->addWidget(_name_label);
+        vbox->addWidget(_message_label);
+
+        QWidget *wid = new QWidget();
+        wid->setLayout(vbox);
+        wid->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+
+        _unread_label = new QLabel(QString::number(_unread_messages));
+        _unread_label->setStyleSheet("background-color: red; color: white; border-radius: 8px; padding: 2px 6px;");
+        _unread_label->setAlignment(Qt::AlignCenter);
+        _unread_label->setFixedSize(20, 20);
+
+        QFont font2 = _unread_label->font();
+        font2.setPointSize(8);
+        _unread_label->setFont(font2);
+
+        QHBoxLayout *hbox = new QHBoxLayout();
+        hbox->addWidget(wid);
+        hbox->addWidget(_unread_label);
+        hbox->setAlignment(_unread_label, Qt::AlignTop | Qt::AlignRight);
+
+        _widget = new QWidget();
+        _widget->setLayout(hbox);
+        _widget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+
+        setSizeHint(_widget->sizeHint());
+        setIcon(icon);
+        parent->setItemWidget(this, _widget);
+
+        _unread_label->setVisible(_unread_messages != 0);
+    }
+
+    void set_client_name(const QString &name) { _client_name = name; }
+    void set_last_message(const QString &message) { _last_message = message; }
+    void set_unread_messages(const int &unread_count)
+    {
+        _unread_messages = unread_count;
+        _unread_label->setText(QString::number(_unread_messages));
+        _unread_label->setVisible(_unread_messages != 0);
+    }
+
+    void update_widget(QListWidget *parent)
+    {
+        if (parent)
+        {
+            _name_label->setText(_client_name);
+            _message_label->setText(_last_message);
+            _message_label->setToolTip(_last_message);
+
+            setSizeHint(_widget->sizeHint());
+
+            parent->setItemWidget(this, _widget);
+        }
+    }
+
+    const QString &get_client_name() const { return _client_name; }
+    const QString &get_last_message() const { return _last_message; }
+    const int &get_unread_messages() const { return _unread_messages; }
+
+    QWidget *get_widget() { return _widget; };
+};
