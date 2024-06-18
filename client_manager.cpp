@@ -342,7 +342,10 @@ QUrl client_manager::get_audio_url(const QString &audio_name)
         c_audio_name);
 
     if (!url)
+    {
+        qDebug() << "client_manager ---> get_audio_url() ---> url empty";
         return QUrl();
+    }
 
     QString qUrl = QString::fromUtf8(url);
     free(url);

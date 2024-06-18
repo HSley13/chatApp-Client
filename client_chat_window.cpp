@@ -131,7 +131,7 @@ void client_chat_window::start_recording()
         else
             _client->send_group_audio(_group_ID, _group_name, my_name(), audio_path, current_time);
 
-        emit data_received_sent(_window_name);
+        emit data_sent(_window_name);
     }
 }
 
@@ -287,7 +287,7 @@ void client_chat_window::send_message()
 
     _insert_message->clear();
 
-    emit data_received_sent(_window_name);
+    emit data_sent(_window_name);
 
     if (_destinator.compare("Server"))
         _client->send_save_conversation(_conversation_ID, _client->my_ID(), _destinator, message, current_time);
@@ -719,7 +719,7 @@ void client_chat_window::set_retrieve_message_window(const QString &type, const 
     {
         QString file_name = QString("%1_%2").arg(date_time, content);
 
-        _client->IDBFS_save_file(file_name, file_data, static_cast<int>(file_data.size()));
+        // _client->IDBFS_save_file(file_name, file_data, static_cast<int>(file_data.size()));
 
         (sender.isEmpty()) ? add_file(file_name, true_or_false, date_time) : add_file(file_name, true_or_false, date_time, sender);
 
@@ -729,7 +729,7 @@ void client_chat_window::set_retrieve_message_window(const QString &type, const 
     {
         QString audio_name = QString("%1_%2").arg(date_time, content);
 
-        _client->IDBFS_save_audio(audio_name, file_data, static_cast<int>(file_data.size()));
+        // _client->IDBFS_save_audio(audio_name, file_data, static_cast<int>(file_data.size()));
 
         (sender.isEmpty()) ? add_audio(audio_name, true_or_false, date_time) : add_audio(audio_name, true_or_false, date_time, sender);
 

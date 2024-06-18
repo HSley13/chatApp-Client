@@ -706,7 +706,7 @@ function dbg(text) {
 }
 
 var ASM_CONSTS = {
- 9410992: () => {
+ 9411024: () => {
   FS.mkdir("/audio");
   FS.mount(IDBFS, {}, "/audio");
   FS.syncfs(true, function(err) {
@@ -714,7 +714,7 @@ var ASM_CONSTS = {
    console.log("IDBFS audio mounted and synced");
   });
  },
- 9411144: () => {
+ 9411176: () => {
   FS.mkdir("/file");
   FS.mount(IDBFS, {}, "/file");
   FS.syncfs(true, function(err) {
@@ -722,7 +722,7 @@ var ASM_CONSTS = {
    console.log("IDBFS file mounted and synced");
   });
  },
- 9411293: $0 => {
+ 9411325: $0 => {
   var audio_path = UTF8ToString($0);
   var audio_data = FS.readFile(audio_path);
   if (!audio_data) {
@@ -738,7 +738,7 @@ var ASM_CONSTS = {
   stringToUTF8(url, stringOnWasmHeap, url_length);
   return stringOnWasmHeap;
  },
- 9411713: $0 => {
+ 9411745: $0 => {
   var file_path = UTF8ToString($0);
   var file_data = FS.readFile(file_path);
   if (!file_data) {
@@ -933,7 +933,7 @@ var ASM_CONSTS = {
   stringToUTF8(url, stringOnWasmHeap, url_length);
   return stringOnWasmHeap;
  },
- 9414704: $0 => {
+ 9414736: $0 => {
   var filePath = Pointer_stringify($0);
   try {
    FS.unlink(audio_path);
@@ -946,7 +946,7 @@ var ASM_CONSTS = {
    console.log("Audio system synced with IndexedDB");
   });
  },
- 9414993: $0 => {
+ 9415025: $0 => {
   var filePath = Pointer_stringify($0);
   try {
    FS.unlink(filePath);
@@ -959,13 +959,13 @@ var ASM_CONSTS = {
    console.log("File system synced with IndexedDB");
   });
  },
- 9415277: () => {
+ 9415309: () => {
   FS.syncfs();
  },
- 9415294: () => {
+ 9415326: () => {
   FS.syncfs();
  },
- 9415311: () => {
+ 9415343: () => {
   FS.syncfs();
  }
 };
@@ -15817,9 +15817,9 @@ var ___cxa_can_catch = createExportWrapper("__cxa_can_catch");
 
 var ___cxa_is_pointer_type = createExportWrapper("__cxa_is_pointer_type");
 
-var ___start_em_js = Module["___start_em_js"] = 9415328;
+var ___start_em_js = Module["___start_em_js"] = 9415360;
 
-var ___stop_em_js = Module["___stop_em_js"] = 9416418;
+var ___stop_em_js = Module["___stop_em_js"] = 9416450;
 
 function invoke_viiii(index, a1, a2, a3, a4) {
  var sp = stackSave();

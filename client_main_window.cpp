@@ -398,13 +398,13 @@ void client_main_window::on_login_request(const QString &hashed_password, bool t
         connect(_server_wid, &client_chat_window::socket_disconnected, this, [=]()
                 { _stack->setDisabled(true); _status_bar->showMessage("SERVER DISCONNECTED YOU", 999999); });
 
-        connect(_server_wid, &client_chat_window::data_received_sent, this, [=](const QString &client_name)
+        connect(_server_wid, &client_chat_window::data_sent, this, [=](const QString &client_name)
                 { add_on_top(client_name); });
 
         connect(_server_wid, &client_chat_window::saving_file, this, [=](const QString &message)
                 { 
                     if (!message.compare("file saved"))
-                    _status_bar->showMessage(QString("%1").arg(message), 3000); 
+                        _status_bar->showMessage(QString("%1").arg(message), 3000); 
                     else
                         _status_bar->showMessage(QString("%1").arg(message), 30000); });
 
@@ -419,7 +419,7 @@ void client_main_window::on_login_request(const QString &hashed_password, bool t
 
                 const QStringList &message = messages[conversation_ID];
 
-                const QHash<QString, QByteArray> &binary_data = binary_datas[conversation_ID];
+                // const QHash<QString, QByteArray> &binary_data = binary_datas[conversation_ID];
 
                 for (const QString &name : friend_info.keys())
                 {
@@ -434,10 +434,10 @@ void client_main_window::on_login_request(const QString &hashed_password, bool t
                         continue;
 
                     client_chat_window *wid = new client_chat_window(conversation_ID, QString::number(friend_info.value(name)), name, this);
-                    wid->retrieve_conversation(message, binary_data);
+                    wid->retrieve_conversation(message, QHash<QString, QByteArray>());
 
                     connect(wid, &client_chat_window::swipe_right, this, &client_main_window::on_swipe_right);
-                    connect(wid, &client_chat_window::data_received_sent, this, [=](QString first_name)
+                    connect(wid, &client_chat_window::data_sent, this, [=](QString first_name)
                             { add_on_top(first_name); });
 
                     wid->window_name(name);
@@ -468,9 +468,9 @@ void client_main_window::on_login_request(const QString &hashed_password, bool t
 
                 const QStringList &group_message = group_messages[group_ID];
 
-                const QHash<QString, QByteArray> group_binary_data = group_binary_datas[group_ID];
+                // const QHash<QString, QByteArray> &group_binary_data = group_binary_datas[group_ID];
 
-                const QStringList group_members = groups_members[group_ID];
+                const QStringList &group_members = groups_members[group_ID];
 
                 _group_list->addItem(group_name_and_adm.values().first());
 
@@ -480,10 +480,10 @@ void client_main_window::on_login_request(const QString &hashed_password, bool t
                 QStringList names = authenticate_group_members(group_members);
 
                 client_chat_window *win = new client_chat_window(group_ID, group_name_and_adm.values().first(), names, QString::number(group_name_and_adm.keys().first()), this);
-                win->retrieve_group_conversation(group_message, group_binary_data);
+                win->retrieve_group_conversation(group_message, QHash<QString, QByteArray>());
 
                 connect(win, &client_chat_window::swipe_right, this, &client_main_window::on_swipe_right);
-                connect(win, &client_chat_window::data_received_sent, this, [=](QString first_name)
+                connect(win, &client_chat_window::data_sent, this, [=](QString first_name)
                         { add_on_top(first_name); });
                 connect(win, &client_chat_window::item_clicked, this, [=](const QString &name)
                         {
@@ -737,7 +737,7 @@ void client_main_window::on_lookup_friend_result(const int &conversation_ID, con
 
         client_chat_window *wid = new client_chat_window(conversation_ID, _search_phone_number->text(), name, this);
         connect(wid, &client_chat_window::swipe_right, this, &client_main_window::on_swipe_right);
-        connect(wid, &client_chat_window::data_received_sent, this, [=](const QString &first_name)
+        connect(wid, &client_chat_window::data_sent, this, [=](const QString &first_name)
                 { add_on_top(first_name); });
 
         wid->window_name(name);
@@ -777,7 +777,7 @@ void client_main_window::on_client_added_you(const int &conversation_ID, const Q
         if (wid)
         {
             connect(wid, &client_chat_window::swipe_right, this, &client_main_window::on_swipe_right);
-            connect(wid, &client_chat_window::data_received_sent, this, [=](const QString &first_name)
+            connect(wid, &client_chat_window::data_sent, this, [=](const QString &first_name)
                     { add_on_top(first_name); });
 
             wid->window_name(name);
@@ -879,13 +879,18 @@ void client_main_window::configure_group(const int &group_ID, const QString &gro
 
     client_chat_window *win = new client_chat_window(group_ID, group_name, names, adm, this);
     connect(win, &client_chat_window::swipe_right, this, &client_main_window::on_swipe_right);
+    connect(win, &client_chat_window::data_sent, this, [=](const QString &first_name)
+            { add_on_top(first_name); });
     connect(win, &client_chat_window::item_clicked, this, [=](const QString &name)
             {
                 int index = _friend_list->findText(name, Qt::MatchExactly);
                 if (index != -1)
                     new_conversation(name);
                 else
-                    win->_client->send_lookup_friend(name); });
+                {
+                    _search_phone_number->setText(name);
+                    win->_client->send_lookup_friend(name);
+                } });
 
     win->window_name(group_name);
 
@@ -969,9 +974,9 @@ void client_main_window::on_group_text_received(const int &group_ID, const QStri
     QWidget *win = _window_map.value(group_name);
     if (win)
     {
-        int index = _friend_list->findText(group_name, Qt::MatchExactly);
+        int index = _group_list->findText(group_name, Qt::MatchExactly);
         if (index == -1)
-            _friend_list->addItem(group_name);
+            _group_list->addItem(group_name);
 
         client_chat_window *wid = qobject_cast<client_chat_window *>(win);
         if (wid)
@@ -1036,7 +1041,15 @@ void client_main_window::add_on_top(const QString &client_name)
         _list->insertItem(0, item_to_replace);
     }
     else
-        _list->insertItem(0, client_name);
+    {
+        QListWidgetItem *item = new QListWidgetItem(client_name);
+
+        int index = _friend_list->findText(client_name, Qt::MatchExactly);
+        if (index != -1)
+            item->setIcon(_friend_list->itemIcon(index));
+
+        _list->insertItem(0, item);
+    }
 }
 
 void client_main_window::mousePressEvent(QMouseEvent *event)
