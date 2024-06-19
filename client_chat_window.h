@@ -22,7 +22,7 @@ public:
     void set_name(const QString &insert_name);
 
     void window_name(const QString &name);
-    void message_received(const QString &message, const QString &time, const QString &sender = QString());
+    void text_message_background(const QString &message, const QString &time, const QString &sender = QString(), bool true_or_false = false);
 
     void retrieve_conversation(const QStringList &messages);
     void retrieve_group_conversation(const QStringList &group_messages);
@@ -109,6 +109,7 @@ private:
 
     void set_retrieve_message_window(const QString &type, const QString &content, const QString &date_time, bool true_or_false, const QString &sender = QString());
 
+    void audio_file_message_background(QWidget *wid, const bool &is_mine, const QString &sender, const QString &time, QVBoxLayout *vbox, QSlider *slider = nullptr);
 signals:
     void swipe_right();
 

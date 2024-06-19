@@ -270,15 +270,12 @@ void client_chat_window::send_message()
     QString current_time = QTime::currentTime().toString();
 
     chat_line *wid = new chat_line(this);
-
-    wid->set_message(message, true, current_time);
-
     wid->setStyleSheet("color: black;");
+    wid->set_message(message, true, current_time);
 
     QListWidgetItem *line = new QListWidgetItem(_list);
     line->setSizeHint(QSize(0, 60));
     line->setData(Qt::UserRole, current_time);
-
     line->setBackground(QBrush(QColorConstants::Svg::lightskyblue));
 
     _list->setItemWidget(line, wid);
@@ -293,39 +290,44 @@ void client_chat_window::send_message()
         _client->send_save_conversation(_conversation_ID, _client->my_ID(), _destinator, message, current_time);
 }
 
-void client_chat_window::message_received(const QString &message, const QString &time, const QString &sender)
+void client_chat_window::text_message_background(const QString &content, const QString &date_time, const QString &sender, bool true_or_false)
 {
     chat_line *wid = new chat_line(this);
     wid->setStyleSheet("color: black;");
 
-    QListWidgetItem *line = new QListWidgetItem();
+    QListWidgetItem *line = new QListWidgetItem(_list);
     line->setSizeHint(QSize(0, 60));
-    line->setData(Qt::UserRole, time);
+    line->setData(Qt::UserRole, date_time);
 
     if (sender.isEmpty())
     {
-        wid->set_message(message, false, time);
+        (true_or_false) ? line->setBackground(QBrush(QColorConstants::Svg::lightskyblue)) : line->setBackground(QBrush(QColorConstants::Svg::lightgray));
 
-        line->setBackground(QBrush(QColorConstants::Svg::lightgray));
+        wid->set_message(content, true_or_false, date_time);
     }
     else
     {
-        wid->set_group_message(message, sender, false, time);
+        wid->set_group_message(content, sender, true_or_false, date_time);
 
-        if (!_last_sender.compare(sender))
-            line->setBackground(QBrush(_last_color));
+        if (true_or_false)
+            line->setBackground(QBrush(QColorConstants::Svg::lightskyblue));
         else
         {
-            line->setBackground(QBrush(_colors[_color_counter % 5]));
-            _last_color = _colors[_color_counter % 5];
+            if (!_last_sender.compare(sender))
+                line->setBackground(QBrush(_last_color));
+            else
+            {
+                line->setBackground(QBrush(_colors[_color_counter % 5]));
+                _last_color = _colors[_color_counter % 5];
 
-            _color_counter++;
+                _color_counter++;
+            }
+
+            _last_sender = sender;
         }
-
-        _last_sender = sender;
     }
 
-    _list->addItem(line);
+    line->setSizeHint(wid->sizeHint());
     _list->setItemWidget(line, wid);
 }
 
@@ -581,61 +583,11 @@ void client_chat_window::add_file(const QString &file_name, bool is_mine, const 
     connect(file, &QPushButton::clicked, this, [=]()
             { QDesktopServices::openUrl(_client->get_file_url(file_name, ID, type)); });
 
-    QListWidgetItem *line = new QListWidgetItem(_list);
-    line->setSizeHint(QSize(0, 68));
-    line->setData(Qt::UserRole, time);
-
     QVBoxLayout *vbox = new QVBoxLayout();
     vbox->addWidget(file);
     vbox->addWidget(time_label, 0, Qt::AlignHCenter);
 
-    QHBoxLayout *hbox = new QHBoxLayout(wid);
-
-    if (sender.isEmpty())
-    {
-        if (is_mine)
-        {
-            hbox->addSpacerItem(new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Minimum));
-
-            hbox->addLayout(vbox);
-            line->setBackground(QBrush(QColorConstants::Svg::lightskyblue));
-        }
-        else
-        {
-            line->setBackground(QBrush(QColorConstants::Svg::lightgray));
-            hbox->addLayout(vbox);
-
-            hbox->addSpacerItem(new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Minimum));
-        }
-    }
-    else
-    {
-        QLabel *lab = new QLabel(QString("%1: ").arg(sender), this);
-        hbox->addWidget(lab);
-        hbox->addLayout(vbox);
-
-        hbox->addSpacerItem(new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Minimum));
-
-        if (is_mine)
-            line->setBackground(QBrush(QColorConstants::Svg::lightskyblue));
-        else
-        {
-            if (!_last_sender.compare(sender))
-                line->setBackground(QBrush(_last_color));
-            else
-            {
-                line->setBackground(QBrush(_colors[_color_counter % 5]));
-                _last_color = _colors[_color_counter % 5];
-
-                _color_counter++;
-            }
-
-            _last_sender = sender;
-        }
-    }
-
-    line->setSizeHint(wid->sizeHint());
-    _list->setItemWidget(line, wid);
+    audio_file_message_background(wid, is_mine, sender, time, vbox);
 
     emit saving_file("file saved");
 }
@@ -657,13 +609,18 @@ void client_chat_window::add_audio(const QString &audio_name, bool is_mine, cons
     connect(audio, &QPushButton::clicked, this, [=]()
             { play_audio(_client->get_audio_url(audio_name, ID, type), audio, slider); });
 
+    QVBoxLayout *vbox = new QVBoxLayout();
+    vbox->addWidget(audio);
+    vbox->addWidget(time_label, 0, Qt::AlignHCenter);
+
+    audio_file_message_background(wid, is_mine, sender, time, vbox, slider);
+}
+
+void client_chat_window::audio_file_message_background(QWidget *wid, const bool &is_mine, const QString &sender, const QString &time, QVBoxLayout *vbox, QSlider *slider)
+{
     QListWidgetItem *line = new QListWidgetItem(_list);
     line->setSizeHint(QSize(0, 80));
     line->setData(Qt::UserRole, time);
-
-    QVBoxLayout *vbox_1 = new QVBoxLayout();
-    vbox_1->addWidget(audio);
-    vbox_1->addWidget(time_label, 0, Qt::AlignHCenter);
 
     QHBoxLayout *hbox = new QHBoxLayout(wid);
 
@@ -673,8 +630,10 @@ void client_chat_window::add_audio(const QString &audio_name, bool is_mine, cons
         {
             hbox->addSpacerItem(new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Minimum));
 
-            hbox->addLayout(vbox_1);
-            hbox->addWidget(slider);
+            hbox->addLayout(vbox);
+
+            if (slider != nullptr)
+                hbox->addWidget(slider);
 
             line->setBackground(QBrush(QColorConstants::Svg::lightskyblue));
         }
@@ -682,8 +641,10 @@ void client_chat_window::add_audio(const QString &audio_name, bool is_mine, cons
         {
             line->setBackground(QBrush(QColorConstants::Svg::lightgray));
 
-            hbox->addLayout(vbox_1);
-            hbox->addWidget(slider);
+            hbox->addLayout(vbox);
+
+            if (slider != nullptr)
+                hbox->addWidget(slider);
 
             hbox->addSpacerItem(new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Minimum));
         }
@@ -692,8 +653,10 @@ void client_chat_window::add_audio(const QString &audio_name, bool is_mine, cons
     {
         QLabel *lab = new QLabel(QString("%1: ").arg(sender), this);
         hbox->addWidget(lab);
-        hbox->addLayout(vbox_1);
-        hbox->addWidget(slider);
+        hbox->addLayout(vbox);
+
+        if (slider != nullptr)
+            hbox->addWidget(slider);
 
         hbox->addSpacerItem(new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Minimum));
 
@@ -738,43 +701,7 @@ void client_chat_window::set_retrieve_message_window(const QString &type, const 
         return;
     }
 
-    chat_line *wid = new chat_line(this);
-    wid->setStyleSheet("color: black;");
-
-    QListWidgetItem *line = new QListWidgetItem(_list);
-    line->setSizeHint(QSize(0, 60));
-    line->setData(Qt::UserRole, date_time);
-
-    if (sender.isEmpty())
-    {
-        (true_or_false) ? line->setBackground(QBrush(QColorConstants::Svg::lightskyblue)) : line->setBackground(QBrush(QColorConstants::Svg::lightgray));
-
-        wid->set_message(content, true_or_false, date_time);
-    }
-    else
-    {
-        wid->set_group_message(content, sender, true_or_false, date_time);
-
-        if (true_or_false)
-            line->setBackground(QBrush(QColorConstants::Svg::lightskyblue));
-        else
-        {
-            if (!_last_sender.compare(sender))
-                line->setBackground(QBrush(_last_color));
-            else
-            {
-                line->setBackground(QBrush(_colors[_color_counter % 5]));
-                _last_color = _colors[_color_counter % 5];
-
-                _color_counter++;
-            }
-
-            _last_sender = sender;
-        }
-    }
-
-    line->setSizeHint(wid->sizeHint());
-    _list->setItemWidget(line, wid);
+    text_message_background(content, date_time, sender, true_or_false);
 }
 
 void client_chat_window::retrieve_conversation(const QStringList &messages)

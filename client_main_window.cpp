@@ -645,7 +645,7 @@ void client_main_window::on_text_message_received(const QString &sender, const Q
         client_chat_window *wid = qobject_cast<client_chat_window *>(win);
         if (wid)
         {
-            wid->message_received(text, time);
+            wid->text_message_background(text, time);
 
             add_on_top(sender);
         }
@@ -977,7 +977,7 @@ void client_main_window::on_group_text_received(const int &group_ID, const QStri
         client_chat_window *wid = qobject_cast<client_chat_window *>(win);
         if (wid)
         {
-            wid->message_received(message, time, sender);
+            wid->text_message_background(message, time, sender);
             add_on_top(group_name);
         }
     }
