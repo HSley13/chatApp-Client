@@ -204,8 +204,6 @@ QByteArray chat_protocol::set_audio_message(const QString &sender, const QString
 
         file.close();
     }
-    else
-        qDebug() << "chat_protocol ---> set_audio_message() ---> Can't open the file you wanna send";
 
     return byte;
 }
@@ -262,8 +260,6 @@ QByteArray chat_protocol::set_save_audio_message(const int &conversation_ID, con
 
         file.close();
     }
-    else
-        qDebug() << "chat_protocol ---> set_save_file_message() ---> Can't open the audio you wanna send";
 
     return byte;
 }
@@ -368,8 +364,6 @@ QByteArray chat_protocol::set_group_audio_message(const int &group_ID, const QSt
 
         file.close();
     }
-    else
-        qDebug() << "chat_protocol ---> set_group_audio_message() ---> Can't open the file you wanna send";
 
     return byte;
 }
@@ -406,6 +400,18 @@ QByteArray chat_protocol::set_request_data_message(const int &conversation_ID, c
     out.setVersion(QDataStream::Qt_6_7);
 
     out << request_data << conversation_ID << date_time << type;
+
+    return byte;
+}
+
+QByteArray chat_protocol::set_delete_account_message(const QString &phone_number)
+{
+    QByteArray byte;
+
+    QDataStream out(&byte, QIODevice::WriteOnly);
+    out.setVersion(QDataStream::Qt_6_7);
+
+    out << delete_account << phone_number;
 
     return byte;
 }

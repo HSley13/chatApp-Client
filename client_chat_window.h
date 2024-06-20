@@ -34,8 +34,10 @@ public:
     void message_deleted(const QString &time);
     void message_widget(bool true_or_false, const QString &content, const QString &date_time, const QString &sender);
 
-    void group_removed();
-    void group_restored();
+    void disable_chat();
+    void enable_chat();
+
+    void delete_account();
 
     static client_manager *_client;
 
@@ -286,11 +288,9 @@ protected:
             int distance = event->pos().x() - drag_start_position.x();
             if (distance < -50)
             {
-                QListWidgetItem *item = itemAt(drag_start_position);
+                QListWidgetItem *item = QListWidget::itemAt(drag_start_position);
                 if (item)
                 {
-                    QStringList info;
-
                     QWidget *widget = item->listWidget()->itemWidget(item);
                     if (widget)
                     {
@@ -300,20 +300,21 @@ protected:
                             QLabel *message = qobject_cast<QLabel *>(layout->itemAt(0)->widget());
 
                             if (message)
-                                info << "Do you really want to delete this Message: " << message->text() << " Press OK to confirm";
+                            {
+                                QStringList info;
+                                info << "Do you really want to delete this Message: "
+                                     << message->text()
+                                     << " Press OK to confirm";
 
-                            ListDialog *dialog = new ListDialog(info, "Delete Message", this);
-                            connect(dialog, &QInputDialog::finished, this, [=](int result)
-                                    {
-                                        if(result == QDialog::Accepted)
-                                        {
-                                            _window->message_deleted(item->data(Qt::UserRole).toString());
+                                ListDialog *dialog = new ListDialog(info, "Delete Message", this);
+                                connect(dialog, &QDialog::accepted, this, [=]()
+                                        {   _window->message_deleted(item->data(Qt::UserRole).toString());
                                             delete _window->_list->takeItem(_window->_list->row(item));
-                                        }  
 
                                         dialog->deleteLater(); });
 
-                            dialog->open();
+                                dialog->open();
+                            }
                         }
                     }
                 }

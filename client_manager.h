@@ -63,6 +63,8 @@ public:
     void send_new_group_member_message(const int &group_ID, const QString &group_name, const QString &adm, const QString &group_member);
     void send_remove_group_member_message(const int &group_ID, const QString &group_name, const QString &adm, const QString &group_member);
 
+    void send_delete_account_message(const QString &phone_number);
+
     const QString &my_ID() const;
     const QString &my_name() const;
     const QString &file_name() const;

@@ -706,29 +706,20 @@ function dbg(text) {
 }
 
 var ASM_CONSTS = {
- 9408336: () => {
+ 9408352: () => {
   FS.mkdir("/audio");
   FS.mount(IDBFS, {}, "/audio");
-  FS.syncfs(true, function(err) {
-   assert(!err);
-   console.log("IDBFS audio mounted and synced");
-  });
+  FS.syncfs(true);
  },
- 9408488: () => {
+ 9408424: () => {
   FS.mkdir("/file");
   FS.mount(IDBFS, {}, "/file");
-  FS.syncfs(true, function(err) {
-   assert(!err);
-   console.log("IDBFS file mounted and synced");
-  });
+  FS.syncfs(true);
  },
- 9408637: $0 => {
+ 9408494: $0 => {
   var audio_path = UTF8ToString($0);
   var audio_data = FS.readFile(audio_path);
-  if (!audio_data) {
-   console.error("Failed to read file:", audio_path);
-   return null;
-  }
+  if (!audio_data) return null;
   var blob = new Blob([ audio_data ], {
    type: "audio/*"
   });
@@ -738,13 +729,10 @@ var ASM_CONSTS = {
   stringToUTF8(url, stringOnWasmHeap, url_length);
   return stringOnWasmHeap;
  },
- 9409057: $0 => {
+ 9408859: $0 => {
   var file_path = UTF8ToString($0);
   var file_data = FS.readFile(file_path);
-  if (!file_data) {
-   console.error("Failed to read file:", file_path);
-   return null;
-  }
+  if (!file_data) return null;
   var mime_type = "application/octet-stream";
   var extension = file_path.split(".").pop().toLowerCase();
   switch (extension) {
@@ -933,33 +921,19 @@ var ASM_CONSTS = {
   stringToUTF8(url, stringOnWasmHeap, url_length);
   return stringOnWasmHeap;
  },
- 9412048: $0 => {
-  var filePath = Pointer_stringify($0);
-  try {
-   FS.unlink(audio_path);
-   console.log("Audio removed from virtual file system");
-  } catch (e) {
-   console.error("Failed to delete audio:", e);
-  }
-  FS.syncfs(false, function(err) {
-   assert(!err);
-   console.log("Audio system synced with IndexedDB");
-  });
+ 9411796: $0 => {
+  var audioPath = UTF8ToString($0);
+  var audioStatus = FS.analyzePath(audioPath);
+  if (audioStatus.exists) FS.unlink(audioPath);
+  FS.syncfs(false);
  },
- 9412337: $0 => {
-  var filePath = Pointer_stringify($0);
-  try {
-   FS.unlink(filePath);
-   console.log("File removed from virtual file system");
-  } catch (e) {
-   console.error("Failed to delete file:", e);
-  }
-  FS.syncfs(false, function(err) {
-   assert(!err);
-   console.log("File system synced with IndexedDB");
-  });
+ 9411943: $0 => {
+  var filePath = UTF8ToString($0);
+  var fileStatus = FS.analyzePath(filePath);
+  if (fileStatus.exists) FS.unlink(filePath);
+  FS.syncfs(false);
  },
- 9412621: () => {
+ 9412085: () => {
   FS.syncfs();
  }
 };
@@ -15811,9 +15785,9 @@ var ___cxa_can_catch = createExportWrapper("__cxa_can_catch");
 
 var ___cxa_is_pointer_type = createExportWrapper("__cxa_is_pointer_type");
 
-var ___start_em_js = Module["___start_em_js"] = 9412638;
+var ___start_em_js = Module["___start_em_js"] = 9412102;
 
-var ___stop_em_js = Module["___stop_em_js"] = 9413728;
+var ___stop_em_js = Module["___stop_em_js"] = 9413192;
 
 function invoke_viiii(index, a1, a2, a3, a4) {
  var sp = stackSave();

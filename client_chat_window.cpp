@@ -55,7 +55,7 @@ void client_chat_window::ask_microphone_permission()
     switch (qApp->checkPermission(microphonePermission))
     {
     case Qt::PermissionStatus::Undetermined:
-        qApp->requestPermission(microphonePermission, this, [=]()
+        qApp->requestPermission(microphonePermission, this, [this]()
                                 { qDebug() << "Undetermined: Microphone permission granted!"; });
 
         break;
@@ -169,14 +169,14 @@ void client_chat_window::play_audio(const QUrl &source, QPushButton *audio, QSli
             _player->setSource(source);
             _audio_output->setVolume(50);
 
-            connect(slider, &QSlider::valueChanged, _player, [=](int position)
+            connect(slider, &QSlider::valueChanged, _player, [this](int position)
                     { _player->setPosition(static_cast<qint64>(position)); });
 
-            connect(_player, &QMediaPlayer::durationChanged, this, [=](qint64 duration)
+            connect(_player, &QMediaPlayer::durationChanged, this, [this, &slider](qint64 duration)
                     {   slider->setRange(0, static_cast<int>(duration));
                         slider->setValue(static_cast<int>(duration)); });
 
-            connect(_player, &QMediaPlayer::playbackStateChanged, this, [=](QMediaPlayer::PlaybackState state)
+            connect(_player, &QMediaPlayer::playbackStateChanged, this, [this, &slider, &audio](QMediaPlayer::PlaybackState state)
                     {
                         if (state == QMediaPlayer::StoppedState)
                         {
@@ -198,7 +198,7 @@ void client_chat_window::play_audio(const QUrl &source, QPushButton *audio, QSli
             audio->setText("⏸️");
 
             QTimer *timer = new QTimer(this);
-            connect(timer, &QTimer::timeout, this, [=]()
+            connect(timer, &QTimer::timeout, this, [this, &slider]()
                     { slider->setValue(static_cast<int>(_player->position())); });
             timer->start(100);
         }
@@ -217,10 +217,11 @@ void client_chat_window::play_audio(const QUrl &source, QPushButton *audio, QSli
 void client_chat_window::on_settings()
 {
     QStringList choices;
-    choices << "Add New Member" << "Remove Member";
+    choices << "Add New Member"
+            << "Remove Member";
 
     ListDialog *add_remove_dialog = new ListDialog(choices, "Add/Remove Member", this);
-    connect(add_remove_dialog, &QDialog::accepted, this, [=]()
+    connect(add_remove_dialog, &QDialog::accepted, this, [this, &add_remove_dialog]()
             { 
                                 QString option = add_remove_dialog->name_selected().first();
 
@@ -230,7 +231,7 @@ void client_chat_window::on_settings()
                                     add_dialog->setWindowTitle("Add New Member");
                                     add_dialog->setLabelText("Enter Phone Number");
 
-                                    connect(add_dialog, &QInputDialog::finished, this, [=](int result)
+                                    connect(add_dialog, &QInputDialog::finished, this, [this, &add_dialog](int result)
                                             { 
                                                 if(result == QDialog::Accepted)
                                                     _client->send_new_group_member_message(_group_ID, _group_name, my_name(), add_dialog->textValue());
@@ -246,7 +247,7 @@ void client_chat_window::on_settings()
                                     remove_dialog->setWindowTitle("Remove Member");
                                     remove_dialog->setLabelText("Enter Member Phone Number");
 
-                                    connect(remove_dialog, &QInputDialog::finished, this, [=](int result)
+                                    connect(remove_dialog, &QInputDialog::finished, this, [this, &remove_dialog](int result)
                                             {  
                                                 if(result == QDialog::Accepted) 
                                                     _client->send_remove_group_member_message(_group_ID, _group_name, my_name(), remove_dialog->textValue()); 
@@ -375,14 +376,14 @@ void client_chat_window::set_up_window()
 
     QPushButton *member_list = new QPushButton("Server's Conversation", this);
     member_list->setStyleSheet("border: none;");
-    connect(member_list, &QPushButton::clicked, this, [=]()
+    connect(member_list, &QPushButton::clicked, this, [this]()
             {
                 if (_group_name.isEmpty())
                     return;
                 else
                 {
                     ListDialog *members = new ListDialog(_group_members, "Group Members", this);
-                    connect(members, &QDialog::accepted, this, [=]()
+                    connect(members, &QDialog::accepted, this, [this, &members]()
                             {   QString name = members->name_selected().first();
                                 emit item_clicked(name);
 
@@ -391,7 +392,7 @@ void client_chat_window::set_up_window()
                     members->open();
                 } });
 
-    connect(this, &client_chat_window::update_button_file, this, [=]()
+    connect(this, &client_chat_window::update_button_file, this, [this, &member_list]()
             { member_list->setText(QString("%1's Conversation").arg(_window_name)); });
 
     _list = new Swipeable_list_widget(this, this);
@@ -401,7 +402,7 @@ void client_chat_window::set_up_window()
     _insert_message = new CustomLineEdit(this);
     _insert_message->setPlaceholderText("Insert New Message");
 
-    connect(_insert_message, &CustomLineEdit::textChanged, this, [=]()
+    connect(_insert_message, &CustomLineEdit::textChanged, this, [this]()
             { if(_group_name.isEmpty()) 
                 _client->send_is_typing(my_name(), _destinator); 
               else
@@ -439,64 +440,64 @@ void client_chat_window::set_up_window()
     if (!_client)
     {
         _client = new client_manager(this);
-        connect(_client, &client_manager::text_message_received, this, [=](const QString &sender, const QString &message, const QString &time)
+        connect(_client, &client_manager::text_message_received, this, [this](const QString &sender, const QString &message, const QString &time)
                 { emit text_message_received(sender, message, time); });
 
-        connect(_client, &client_manager::is_typing_received, this, [=](const QString &sender)
+        connect(_client, &client_manager::is_typing_received, this, [this](const QString &sender)
                 { emit is_typing_received(sender); });
 
-        connect(_client, &client_manager::client_disconnected, this, [=](const QString &client_name)
+        connect(_client, &client_manager::client_disconnected, this, [this](const QString &client_name)
                 { emit client_disconnected(client_name); });
 
-        connect(_client, &client_manager::client_connected, this, [=](const QString &client_name)
+        connect(_client, &client_manager::client_connected, this, [this](const QString &client_name)
                 { emit client_connected(client_name); });
 
-        connect(_client, &client_manager::client_name_changed, this, [=](const QString &old_name, const QString &client_name)
+        connect(_client, &client_manager::client_name_changed, this, [this](const QString &old_name, const QString &client_name)
                 { emit client_name_changed(old_name, client_name); });
 
-        connect(_client, &client_manager::socket_disconnected, this, [=]()
+        connect(_client, &client_manager::socket_disconnected, this, [this]()
                 { emit socket_disconnected(); });
 
-        connect(_client, &client_manager::client_added_you, this, [=](const int &conversation_ID, const QString &name, const QString &ID)
+        connect(_client, &client_manager::client_added_you, this, [this](const int &conversation_ID, const QString &name, const QString &ID)
                 { emit client_added_you(conversation_ID, name, ID); });
 
-        connect(_client, &client_manager::lookup_friend_result, this, [=](const int &conversation_ID, const QString &name, bool true_or_false)
+        connect(_client, &client_manager::lookup_friend_result, this, [this](const int &conversation_ID, const QString &name, bool true_or_false)
                 { emit lookup_friend_result(conversation_ID, name, true_or_false); });
 
-        connect(_client, &client_manager::audio_received, this, [=](const QString &sender, const QString &audio_name, const QString &time)
+        connect(_client, &client_manager::audio_received, this, [this](const QString &sender, const QString &audio_name, const QString &time)
                 { emit audio_received(sender, audio_name, time); });
 
-        connect(_client, &client_manager::file_received, this, [=](const QString &sender, const QString &file_name, const QString &time)
+        connect(_client, &client_manager::file_received, this, [this](const QString &sender, const QString &file_name, const QString &time)
                 { emit file_received(sender, file_name, time); });
 
-        connect(_client, &client_manager::login_request, this, [=](const QString &hashed_password, bool true_or_false, const QHash<int, QHash<QString, int>> &friend_list, const QStringList &online_friends, const QHash<int, QStringList> &messages, const QHash<int, QHash<int, QString>> &group_list, const QHash<int, QStringList> &group_messages, const QHash<int, QStringList> &groups_members)
+        connect(_client, &client_manager::login_request, this, [this](const QString &hashed_password, bool true_or_false, const QHash<int, QHash<QString, int>> &friend_list, const QStringList &online_friends, const QHash<int, QStringList> &messages, const QHash<int, QHash<int, QString>> &group_list, const QHash<int, QStringList> &group_messages, const QHash<int, QStringList> &groups_members)
                 { emit login_request(hashed_password, true_or_false, friend_list, online_friends, messages, group_list, group_messages, groups_members); });
 
-        connect(_client, &client_manager::delete_message, this, [=](const QString &sender, const QString &time)
+        connect(_client, &client_manager::delete_message, this, [this](const QString &sender, const QString &time)
                 { emit delete_message(sender, time); });
 
-        connect(_client, &client_manager::saving_file, this, [=](const QString &message)
+        connect(_client, &client_manager::saving_file, this, [this](const QString &message)
                 { emit saving_file(message); });
 
-        connect(_client, &client_manager::new_group_ID, this, [=](const int &group_ID)
+        connect(_client, &client_manager::new_group_ID, this, [this](const int &group_ID)
                 { emit new_group_ID(group_ID); });
 
-        connect(_client, &client_manager::added_to_group, this, [=](const int &group_ID, const QString &adm, const QStringList &group_members, const QString &group_name)
+        connect(_client, &client_manager::added_to_group, this, [this](const int &group_ID, const QString &adm, const QStringList &group_members, const QString &group_name)
                 { emit added_to_group(group_ID, adm, group_members, group_name); });
 
-        connect(_client, &client_manager::group_is_typing_received, this, [=](const int &group_ID, const QString &group_name, const QString &sender)
+        connect(_client, &client_manager::group_is_typing_received, this, [this](const int &group_ID, const QString &group_name, const QString &sender)
                 { emit group_is_typing_received(group_ID, group_name, sender); });
 
-        connect(_client, &client_manager::group_text_received, this, [=](const int &group_ID, const QString &group_name, const QString &sender, const QString &message, const QString time)
+        connect(_client, &client_manager::group_text_received, this, [this](const int &group_ID, const QString &group_name, const QString &sender, const QString &message, const QString time)
                 { emit group_text_received(group_ID, group_name, sender, message, time); });
 
-        connect(_client, &client_manager::group_audio_received, this, [=](const int &group_ID, const QString &group_name, const QString &sender, const QString &audio_name, const QString &time)
+        connect(_client, &client_manager::group_audio_received, this, [this](const int &group_ID, const QString &group_name, const QString &sender, const QString &audio_name, const QString &time)
                 { emit group_audio_received(group_ID, group_name, sender, audio_name, time); });
 
-        connect(_client, &client_manager::group_file_received, this, [=](const int &group_ID, const QString &group_name, const QString &sender, const QString &file_name, const QString &time)
+        connect(_client, &client_manager::group_file_received, this, [this](const int &group_ID, const QString &group_name, const QString &sender, const QString &file_name, const QString &time)
                 { emit group_file_received(group_ID, group_name, sender, file_name, time); });
 
-        connect(_client, &client_manager::removed_from_group, this, [=](const int &group_ID, const QString &group_name, const QString &adm)
+        connect(_client, &client_manager::removed_from_group, this, [this](const int &group_ID, const QString &group_name, const QString &adm)
                 { emit removed_from_group(group_ID, group_name, adm); });
     }
 }
@@ -580,7 +581,7 @@ void client_chat_window::add_file(const QString &file_name, bool is_mine, const 
     file->setIconSize(QSize(30, 30));
     file->setFixedSize(QSize(30, 30));
     file->setStyleSheet("border: none");
-    connect(file, &QPushButton::clicked, this, [=]()
+    connect(file, &QPushButton::clicked, this, [this, &file_name, &ID, &type]()
             { QDesktopServices::openUrl(_client->get_file_url(file_name, ID, type)); });
 
     QVBoxLayout *vbox = new QVBoxLayout();
@@ -606,7 +607,7 @@ void client_chat_window::add_audio(const QString &audio_name, bool is_mine, cons
     const int &ID = (_group_name.isEmpty()) ? _conversation_ID : _group_ID;
 
     QPushButton *audio = new QPushButton("▶️", this);
-    connect(audio, &QPushButton::clicked, this, [=]()
+    connect(audio, &QPushButton::clicked, this, [this, &audio_name, &ID, &type, &audio, &slider]()
             { play_audio(_client->get_audio_url(audio_name, ID, type), audio, slider); });
 
     QVBoxLayout *vbox = new QVBoxLayout();
@@ -747,7 +748,7 @@ void client_chat_window::retrieve_group_conversation(const QStringList &messages
     }
 }
 
-void client_chat_window::group_removed()
+void client_chat_window::disable_chat()
 {
     _insert_message->setDisabled(true);
     _send_button->setDisabled(true);
@@ -755,10 +756,17 @@ void client_chat_window::group_removed()
     _record_button->setDisabled(true);
 }
 
-void client_chat_window::group_restored()
+void client_chat_window::enable_chat()
 {
     _insert_message->setEnabled(true);
     _send_button->setEnabled(true);
     _send_file_button->setEnabled(true);
     _record_button->setEnabled(true);
+}
+
+void client_chat_window::delete_account()
+{
+    _client->send_delete_account_message(_client->my_ID());
+
+    disable_chat();
 }

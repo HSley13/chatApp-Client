@@ -46,7 +46,9 @@ public:
 
         new_group_member,
         remove_group_member,
-        request_data
+        request_data,
+
+        delete_account
     };
 
     QByteArray set_text_message(const QString &sender, const QString &receiver, const QString &message, const QString &time);
@@ -78,6 +80,8 @@ public:
     QByteArray set_remove_group_member_message(const int &group_ID, const QString &group_name, const QString &adm, const QString &group_member);
 
     QByteArray set_request_data_message(const int &conversation_ID, const QString &date_time, const QString &type);
+
+    QByteArray set_delete_account_message(const QString &phone_number);
 
     void load_data(const QByteArray &data);
 

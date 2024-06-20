@@ -19,10 +19,10 @@ client_manager::client_manager(QWidget *parent)
 
         connect(_socket, &QWebSocket::disconnected, this, &client_manager::on_disconnected);
         connect(_socket, &QWebSocket::binaryMessageReceived, this, &client_manager::on_binary_message_received);
-        connect(_socket, &QWebSocket::errorOccurred, this, [=]()
+        connect(_socket, &QWebSocket::errorOccurred, this, [this, &url]()
                 {
                     if (_socket->state() == QAbstractSocket::UnconnectedState)
-                        QTimer::singleShot(3000, this, [=]() { _socket->open(url); }); });
+                        QTimer::singleShot(3000, this, [this, &url]() { _socket->open(url); }); });
 
         _socket->open(url);
 
@@ -171,11 +171,12 @@ void client_manager::send_is_typing(const QString &sender, const QString &receiv
 
 void client_manager::save_file(const QString &sender, const QString &file_name, const QByteArray &file_data, const QString &time)
 {
-    emit saving_file(QString("Saving file: %1").arg(file_name));
 
     QString full_file_name = QString("%1_%2").arg(QDateTime::currentDateTime().toString("yyyyMMdd_HHmmss"), file_name);
 
     IDBFS_save_file(full_file_name, file_data, static_cast<int>(file_data.size()));
+
+    emit saving_file(QString("File Saved: %1").arg(file_name));
 
     emit file_received(sender, full_file_name, time);
 }
@@ -201,11 +202,11 @@ void client_manager::save_audio(const QString &sender, const QString &audio_name
 
 void client_manager::save_group_file(const int &group_ID, const QString &group_name, const QString &sender, const QString &file_name, const QByteArray &file_data, const QString &time)
 {
-    emit saving_file(QString("Saving file: %1").arg(file_name));
-
     QString full_file_name = QString("%1_%2").arg(QDateTime::currentDateTime().toString("yyyyMMdd_HHmmss"), file_name);
 
     IDBFS_save_file(full_file_name, file_data, static_cast<int>(file_data.size()));
+
+    emit saving_file(QString("File Saved: %1").arg(file_name));
 
     emit group_file_received(group_ID, group_name, sender, full_file_name, time);
 }
@@ -274,9 +275,7 @@ void client_manager::mount_audio_IDBFS()
     EM_ASM({
         FS.mkdir('/audio');
         FS.mount(IDBFS, {}, '/audio');
-        FS.syncfs(true, function(err) {
-            assert(!err);
-            console.log('IDBFS audio mounted and synced'); });
+        FS.syncfs(true);
     });
 }
 
@@ -285,9 +284,7 @@ void client_manager::mount_file_IDBFS()
     EM_ASM({
         FS.mkdir('/file');
         FS.mount(IDBFS, {}, '/file');
-        FS.syncfs(true, function(err) {
-            assert(!err);
-            console.log('IDBFS file mounted and synced'); });
+        FS.syncfs(true);
     });
 }
 
@@ -329,10 +326,7 @@ QUrl client_manager::get_audio_url(const QString &audio_name, const int &convers
             var audio_data = FS.readFile(audio_path);
 
             if (!audio_data)
-            {
-                console.error("Failed to read file:", audio_path);
                 return null;
-            }
 
             var blob = new Blob([audio_data],
                                 { type: 'audio/*' });
@@ -374,10 +368,7 @@ QUrl client_manager::get_file_url(const QString &file_name, const int &conversat
             var file_data = FS.readFile(file_path);
 
             if (!file_data)
-            {
-                console.error("Failed to read file:", file_path);
                 return null;
-            }
 
             var mime_type = 'application/octet-stream';
             var extension = file_path.split('.').pop().toLowerCase();
@@ -556,20 +547,12 @@ void client_manager::delete_audio_IDBFS(const QString &audio_name)
 
     EM_ASM(
         {
-            var filePath = Pointer_stringify($0);
-            try
-            {
-                FS.unlink(audio_path);
-                console.log('Audio removed from virtual file system');
-            }
-            catch (e)
-            {
-                console.error("Failed to delete audio:", e);
-            }
+            var audioPath = UTF8ToString($0);
+            var audioStatus = FS.analyzePath(audioPath);
+            if (audioStatus.exists)
+                FS.unlink(audioPath);
 
-            FS.syncfs(false, function(err) {
-            assert(!err);
-            console.log('Audio system synced with IndexedDB'); });
+            FS.syncfs(false);
         },
         audio_path.c_str());
 }
@@ -581,20 +564,12 @@ void client_manager::delete_file_IDBFS(const QString &file_name)
 
     EM_ASM(
         {
-            var filePath = Pointer_stringify($0);
-            try
-            {
+            var filePath = UTF8ToString($0);
+            var fileStatus = FS.analyzePath(filePath);
+            if (fileStatus.exists)
                 FS.unlink(filePath);
-                console.log('File removed from virtual file system');
-            }
-            catch (e)
-            {
-                console.error("Failed to delete file:", e);
-            }
 
-            FS.syncfs(false, function(err) {
-            assert(!err);
-            console.log('File system synced with IndexedDB'); });
+            FS.syncfs(false);
         },
         file_path.c_str());
 }
@@ -637,4 +612,9 @@ void client_manager::send_new_group_member_message(const int &group_ID, const QS
 void client_manager::send_remove_group_member_message(const int &group_ID, const QString &group_name, const QString &adm, const QString &group_member)
 {
     _socket->sendBinaryMessage(_protocol->set_remove_group_member_message(group_ID, group_name, adm, group_member));
+}
+
+void client_manager::send_delete_account_message(const QString &phone_number)
+{
+    _socket->sendBinaryMessage(_protocol->set_delete_account_message(phone_number));
 }
