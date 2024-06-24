@@ -275,12 +275,12 @@ void client_chat_window::send_message()
 
     QListWidgetItem *line = new QListWidgetItem(_list);
     line->setSizeHint(QSize(0, 60));
-    line->setData(Qt::UserRole, current_time);
+    line->setData(Qt::UserRole, current_time.split(" ").last());
     line->setBackground(QBrush(QColorConstants::Svg::lightskyblue));
 
     _list->setItemWidget(line, wid);
 
-    (_group_name.isEmpty()) ? _client->send_text(my_name(), _destinator, message, current_time.split(" ").last()) : _client->send_group_text(_group_ID, _group_name, my_name(), message, current_time.split(" ").last());
+    (_group_name.isEmpty()) ? _client->send_text(my_name(), _destinator, message, current_time.split(" ").last()) : _client->send_group_text(_group_ID, _group_name, my_name(), message, current_time);
 
     _insert_message->clear();
 
@@ -700,6 +700,17 @@ void client_chat_window::set_retrieve_message_window(const QString &type, const 
     text_message_background(content, date_time, sender, true_or_false);
 }
 
+int client_chat_window::time_difference(const QString &date_time1, const QString &date_time2)
+{
+    QDateTime dt1 = QDateTime::fromString(date_time1, "yyyy-MM-dd HH:mm:ss");
+    QDateTime dt2 = QDateTime::fromString(date_time2, "yyyy-MM-dd HH:mm:ss");
+
+    qint64 seconds_difference = dt1.secsTo(dt2);
+    int hours_difference = seconds_difference / 3600;
+
+    return hours_difference;
+}
+
 void client_chat_window::retrieve_conversation(const QStringList &messages)
 {
     if (messages.isEmpty())
@@ -714,6 +725,8 @@ void client_chat_window::retrieve_conversation(const QStringList &messages)
         QString content = parts.at(2);
         QString date_time = parts.at(3);
         QString type = parts.last();
+
+        (time_difference(date_time, QDateTime::currentDateTime().toString("yyyy-MM-dd HH:mm:ss")) >= 24) ? date_time = date_time : date_time = date_time.split(" ").last();
 
         if (!sender_ID.compare(_client->my_ID()))
             set_retrieve_message_window(type, content, date_time, true);
@@ -735,6 +748,8 @@ void client_chat_window::retrieve_group_conversation(const QStringList &messages
         QString content = parts.at(1);
         QString date_time = parts.at(2);
         QString type = parts.last();
+
+        (time_difference(date_time, QDateTime::currentDateTime().toString("yyyy-MM-dd HH:mm:ss")) >= 24) ? date_time = date_time : date_time = date_time.split(" ").last();
 
         if (!sender.compare(my_name()))
             set_retrieve_message_window(type, content, date_time, true);

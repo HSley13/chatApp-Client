@@ -39,6 +39,8 @@ public:
 
     void delete_account();
 
+    int time_difference(const QString &date_time1, const QString &date_time2);
+
     static client_manager *_client;
 
     Swipeable_list_widget *_list;
