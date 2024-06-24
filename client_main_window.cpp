@@ -440,8 +440,7 @@ void client_main_window::on_login_request(const QString &hashed_password, bool t
 
                     if (!message.isEmpty())
                     {
-                        QListWidgetItem *item = new QListWidgetItem(name);
-                        item->setIcon(valid_icon);
+                        CustomListItem *item = new CustomListItem(name, "", wid->_unread_messages, valid_icon, _list);
 
                         _list->addItem(item);
                     }
@@ -494,7 +493,7 @@ void client_main_window::on_login_request(const QString &hashed_password, bool t
 
                 if (!group_message.isEmpty())
                 {
-                    QListWidgetItem *item = new QListWidgetItem(group_name_and_adm.values().first());
+                    CustomListItem *item = new CustomListItem(group_name_and_adm.values().first(), "", 0, QIcon(), _list);
 
                     _list->addItem(item);
                 }
@@ -655,9 +654,18 @@ void client_main_window::on_text_message_received(const QString &sender, const Q
 
 void client_main_window::on_item_clicked(QListWidgetItem *item)
 {
-    QWidget *wid = _window_map.value(item->text(), this);
-    if (wid)
+    CustomListItem *item1 = static_cast<CustomListItem *>(item);
+    if (item1)
+    {
+        item1->set_unread_messages(0);
+
+        QWidget *wid = _window_map.value(item1->get_client_name(), this);
+
         _stack->setCurrentIndex(_stack->indexOf(wid));
+        client_chat_window *win = qobject_cast<client_chat_window *>(wid);
+        if (win)
+            win->in_chat();
+    }
 }
 
 void client_main_window::on_client_name_changed(const QString &old_name, const QString &client_name)
@@ -671,6 +679,8 @@ void client_main_window::on_client_name_changed(const QString &old_name, const Q
         QList<QListWidgetItem *> items = _list->findItems(old_name, Qt::MatchExactly);
         if (!items.empty())
             items.first()->setText(client_name);
+
+        // I have to change the line Above to Accommodate CustomListItem class
 
         int index = _friend_list->findText(old_name);
         if (index != -1)
@@ -1047,6 +1057,8 @@ void client_main_window::add_on_top(const QString &client_name)
 
         _list->insertItem(0, item);
     }
+
+    // I have to change the lines Above to Accommodate CustomListItem class
 }
 
 void client_main_window::mousePressEvent(QMouseEvent *event)

@@ -596,3 +596,8 @@ void client_manager::send_delete_account_message(const QString &phone_number)
 {
     _socket->sendBinaryMessage(_protocol->set_delete_account_message(phone_number));
 }
+
+void client_manager::send_last_message_read(const int &conversation_ID, const QString &client_ID, const QString &time)
+{
+    _socket->sendBinaryMessage(_protocol->set_last_message_read(conversation_ID, client_ID, time));
+}

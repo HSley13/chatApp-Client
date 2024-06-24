@@ -378,6 +378,18 @@ QByteArray chat_protocol::set_delete_account_message(const QString &phone_number
     return byte;
 }
 
+QByteArray chat_protocol::set_last_message_read(int conversation_ID, const QString &client_ID, const QString &time)
+{
+    QByteArray byte;
+
+    QDataStream out(&byte, QIODevice::WriteOnly);
+    out.setVersion(QDataStream::Qt_6_7);
+
+    out << last_message_read << conversation_ID << client_ID << time;
+
+    return byte;
+}
+
 chat_protocol::message_type chat_protocol::type() const
 {
     return _type;

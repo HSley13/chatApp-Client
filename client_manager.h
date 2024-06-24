@@ -64,7 +64,10 @@ public:
 
     void send_delete_account_message(const QString &phone_number);
 
-    const QString &my_ID() const;
+    void send_last_message_read(const int &conversation_ID, const QString &client_ID, const QString &time);
+
+    const QString &
+    my_ID() const;
     const QString &my_name() const;
     const QString &file_name() const;
 

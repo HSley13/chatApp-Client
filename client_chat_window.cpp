@@ -724,7 +724,9 @@ void client_chat_window::retrieve_conversation(const QStringList &messages)
         QString receiver_ID = parts.at(1);
         QString content = parts.at(2);
         QString date_time = parts.at(3);
-        QString type = parts.last();
+        QString type = parts.at(4);
+
+        _unread_messages = parts.last().toInt();
 
         (time_difference(date_time, QDateTime::currentDateTime().toString("yyyy-MM-dd HH:mm:ss")) >= 24) ? date_time = date_time : date_time = date_time.split(" ").last();
 
@@ -779,4 +781,9 @@ void client_chat_window::delete_account()
     _client->send_delete_account_message(_client->my_ID());
 
     disable_chat();
+}
+
+void client_chat_window::in_chat()
+{
+    _client->send_last_message_read(_conversation_ID, _client->my_ID(), _list->item(_list->count() - 1)->data(Qt::UserRole).toString());
 }

@@ -41,12 +41,16 @@ public:
 
     int time_difference(const QString &date_time1, const QString &date_time2);
 
+    void in_chat();
+
     static client_manager *_client;
 
     Swipeable_list_widget *_list;
 
     QStringList _group_members = QStringList();
     QString _group_name = QString();
+
+    int _unread_messages;
 
     QString my_name();
 
