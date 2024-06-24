@@ -171,58 +171,40 @@ void client_manager::send_is_typing(const QString &sender, const QString &receiv
 
 void client_manager::save_file(const QString &sender, const QString &file_name, const QByteArray &file_data, const QString &time)
 {
+    IDBFS_save_file(file_name, file_data, static_cast<int>(file_data.size()));
 
-    QString full_file_name = QString("%1_%2").arg(QDateTime::currentDateTime().toString("yyyyMMdd_HHmmss"), file_name);
-
-    IDBFS_save_file(full_file_name, file_data, static_cast<int>(file_data.size()));
-
-    emit saving_file(QString("File Saved: %1").arg(file_name));
-
-    emit file_received(sender, full_file_name, time);
+    emit file_received(sender, file_name, time);
 }
 
-void client_manager::send_save_audio(const int &conversation_ID, const QString &sender, const QString &receiver, const QString &data_name, const QString &type, const QString &time)
+void client_manager::send_save_data(const int &conversation_ID, const QString &sender, const QString &receiver, const QString &data_name, const QByteArray &data_data, const QString &type, const QString &time)
 {
-    _socket->sendBinaryMessage(_protocol->set_save_audio_message(conversation_ID, sender, receiver, data_name, type, time));
-}
-
-void client_manager::send_save_file(const int &conversation_ID, const QString &sender, const QString &receiver, const QString &data_name, const QByteArray &file_data, const QString &type, const QString &time)
-{
-    _socket->sendBinaryMessage(_protocol->set_save_file_message(conversation_ID, sender, receiver, data_name, file_data, type, time));
+    _socket->sendBinaryMessage(_protocol->set_save_data_message(conversation_ID, sender, receiver, data_name, data_data, type, time));
 }
 
 void client_manager::save_audio(const QString &sender, const QString &audio_name, const QByteArray &audio_data, const QString &time)
 {
-    QString full_audio_name = QString("%1_%2").arg(QDateTime::currentDateTime().toString("yyyyMMdd_HHmmss"), audio_name);
+    IDBFS_save_audio(audio_name, audio_data, static_cast<int>(audio_data.size()));
 
-    IDBFS_save_audio(full_audio_name, audio_data, static_cast<int>(audio_data.size()));
-
-    emit audio_received(sender, full_audio_name, time);
+    emit audio_received(sender, audio_name, time);
 }
 
 void client_manager::save_group_file(const int &group_ID, const QString &group_name, const QString &sender, const QString &file_name, const QByteArray &file_data, const QString &time)
 {
-    QString full_file_name = QString("%1_%2").arg(QDateTime::currentDateTime().toString("yyyyMMdd_HHmmss"), file_name);
+    IDBFS_save_file(file_name, file_data, static_cast<int>(file_data.size()));
 
-    IDBFS_save_file(full_file_name, file_data, static_cast<int>(file_data.size()));
-
-    emit saving_file(QString("File Saved: %1").arg(file_name));
-
-    emit group_file_received(group_ID, group_name, sender, full_file_name, time);
+    emit group_file_received(group_ID, group_name, sender, file_name, time);
 }
 
 void client_manager::save_group_audio(const int &group_ID, const QString &group_name, const QString &sender, const QString &audio_name, const QByteArray &audio_data, const QString &time)
 {
-    QString full_audio_name = QString("%1_%2").arg(QDateTime::currentDateTime().toString("yyyyMMdd_HHmmss"), audio_name);
+    IDBFS_save_audio(audio_name, audio_data, static_cast<int>(audio_data.size()));
 
-    IDBFS_save_audio(full_audio_name, audio_data, static_cast<int>(audio_data.size()));
-
-    emit group_audio_received(group_ID, group_name, sender, full_audio_name, time);
+    emit group_audio_received(group_ID, group_name, sender, audio_name, time);
 }
 
-void client_manager::send_audio(const QString &sender, const QString &receiver, const QString &audio_name, const QString &time)
+void client_manager::send_audio(const QString &sender, const QString &receiver, const QString &audio_name, const QByteArray &audio_data, const QString &time)
 {
-    _socket->sendBinaryMessage(_protocol->set_audio_message(sender, receiver, audio_name, time));
+    _socket->sendBinaryMessage(_protocol->set_audio_message(sender, receiver, audio_name, audio_data, time));
 }
 
 void client_manager::send_lookup_friend(const QString &ID)
@@ -290,8 +272,7 @@ void client_manager::mount_file_IDBFS()
 
 void client_manager::IDBFS_save_audio(const QString &audio_name, const QByteArray &audio_data, const int &size)
 {
-    std::string audio_path = "/audio/";
-    audio_path += audio_name.toStdString();
+    std::string audio_path = "/audio/" + audio_name.toStdString();
 
     FILE *file = fopen(audio_path.c_str(), "wb");
     if (file)
@@ -299,12 +280,13 @@ void client_manager::IDBFS_save_audio(const QString &audio_name, const QByteArra
         fwrite(audio_data, 1, size, file);
         fclose(file);
     }
+
+    EM_ASM({ FS.syncfs(); });
 }
 
 void client_manager::IDBFS_save_file(const QString &file_name, const QByteArray &file_data, const int &size)
 {
-    std::string file_path = "/file/";
-    file_path += file_name.toStdString();
+    std::string file_path = "/file/" + file_name.toStdString();
 
     FILE *file = fopen(file_path.c_str(), "wb");
     if (file)
@@ -312,13 +294,13 @@ void client_manager::IDBFS_save_file(const QString &file_name, const QByteArray 
         fwrite(file_data, 1, size, file);
         fclose(file);
     }
+
+    EM_ASM({ FS.syncfs(); });
 }
 
 QUrl client_manager::get_audio_url(const QString &audio_name, const int &conversation_ID, const QString &type)
 {
     const QString full_audio_path = "/audio/" + audio_name;
-
-    const char *c_audio_name = full_audio_path.toUtf8().constData();
 
     char *url = (char *)EM_ASM_PTR(
         {
@@ -339,7 +321,7 @@ QUrl client_manager::get_audio_url(const QString &audio_name, const int &convers
 
             return stringOnWasmHeap;
         },
-        c_audio_name);
+        full_audio_path.toUtf8().constData());
 
     if (!url)
     {
@@ -359,8 +341,6 @@ QUrl client_manager::get_audio_url(const QString &audio_name, const int &convers
 QUrl client_manager::get_file_url(const QString &file_name, const int &conversation_ID, const QString &type)
 {
     const QString full_file_path = "/file/" + file_name;
-
-    const char *c_filename = full_file_path.toUtf8().constData();
 
     char *url = (char *)EM_ASM_PTR(
         {
@@ -523,7 +503,7 @@ QUrl client_manager::get_file_url(const QString &file_name, const int &conversat
 
             return stringOnWasmHeap;
         },
-        c_filename);
+        full_file_path.toUtf8().constData());
 
     if (!url)
     {
@@ -542,8 +522,7 @@ QUrl client_manager::get_file_url(const QString &file_name, const int &conversat
 
 void client_manager::delete_audio_IDBFS(const QString &audio_name)
 {
-    std::string audio_path = "/audio/";
-    audio_path += audio_name.toStdString();
+    std::string audio_path = "/audio/" + audio_name.toStdString();
 
     EM_ASM(
         {
@@ -559,8 +538,7 @@ void client_manager::delete_audio_IDBFS(const QString &audio_name)
 
 void client_manager::delete_file_IDBFS(const QString &file_name)
 {
-    std::string file_path = "/file/";
-    file_path += file_name.toStdString();
+    std::string file_path = "/file/" + file_name.toStdString();
 
     EM_ASM(
         {
@@ -599,9 +577,9 @@ void client_manager::send_group_file(const int &group_ID, const QString &group_n
     _socket->sendBinaryMessage(_protocol->set_group_file_message(group_ID, group_name, sender, file_name, file_data, time));
 }
 
-void client_manager::send_group_audio(const int &group_ID, const QString &group_name, const QString &sender, const QString &audio_name, const QString &time)
+void client_manager::send_group_audio(const int &group_ID, const QString &group_name, const QString &sender, const QString &audio_name, const QByteArray &audio_data, const QString &time)
 {
-    _socket->sendBinaryMessage(_protocol->set_group_audio_message(group_ID, group_name, sender, audio_name, time));
+    _socket->sendBinaryMessage(_protocol->set_group_audio_message(group_ID, group_name, sender, audio_name, audio_data, time));
 }
 
 void client_manager::send_new_group_member_message(const int &group_ID, const QString &group_name, const QString &adm, const QString &group_member)

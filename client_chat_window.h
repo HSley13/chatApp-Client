@@ -135,11 +135,9 @@ signals:
     void audio_received(const QString &sender, const QString &audio_name, const QString &time);
     void file_received(const QString &sender, const QString &file_name, const QString &time);
 
-    void login_request(const QString &hashed_password, bool true_or_false, const QHash<int, QHash<QString, int>> &friend_list, const QStringList &online_friends, const QHash<int, QStringList> &messages, const QHash<int, QHash<int, QString>> &group_list, const QHash<int, QStringList> &group_messages, const QHash<int, QStringList> &groups_members);
+    void login_request(const QString &hashed_password, bool true_or_false, const QHash<int, QHash<QString, QString>> &friend_list, const QStringList &online_friends, const QHash<int, QStringList> &messages, const QHash<int, QHash<int, QString>> &group_list, const QHash<int, QStringList> &group_messages, const QHash<int, QStringList> &groups_members);
 
     void delete_message(const QString &sender, const QString &time);
-
-    void saving_file(const QString &message);
 
     void new_group_ID(const int &group_ID);
 

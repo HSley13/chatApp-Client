@@ -56,9 +56,8 @@ public:
     QByteArray set_name_message(const QString &my_name, const QString &name);
 
     QByteArray set_file_message(const QString &sender, const QString &receiver, const QString &file_name, const QByteArray &file_data, const QString &time);
-    QByteArray set_audio_message(const QString &sender, const QString &receiver, const QString &audio_name, const QString &time);
-    QByteArray set_save_audio_message(const int &conversation_ID, const QString &sender, const QString &receiver, const QString &file_name, const QString &type, const QString &time);
-    QByteArray set_save_file_message(const int &conversation_ID, const QString &sender, const QString &receiver, const QString &file_name, const QByteArray &file_data, const QString &type, const QString &time);
+    QByteArray set_audio_message(const QString &sender, const QString &receiver, const QString &audio_name, const QByteArray &audio_data, const QString &time);
+    QByteArray set_save_data_message(const int &conversation_ID, const QString &sender, const QString &receiver, const QString &data_name, const QByteArray &data_data, const QString &type, const QString &time);
 
     QByteArray set_lookup_friend_message(const QString &ID);
     QByteArray set_create_conversation_message(const int &conversation_ID, const QString &participant1, const int &participant1_ID, const QString &participant2, const int &participant2_ID);
@@ -74,7 +73,7 @@ public:
     QByteArray set_group_is_typing(const int &group_ID, const QString &group_name, const QString &sender);
     QByteArray set_group_text_message(const int &group_ID, const QString &group_name, const QString &sender, const QString &message, const QString &time);
     QByteArray set_group_file_message(const int &group_ID, const QString &group_name, const QString &sender, const QString &file_name, const QByteArray &file_data, const QString &time);
-    QByteArray set_group_audio_message(const int &group_ID, const QString &group_name, const QString &sender, const QString &audio_name, const QString &time);
+    QByteArray set_group_audio_message(const int &group_ID, const QString &group_name, const QString &sender, const QString &audio_name, const QByteArray &audio_data, const QString &time);
 
     QByteArray set_new_group_member_message(const int &group_ID, const QString &group_name, const QString &adm, const QString &group_member);
     QByteArray set_remove_group_member_message(const int &group_ID, const QString &group_name, const QString &adm, const QString &group_member);
@@ -119,7 +118,7 @@ public:
     const QByteArray &group_audio_data() const;
 
     const QStringList &online_friends() const;
-    const QHash<int, QHash<QString, int>> &friend_list() const;
+    const QHash<int, QHash<QString, QString>> &friend_list() const;
     const int &conversation_ID() const;
     const QHash<int, QStringList> &messages() const;
 
@@ -167,7 +166,7 @@ private:
     QString _client_name;
     QString _old_name;
 
-    QHash<int, QHash<QString, int>> _friend_list;
+    QHash<int, QHash<QString, QString>> _friend_list;
     QStringList _online_friends;
     int _conversation_ID;
     QHash<int, QStringList> _messages;

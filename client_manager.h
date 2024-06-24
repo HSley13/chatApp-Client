@@ -23,14 +23,13 @@ public:
     void save_file(const QString &sender, const QString &file_name, const QByteArray &file_data, const QString &time);
     void save_audio(const QString &sender, const QString &audio_name, const QByteArray &audio_data, const QString &time);
 
-    void send_audio(const QString &sender, const QString &receiver, const QString &audio_name, const QString &time);
+    void send_audio(const QString &sender, const QString &receiver, const QString &audio_name, const QByteArray &audio_data, const QString &time);
     void send_lookup_friend(const QString &ID);
 
     void send_create_conversation(const int &conversation_ID, const QString &participant1, const int &participant1_ID, const QString &participant2, const int &participant2_ID);
     void send_save_conversation(const int &conversation_ID, const QString &sender, const QString &receiver, const QString &content, const QString &time);
 
-    void send_save_audio(const int &conversation_ID, const QString &sender, const QString &receiver, const QString &data_name, const QString &type, const QString &time);
-    void send_save_file(const int &conversation_ID, const QString &sender, const QString &receiver, const QString &data_name, const QByteArray &file_data, const QString &type, const QString &time);
+    void send_save_data(const int &conversation_ID, const QString &sender, const QString &receiver, const QString &data_name, const QByteArray &data_data, const QString &type, const QString &time);
 
     void send_sign_up(const QString &phone_number, const QString &first_name, const QString &last_name, const QString &password, const QString &secret_question, const QString &secret_answer);
     void send_login_request(const QString &phone_number, const QString &password);
@@ -55,7 +54,7 @@ public:
     void send_group_is_typing(const int &group_ID, const QString &group_name, const QString &sender);
     void send_group_text(const int &group_ID, const QString &group_name, const QString &sender, const QString &message, const QString &time);
     void send_group_file(const int &group_ID, const QString &group_name, const QString &sender, const QString &file_name, const QByteArray &file_data, const QString &time);
-    void send_group_audio(const int &group_ID, const QString &group_name, const QString &sender, const QString &audio_name, const QString &time);
+    void send_group_audio(const int &group_ID, const QString &group_name, const QString &sender, const QString &audio_name, const QByteArray &audio_data, const QString &time);
 
     void save_group_file(const int &group_ID, const QString &group_name, const QString &sender, const QString &file_name, const QByteArray &file_data, const QString &time);
     void save_group_audio(const int &group_ID, const QString &group_name, const QString &sender, const QString &audio_name, const QByteArray &audio_data, const QString &time);
@@ -98,7 +97,7 @@ signals:
     void client_added_you(const int &conversation_ID, const QString &name, const QString &ID);
     void lookup_friend_result(const int &conversation_ID, const QString &name, bool true_or_false);
 
-    void login_request(const QString &hashed_password, bool true_or_false, const QHash<int, QHash<QString, int>> &friend_list, const QStringList &online_friends, const QHash<int, QStringList> &messages, const QHash<int, QHash<int, QString>> &group_list, const QHash<int, QStringList> &group_messages, const QHash<int, QStringList> &groups_members);
+    void login_request(const QString &hashed_password, bool true_or_false, const QHash<int, QHash<QString, QString>> &friend_list, const QStringList &online_friends, const QHash<int, QStringList> &messages, const QHash<int, QHash<int, QString>> &group_list, const QHash<int, QStringList> &group_messages, const QHash<int, QStringList> &groups_members);
 
     void delete_message(const QString &sender, const QString &time);
 

@@ -17,7 +17,7 @@ void chat_protocol::load_data(const QByteArray &data)
     switch (_type)
     {
     case text:
-        in >> _sender >> _receiver >> _message >> _time;
+        in >> _sender >> _message >> _time;
 
         break;
 
@@ -27,7 +27,7 @@ void chat_protocol::load_data(const QByteArray &data)
         break;
 
     case is_typing:
-        in >> _sender >> _receiver;
+        in >> _sender;
 
         break;
 
@@ -47,7 +47,7 @@ void chat_protocol::load_data(const QByteArray &data)
         break;
 
     case added_you:
-        in >> _conversation_ID >> _client_name >> _client_ID >> _receiver;
+        in >> _conversation_ID >> _client_name >> _client_ID;
 
         break;
 
@@ -113,8 +113,6 @@ void chat_protocol::load_data(const QByteArray &data)
 
     case request_data:
         in >> _file_data >> _file_name;
-
-        break;
 
         break;
 
@@ -188,22 +186,14 @@ QByteArray chat_protocol::set_create_conversation_message(const int &conversatio
     return byte;
 }
 
-QByteArray chat_protocol::set_audio_message(const QString &sender, const QString &receiver, const QString &audio_name, const QString &time)
+QByteArray chat_protocol::set_audio_message(const QString &sender, const QString &receiver, const QString &audio_name, const QByteArray &audio_data, const QString &time)
 {
     QByteArray byte;
 
-    QFile file(audio_name);
-    if (file.open(QIODevice::ReadOnly))
-    {
-        QDataStream out(&byte, QIODevice::WriteOnly);
-        out.setVersion(QDataStream::Qt_6_7);
+    QDataStream out(&byte, QIODevice::WriteOnly);
+    out.setVersion(QDataStream::Qt_6_7);
 
-        QFileInfo info(audio_name);
-
-        out << audio << sender << receiver << info.fileName() << file.readAll() << time;
-
-        file.close();
-    }
+    out << audio << sender << receiver << audio_name << audio_data << time;
 
     return byte;
 }
@@ -244,34 +234,14 @@ QByteArray chat_protocol::set_login_request_message(const QString &phone_number,
     return byte;
 }
 
-QByteArray chat_protocol::set_save_audio_message(const int &conversation_ID, const QString &sender, const QString &receiver, const QString &file_name, const QString &type, const QString &time)
-{
-    QByteArray byte;
-
-    QFile file(file_name);
-    if (file.open(QIODevice::ReadOnly))
-    {
-        QDataStream out(&byte, QIODevice::WriteOnly);
-        out.setVersion(QDataStream::Qt_6_7);
-
-        QFileInfo info(file_name);
-
-        out << save_data << conversation_ID << sender << receiver << info.fileName() << file.readAll() << type << time;
-
-        file.close();
-    }
-
-    return byte;
-}
-
-QByteArray chat_protocol::set_save_file_message(const int &conversation_ID, const QString &sender, const QString &receiver, const QString &file_name, const QByteArray &file_data, const QString &type, const QString &time)
+QByteArray chat_protocol::set_save_data_message(const int &conversation_ID, const QString &sender, const QString &receiver, const QString &data_name, const QByteArray &data_data, const QString &type, const QString &time)
 {
     QByteArray byte;
 
     QDataStream out(&byte, QIODevice::WriteOnly);
     out.setVersion(QDataStream::Qt_6_7);
 
-    out << save_data << conversation_ID << sender << receiver << file_name << file_data << type << time;
+    out << save_data << conversation_ID << sender << receiver << data_name << data_data << type << time;
 
     return byte;
 }
@@ -348,22 +318,14 @@ QByteArray chat_protocol::set_group_file_message(const int &group_ID, const QStr
     return byte;
 }
 
-QByteArray chat_protocol::set_group_audio_message(const int &group_ID, const QString &group_name, const QString &sender, const QString &audio_name, const QString &time)
+QByteArray chat_protocol::set_group_audio_message(const int &group_ID, const QString &group_name, const QString &sender, const QString &audio_name, const QByteArray &audio_data, const QString &time)
 {
     QByteArray byte;
 
-    QFile file(audio_name);
-    if (file.open(QIODevice::ReadOnly))
-    {
-        QDataStream out(&byte, QIODevice::WriteOnly);
-        out.setVersion(QDataStream::Qt_6_7);
+    QDataStream out(&byte, QIODevice::WriteOnly);
+    out.setVersion(QDataStream::Qt_6_7);
 
-        QFileInfo info(audio_name);
-
-        out << group_audio << group_ID << group_name << sender << info.fileName() << file.readAll() << time;
-
-        file.close();
-    }
+    out << group_audio << group_ID << group_name << sender << audio_name << audio_data << time;
 
     return byte;
 }
@@ -461,7 +423,7 @@ const QString &chat_protocol::clients_ID() const
     return _client_ID;
 }
 
-const QHash<int, QHash<QString, int>> &chat_protocol::friend_list() const
+const QHash<int, QHash<QString, QString>> &chat_protocol::friend_list() const
 {
     return _friend_list;
 }
