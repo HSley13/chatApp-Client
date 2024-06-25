@@ -40,6 +40,8 @@ public:
 
     int time_difference(const QString &date_time1, const QString &date_time2);
 
+    static void set_window_blur(QWidget *window, bool blur);
+
     void in_chat();
 
     static client_manager *_client;
@@ -323,9 +325,15 @@ public:
                      << " Press OK to confirm";
 
                 ListDialog *dialog = new ListDialog(info, "Delete Message", this);
+
+                client_chat_window::set_window_blur(_window, true);
+
                 connect(dialog, &QDialog::accepted, this, [=]()
                         {   _window->message_deleted(item->data(Qt::UserRole).toString());
                             dialog->deleteLater(); });
+
+                connect(dialog, &QDialog::finished, this, [=]()
+                        { client_chat_window::set_window_blur(_window, false); });
 
                 dialog->open();
 

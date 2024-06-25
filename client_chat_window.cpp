@@ -267,6 +267,18 @@ void client_chat_window::on_settings()
 
 /*-------------------------------------------------------------------- Functions --------------------------------------------------------------*/
 
+void client_chat_window::set_window_blur(QWidget *window, bool blur)
+{
+    if (blur)
+    {
+        QGraphicsBlurEffect *blur_effect = new QGraphicsBlurEffect;
+        blur_effect->setBlurRadius(10);
+        window->setGraphicsEffect(blur_effect);
+    }
+    else
+        window->setGraphicsEffect(nullptr);
+}
+
 void client_chat_window::delete_message_received(const QString &time)
 {
     for (QListWidgetItem *item : _list->findItems(QString("*"), Qt::MatchWildcard))
