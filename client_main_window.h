@@ -75,8 +75,6 @@ private:
 signals:
     void swipe_right();
 
-    void clientNameClicked(const QString &client_name);
-
 private slots:
     void sign_up();
     void login();
@@ -132,9 +130,11 @@ public:
         OnlineIconRole
     };
 
+    int _unread_count = 0;
+
     explicit ChatModel(QObject *parent = nullptr) {}
 
-    void add_chat(const QString &client_name, const QString &last_message, int unread_messages, const QIcon &online_icon = QIcon())
+    void add_chat(const QString &client_name, const QString &last_message, int unread_messages = 0, const QIcon &online_icon = QIcon())
     {
         QStandardItem *item = new QStandardItem();
         item->setData(client_name, ClientNameRole);
@@ -161,16 +161,6 @@ public:
         return QModelIndex();
     }
 
-    void update_client_name(const QString &old_client_name, const QString &new_client_name)
-    {
-        QModelIndex index = find_chat_row(old_client_name);
-        if (index.isValid())
-        {
-            QStandardItem *item = QStandardItemModel::itemFromIndex(index);
-            item->setData(new_client_name, ClientNameRole);
-        }
-    }
-
     void update_unread_messages(const QString &client_name, int unread_messages)
     {
         QModelIndex index = find_chat_row(client_name);
@@ -178,6 +168,16 @@ public:
         {
             QStandardItem *item = QStandardItemModel::itemFromIndex(index);
             item->setData(unread_messages, UnreadMessagesRole);
+        }
+    }
+
+    void update_client_name(const QString &old_client_name, const QString &new_client_name)
+    {
+        QModelIndex index = find_chat_row(old_client_name);
+        if (index.isValid())
+        {
+            QStandardItem *item = QStandardItemModel::itemFromIndex(index);
+            item->setData(new_client_name, ClientNameRole);
         }
     }
 
@@ -191,9 +191,8 @@ public:
         }
     }
 
-    void add_on_top(const QString &client_name, const QString &last_message)
+    void add_on_top(const QString &client_name, const QString &last_message, int unread_messages = 0)
     {
-        qDebug() << "NEW";
         QModelIndex index = find_chat_row(client_name);
         if (index.isValid())
         {
@@ -202,6 +201,9 @@ public:
             removeRow(index.row());
 
             takenItem->setData(last_message, LastMessageRole);
+
+            (unread_messages) ? _unread_count += 1 : _unread_count = 0;
+            takenItem->setData(_unread_count, UnreadMessagesRole);
 
             insertRow(0, takenItem);
         }
@@ -246,11 +248,11 @@ public:
         painter->drawText(last_message_rect, Qt::AlignLeft | Qt::TextWordWrap, last_message);
 
         int unread_messages = index.data(ChatModel::UnreadMessagesRole).toInt();
-        if (unread_messages > 0)
+        if (unread_messages)
         {
             QString unread_messages_text = QString::number(unread_messages);
             QRect unread_messages_rect = QRect(rect.right() - 40, rect.top() + 5, 20, 20);
-            painter->setBrush(Qt::blue);
+            painter->setBrush(QColorConstants::Svg::lightskyblue);
             painter->setPen(Qt::NoPen);
             painter->drawEllipse(unread_messages_rect);
 

@@ -207,9 +207,7 @@ client_main_window::client_main_window(QWidget *parent)
     _list_view->setMinimumWidth(200);
     _list_view->setFont(QFont("Arial", 20));
     connect(_list_view, &QListView::clicked, this, [=](const QModelIndex &index)
-            {   QString clientName = index.data(ChatModel::ClientNameRole).toString();
-                emit clientNameClicked(clientName); });
-    connect(this, &client_main_window::clientNameClicked, this, &client_main_window::on_client_name_clicked);
+            { on_client_name_clicked(index.data(ChatModel::ClientNameRole).toString()); });
 
     QHBoxLayout *hbox_3 = new QHBoxLayout();
     hbox_3->addWidget(friend_button);
@@ -445,7 +443,7 @@ void client_main_window::on_login_request(const QString &hashed_password, bool t
                     _stack->addWidget(wid);
 
                     if (!message.isEmpty())
-                        _model->add_chat(name, "Hello", 3, valid_icon);
+                        _model->add_chat(name, wid->_last_message, wid->_unread_messages, valid_icon);
                 }
             }
         }
@@ -495,7 +493,7 @@ void client_main_window::on_login_request(const QString &hashed_password, bool t
                 _stack->addWidget(win);
 
                 if (!group_message.isEmpty())
-                    _model->add_chat(group_name_and_adm.values().first(), QString(), 0);
+                    _model->add_chat(group_name_and_adm.values().first(), win->_last_message);
             }
         }
     }
@@ -644,7 +642,7 @@ void client_main_window::on_text_message_received(const QString &sender, const Q
         {
             wid->text_message_background(text, time);
 
-            _model->add_on_top(sender, text);
+            _model->add_on_top(sender, text, 1);
         }
     }
 }
@@ -655,6 +653,8 @@ void client_main_window::on_client_name_clicked(const QString &client_name)
     if (wid)
     {
         _stack->setCurrentIndex(_stack->indexOf(wid));
+        _model->update_unread_messages(client_name, 0);
+
         client_chat_window *win = qobject_cast<client_chat_window *>(wid);
         if (win)
             win->in_chat();
@@ -796,7 +796,8 @@ void client_main_window::on_audio_received(const QString &sender, const QString 
         if (wid)
         {
             wid->add_audio(audio_name, false, time);
-            _model->add_on_top(sender, audio_name);
+
+            _model->add_on_top(sender, audio_name, 1);
         }
     }
 }
@@ -810,7 +811,8 @@ void client_main_window::on_file_received(const QString &sender, const QString &
         if (wid)
         {
             wid->add_file(file_name, false, time);
-            _model->add_on_top(sender, file_name);
+
+            _model->add_on_top(sender, file_name, 1);
         }
     }
 }
@@ -979,7 +981,8 @@ void client_main_window::on_group_text_received(const int &group_ID, const QStri
         if (wid)
         {
             wid->text_message_background(message, time, sender);
-            _model->add_on_top(group_name, message);
+
+            _model->add_on_top(group_name, message, 1);
         }
     }
 }
@@ -993,7 +996,8 @@ void client_main_window::on_group_audio_received(const int &group_ID, const QStr
         if (wid)
         {
             wid->add_audio(audio_name, false, time, sender);
-            _model->add_on_top(group_name, audio_name);
+
+            _model->add_on_top(group_name, audio_name, 1);
         }
     }
 }
@@ -1008,7 +1012,7 @@ void client_main_window::on_group_file_received(const int &group_ID, const QStri
         {
             wid->add_file(file_name, false, time, sender);
 
-            _model->add_on_top(group_name, file_name);
+            _model->add_on_top(group_name, file_name, 1);
         }
     }
 }

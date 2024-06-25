@@ -51,6 +51,7 @@ public:
     QString _group_name = QString();
 
     int _unread_messages;
+    QString _last_message;
 
     QString my_name();
 
@@ -276,13 +277,32 @@ private:
     QPoint drag_start_position;
     client_chat_window *_window;
 
-protected:
+public:
+    explicit Swipeable_list_widget(client_chat_window *window, QWidget *parent = nullptr) : QListWidget(parent), _window(window) {}
+
     void mousePressEvent(QMouseEvent *event) override
     {
         if (event->button() == Qt::LeftButton)
             drag_start_position = event->pos();
 
         QListWidget::mousePressEvent(event);
+    }
+
+    static QString item_message(QListWidgetItem *item)
+    {
+        QWidget *widget = item->listWidget()->itemWidget(item);
+        if (widget)
+        {
+            QVBoxLayout *layout = widget->findChild<QVBoxLayout *>();
+            if (layout)
+            {
+                QLabel *message = qobject_cast<QLabel *>(layout->itemAt(0)->widget());
+                if (message)
+                    return message->text();
+            }
+        }
+
+        return QString();
     }
 
     void mouseReleaseEvent(QMouseEvent *event) override
@@ -293,42 +313,25 @@ protected:
             if (distance < -50)
             {
                 QListWidgetItem *item = QListWidget::itemAt(drag_start_position);
-                if (item)
-                {
-                    QWidget *widget = item->listWidget()->itemWidget(item);
-                    if (widget)
-                    {
-                        QVBoxLayout *layout = widget->findChild<QVBoxLayout *>();
-                        if (layout)
-                        {
-                            QLabel *message = qobject_cast<QLabel *>(layout->itemAt(0)->widget());
 
-                            if (message)
-                            {
-                                QStringList info;
-                                info << "Do you really want to delete this Message: "
-                                     << message->text()
-                                     << " Press OK to confirm";
+                QStringList info;
+                info << "Do you really want to delete this Message: "
+                     << item_message(item)
+                     << " Press OK to confirm";
 
-                                ListDialog *dialog = new ListDialog(info, "Delete Message", this);
-                                connect(dialog, &QDialog::accepted, this, [=]()
-                                        {   _window->message_deleted(item->data(Qt::UserRole).toString());
+                ListDialog *dialog = new ListDialog(info, "Delete Message", this);
+                connect(dialog, &QDialog::accepted, this, [=]()
+                        {   _window->message_deleted(item->data(Qt::UserRole).toString());
                                             delete _window->_list->takeItem(_window->_list->row(item));
 
                                         dialog->deleteLater(); });
 
-                                dialog->open();
-                            }
-                        }
-                    }
-                }
+                dialog->open();
+
+                QListWidget::mouseReleaseEvent(event);
             }
-            QListWidget::mouseReleaseEvent(event);
         }
     }
-
-public:
-    explicit Swipeable_list_widget(client_chat_window *window, QWidget *parent = nullptr) : QListWidget(parent), _window(window) {}
 };
 
 class DisplayWidget : public QWidget
@@ -345,7 +348,6 @@ public:
         layout->addWidget(_lineEdit);
 
         setLayout(layout);
-        setStyleSheet("border: 2px solid #4A90E2;");
     }
 
     void setText(const QString &text)

@@ -738,6 +738,8 @@ void client_chat_window::retrieve_conversation(const QStringList &messages)
         else
             set_retrieve_message_window(type, content, date_time, false);
     }
+
+    _last_message = Swipeable_list_widget::item_message(_list->item(_list->count() - 1));
 }
 
 void client_chat_window::retrieve_group_conversation(const QStringList &messages)
@@ -759,6 +761,8 @@ void client_chat_window::retrieve_group_conversation(const QStringList &messages
         else
             set_retrieve_message_window(type, content, date_time, false, sender);
     }
+
+    _last_message = Swipeable_list_widget::item_message(_list->item(_list->count() - 1));
 }
 
 void client_chat_window::disable_chat()
