@@ -6,6 +6,10 @@
 #include <QtMultimedia>
 #include <QWebSocket>
 
+class ChatModel;
+
+class ChatDelegate;
+
 class client_main_window : public QMainWindow
 {
     Q_OBJECT
@@ -42,8 +46,6 @@ private:
     QStringList _group_members;
     QString _group_name;
 
-    QListWidget *_list;
-
     QComboBox *_group_list;
     QDialog *_group_dialog;
     QComboBox *_friend_list;
@@ -52,8 +54,6 @@ private:
     QPushButton *_login_button;
 
     static QHash<QString, std::function<void()>> _settings_choices;
-
-    void add_on_top(const QString &client_name);
 
     QIcon create_dot_icon(const QColor &color, int size);
     void set_icon(const QIcon &icon, const QString &client_name);
@@ -69,8 +69,13 @@ private:
 
     void configure_settings_choice();
 
+    QListView *_list_view;
+    ChatModel *_model;
+
 signals:
     void swipe_right();
+
+    void clientNameClicked(const QString &client_name);
 
 private slots:
     void sign_up();
@@ -91,7 +96,6 @@ private slots:
 
     void on_text_message_received(const QString &sender, const QString &message, const QString &time);
 
-    void on_item_clicked(QListWidgetItem *item);
     void new_conversation(const QString &name);
 
     void on_client_added_you(const int &conversation_ID, const QString &name, const QString &ID);
@@ -111,93 +115,155 @@ private slots:
     void on_group_file_received(const int &group_ID, const QString &group_name, const QString &sender, const QString &file_name, const QString &time);
 
     void on_removed_from_group(const int &group_ID, const QString &group_name, const QString &adm);
+
+    void on_client_name_clicked(const QString &client_name);
 };
 
-class CustomListItem : public QListWidgetItem
+class ChatModel : public QStandardItemModel
 {
-private:
-    QString _client_name;
-    QString _last_message;
-    int _unread_messages;
-
-    QLabel *_name_label;
-    QLabel *_message_label;
-    QLabel *_unread_label;
-    QWidget *_widget;
+    Q_OBJECT
 
 public:
-    CustomListItem(const QString &client_name, const QString &last_message, int unread_messages, QIcon icon = QIcon(), QListWidget *parent = nullptr)
-        : QListWidgetItem(parent), _client_name(client_name), _last_message(last_message), _unread_messages(unread_messages)
+    enum Roles
     {
-        _name_label = new QLabel(_client_name);
+        ClientNameRole = Qt::UserRole + 1,
+        LastMessageRole,
+        UnreadMessagesRole,
+        OnlineIconRole
+    };
 
-        _message_label = new QLabel(_last_message);
-        _message_label->setWordWrap(true);
-        _message_label->setToolTip(_last_message);
+    explicit ChatModel(QObject *parent = nullptr) {}
 
-        QFont font1 = _message_label->font();
-        font1.setPointSize(8);
-        _message_label->setFont(font1);
+    void add_chat(const QString &client_name, const QString &last_message, int unread_messages, const QIcon &online_icon = QIcon())
+    {
+        QStandardItem *item = new QStandardItem();
+        item->setData(client_name, ClientNameRole);
+        item->setData(last_message, LastMessageRole);
+        item->setData(unread_messages, UnreadMessagesRole);
+        if (!online_icon.isNull())
+            item->setData(QVariant::fromValue(online_icon), OnlineIconRole);
 
-        QVBoxLayout *vbox = new QVBoxLayout();
-        vbox->addWidget(_name_label);
-        vbox->addWidget(_message_label);
-
-        QWidget *wid = new QWidget();
-        wid->setLayout(vbox);
-        wid->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
-
-        _unread_label = new QLabel(QString::number(_unread_messages));
-        _unread_label->setStyleSheet("background-color: red; color: white; border-radius: 8px; padding: 2px 6px;");
-        _unread_label->setAlignment(Qt::AlignCenter);
-        _unread_label->setFixedSize(20, 20);
-
-        QFont font2 = _unread_label->font();
-        font2.setPointSize(8);
-        _unread_label->setFont(font2);
-
-        QHBoxLayout *hbox = new QHBoxLayout();
-        hbox->addWidget(wid);
-        hbox->addWidget(_unread_label);
-        hbox->setAlignment(_unread_label, Qt::AlignTop | Qt::AlignRight);
-
-        _widget = new QWidget();
-        _widget->setLayout(hbox);
-        _widget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
-
-        setSizeHint(_widget->sizeHint());
-        setIcon(icon);
-        parent->setItemWidget(this, _widget);
-
-        _unread_label->setVisible(_unread_messages != 0);
+        QStandardItemModel::appendRow(item);
     }
 
-    void set_client_name(const QString &name) { _client_name = name; }
-    void set_last_message(const QString &message) { _last_message = message; }
-    void set_unread_messages(const int &unread_count)
+    QModelIndex find_chat_row(const QString &client_name) const
     {
-        _unread_messages = unread_count;
-        _unread_label->setText(QString::number(_unread_messages));
-        _unread_label->setVisible(_unread_messages != 0);
-    }
-
-    void update_widget(QListWidget *parent)
-    {
-        if (parent)
+        for (int row = 0; row < QStandardItemModel::rowCount(); row++)
         {
-            _name_label->setText(_client_name);
-            _message_label->setText(_last_message);
-            _message_label->setToolTip(_last_message);
+            QModelIndex index = this->index(row, 0);
+            if (index.isValid())
+            {
+                if (index.data(ClientNameRole).toString() == client_name)
+                    return index;
+            }
+        }
 
-            setSizeHint(_widget->sizeHint());
+        return QModelIndex();
+    }
 
-            parent->setItemWidget(this, _widget);
+    void update_client_name(const QString &old_client_name, const QString &new_client_name)
+    {
+        QModelIndex index = find_chat_row(old_client_name);
+        if (index.isValid())
+        {
+            QStandardItem *item = QStandardItemModel::itemFromIndex(index);
+            item->setData(new_client_name, ClientNameRole);
         }
     }
 
-    const QString &get_client_name() const { return _client_name; }
-    const QString &get_last_message() const { return _last_message; }
-    const int &get_unread_messages() const { return _unread_messages; }
+    void update_unread_messages(const QString &client_name, int unread_messages)
+    {
+        QModelIndex index = find_chat_row(client_name);
+        if (index.isValid())
+        {
+            QStandardItem *item = QStandardItemModel::itemFromIndex(index);
+            item->setData(unread_messages, UnreadMessagesRole);
+        }
+    }
 
-    QWidget *get_widget() { return _widget; };
+    void update_online_icon(const QString &client_name, const QIcon &online_icon)
+    {
+        QModelIndex index = find_chat_row(client_name);
+        if (index.isValid())
+        {
+            QStandardItem *item = QStandardItemModel::itemFromIndex(index);
+            item->setData(QVariant::fromValue(online_icon), OnlineIconRole);
+        }
+    }
+
+    void add_on_top(const QString &client_name, const QString &last_message)
+    {
+        qDebug() << "NEW";
+        QModelIndex index = find_chat_row(client_name);
+        if (index.isValid())
+        {
+            QStandardItem *takenItem = QStandardItemModel::takeItem(index.row());
+
+            removeRow(index.row());
+
+            takenItem->setData(last_message, LastMessageRole);
+
+            insertRow(0, takenItem);
+        }
+    }
+};
+
+class ChatDelegate : public QStyledItemDelegate
+{
+    Q_OBJECT
+
+public:
+    ChatDelegate(QObject *parent = nullptr) : QStyledItemDelegate(parent) {}
+
+    void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const override
+    {
+        painter->save();
+
+        QRect rect = option.rect;
+        QFont font = QApplication::font();
+        font.setPointSize(10);
+
+        QIcon online_icon = index.data(ChatModel::OnlineIconRole).value<QIcon>();
+        if (!online_icon.isNull())
+        {
+            QRect icon_rect = rect.adjusted(10, 5, 10 + 20, 5 + 20);
+            online_icon.paint(painter, icon_rect, Qt::AlignLeft);
+        }
+
+        QString client_name = index.data(ChatModel::ClientNameRole).toString();
+        QRect client_name_rect = rect;
+        client_name_rect.setLeft(rect.left() + 40);
+        client_name_rect.setTop(rect.top() + 5);
+        painter->setFont(font);
+        painter->drawText(client_name_rect, Qt::AlignLeft, client_name);
+
+        QString last_message = index.data(ChatModel::LastMessageRole).toString();
+        QRect last_message_rect = rect;
+        last_message_rect.setLeft(rect.left() + 40);
+        last_message_rect.setTop(rect.top() + 25);
+        font.setPointSize(8);
+        painter->setFont(font);
+        painter->drawText(last_message_rect, Qt::AlignLeft | Qt::TextWordWrap, last_message);
+
+        int unread_messages = index.data(ChatModel::UnreadMessagesRole).toInt();
+        if (unread_messages > 0)
+        {
+            QString unread_messages_text = QString::number(unread_messages);
+            QRect unread_messages_rect = QRect(rect.right() - 40, rect.top() + 5, 20, 20);
+            painter->setBrush(Qt::blue);
+            painter->setPen(Qt::NoPen);
+            painter->drawEllipse(unread_messages_rect);
+
+            painter->setPen(Qt::black);
+            painter->setFont(font);
+            painter->drawText(unread_messages_rect, Qt::AlignCenter, unread_messages_text);
+        }
+
+        painter->setPen(QPen(Qt::gray, 1));
+        painter->drawLine(rect.bottomLeft(), rect.bottomRight());
+
+        painter->restore();
+    }
+
+    QSize sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const override { return QSize(option.rect.width(), 50); }
 };

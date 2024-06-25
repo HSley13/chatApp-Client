@@ -133,7 +133,7 @@ signals:
 
     void update_button_file();
 
-    void data_sent(const QString &client_name);
+    void data_sent(const QString &client_name, const QString &last_message);
 
     void client_added_you(const int &conversation_ID, const QString &name, const QString &ID);
     void lookup_friend_result(const int &conversation_ID, const QString &name, bool true_or_false);

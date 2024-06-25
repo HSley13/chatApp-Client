@@ -130,7 +130,7 @@ void client_chat_window::start_recording()
         else
             _client->send_group_audio(_group_ID, _group_name, my_name(), audio_name, audio_data, current_time);
 
-        emit data_sent(_window_name);
+        emit data_sent(_window_name, audio_name);
     }
 }
 
@@ -284,7 +284,7 @@ void client_chat_window::send_message()
 
     _insert_message->clear();
 
-    emit data_sent(_window_name);
+    emit data_sent(_window_name, message);
 
     if (_destinator.compare("Server"))
         _client->send_save_conversation(_conversation_ID, _client->my_ID(), _destinator, message, current_time);
@@ -351,6 +351,8 @@ void client_chat_window::send_file()
             QString IDBFS_file_name = QString("%1_%2").arg(current_time, QFileInfo(file_name).fileName());
 
             add_file(IDBFS_file_name, true, current_time.split(" ").last());
+
+            emit data_sent(_window_name, QFileInfo(file_name).fileName());
 
             _client->IDBFS_save_file(IDBFS_file_name, file_data, static_cast<int>(file_data.size()));
 
@@ -680,11 +682,14 @@ void client_chat_window::audio_file_message_background(QWidget *wid, const bool 
 
 void client_chat_window::set_retrieve_message_window(const QString &type, const QString &content, const QString &date_time, bool true_or_false, const QString &sender)
 {
+    QString time_display;
+    (time_difference(date_time, QDateTime::currentDateTime().toString("yyyy-MM-dd HH:mm:ss")) >= 24) ? time_display = date_time : time_display = date_time.split(" ").last();
+
     if (!type.compare("file"))
     {
         QString file_name = QString("%1_%2").arg(date_time, content);
 
-        (sender.isEmpty()) ? add_file(file_name, true_or_false, date_time) : add_file(file_name, true_or_false, date_time, sender);
+        (sender.isEmpty()) ? add_file(file_name, true_or_false, time_display) : add_file(file_name, true_or_false, time_display, sender);
 
         return;
     }
@@ -692,12 +697,12 @@ void client_chat_window::set_retrieve_message_window(const QString &type, const 
     {
         QString audio_name = QString("%1_%2").arg(date_time, content);
 
-        (sender.isEmpty()) ? add_audio(audio_name, true_or_false, date_time) : add_audio(audio_name, true_or_false, date_time, sender);
+        (sender.isEmpty()) ? add_audio(audio_name, true_or_false, time_display) : add_audio(audio_name, true_or_false, time_display, sender);
 
         return;
     }
 
-    text_message_background(content, date_time, sender, true_or_false);
+    text_message_background(content, time_display, sender, true_or_false);
 }
 
 int client_chat_window::time_difference(const QString &date_time1, const QString &date_time2)
@@ -728,8 +733,6 @@ void client_chat_window::retrieve_conversation(const QStringList &messages)
 
         _unread_messages = parts.last().toInt();
 
-        (time_difference(date_time, QDateTime::currentDateTime().toString("yyyy-MM-dd HH:mm:ss")) >= 24) ? date_time = date_time : date_time = date_time.split(" ").last();
-
         if (!sender_ID.compare(_client->my_ID()))
             set_retrieve_message_window(type, content, date_time, true);
         else
@@ -750,8 +753,6 @@ void client_chat_window::retrieve_group_conversation(const QStringList &messages
         QString content = parts.at(1);
         QString date_time = parts.at(2);
         QString type = parts.last();
-
-        (time_difference(date_time, QDateTime::currentDateTime().toString("yyyy-MM-dd HH:mm:ss")) >= 24) ? date_time = date_time : date_time = date_time.split(" ").last();
 
         if (!sender.compare(my_name()))
             set_retrieve_message_window(type, content, date_time, true);

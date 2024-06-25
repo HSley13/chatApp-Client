@@ -198,12 +198,18 @@ client_main_window::client_main_window(QWidget *parent)
 
     QLabel *chats_label = new QLabel("CHATS", this);
 
-    _list = new QListWidget(this);
-    _list->setSelectionMode(QAbstractItemView::NoSelection);
-    _list->setMinimumWidth(200);
-    _list->setFont(QFont("Arial", 20));
-    _list->setItemDelegate(new separator_delegate(_list));
-    connect(_list, &QListWidget::itemClicked, this, &client_main_window::on_item_clicked);
+    _model = new ChatModel(this);
+
+    _list_view = new QListView(this);
+    _list_view->setModel(_model);
+    _list_view->setItemDelegate(new ChatDelegate(this));
+    _list_view->setSelectionMode(QAbstractItemView::NoSelection);
+    _list_view->setMinimumWidth(200);
+    _list_view->setFont(QFont("Arial", 20));
+    connect(_list_view, &QListView::clicked, this, [=](const QModelIndex &index)
+            {   QString clientName = index.data(ChatModel::ClientNameRole).toString();
+                emit clientNameClicked(clientName); });
+    connect(this, &client_main_window::clientNameClicked, this, &client_main_window::on_client_name_clicked);
 
     QHBoxLayout *hbox_3 = new QHBoxLayout();
     hbox_3->addWidget(friend_button);
@@ -227,7 +233,7 @@ client_main_window::client_main_window(QWidget *parent)
     VBOX_2->addLayout(hbox_3);
 
     VBOX_2->addWidget(chats_label);
-    VBOX_2->addWidget(_list);
+    VBOX_2->addWidget(_list_view);
     VBOX_2->addWidget(_search_phone_number);
 
     /*-----------------------------------¬------------------------------------------------------------------------------------------------------------------------------------*/
@@ -399,8 +405,8 @@ void client_main_window::on_login_request(const QString &hashed_password, bool t
         connect(_server_wid, &client_chat_window::socket_disconnected, this, [=]()
                 { _stack->setDisabled(true); _status_bar->showMessage("SERVER DISCONNECTED YOU", 999999); });
 
-        connect(_server_wid, &client_chat_window::data_sent, this, [=](const QString &client_name)
-                { add_on_top(client_name); });
+        connect(_server_wid, &client_chat_window::data_sent, this, [=](const QString &first_name, const QString &last_message)
+                { _model->add_on_top(first_name, last_message); });
 
         QIcon offline_icon = create_dot_icon(Qt::red, 10);
         QIcon online_icon = create_dot_icon(Qt::green, 10);
@@ -429,8 +435,8 @@ void client_main_window::on_login_request(const QString &hashed_password, bool t
                     wid->retrieve_conversation(message);
 
                     connect(wid, &client_chat_window::swipe_right, this, &client_main_window::on_swipe_right);
-                    connect(wid, &client_chat_window::data_sent, this, [=](QString first_name)
-                            { add_on_top(first_name); });
+                    connect(wid, &client_chat_window::data_sent, this, [=](const QString &first_name, const QString &last_message)
+                            { _model->add_on_top(first_name, last_message); });
 
                     wid->window_name(name);
 
@@ -439,11 +445,7 @@ void client_main_window::on_login_request(const QString &hashed_password, bool t
                     _stack->addWidget(wid);
 
                     if (!message.isEmpty())
-                    {
-                        CustomListItem *item = new CustomListItem(name, "", wid->_unread_messages, valid_icon, _list);
-
-                        _list->addItem(item);
-                    }
+                        _model->add_chat(name, "Hello", 3, valid_icon);
                 }
             }
         }
@@ -472,8 +474,9 @@ void client_main_window::on_login_request(const QString &hashed_password, bool t
                 win->retrieve_group_conversation(group_message);
 
                 connect(win, &client_chat_window::swipe_right, this, &client_main_window::on_swipe_right);
-                connect(win, &client_chat_window::data_sent, this, [=](QString first_name)
-                        { add_on_top(first_name); });
+                connect(win, &client_chat_window::data_sent, this, [=](const QString &first_name, const QString &last_message)
+                        { _model->add_on_top(first_name, last_message); });
+
                 connect(win, &client_chat_window::item_clicked, this, [=](const QString &name)
                         {
                             int index = _friend_list->findText(name, Qt::MatchExactly);
@@ -492,11 +495,7 @@ void client_main_window::on_login_request(const QString &hashed_password, bool t
                 _stack->addWidget(win);
 
                 if (!group_message.isEmpty())
-                {
-                    CustomListItem *item = new CustomListItem(group_name_and_adm.values().first(), "", 0, QIcon(), _list);
-
-                    _list->addItem(item);
-                }
+                    _model->add_chat(group_name_and_adm.values().first(), QString(), 0);
             }
         }
     }
@@ -615,9 +614,7 @@ void client_main_window::set_icon(const QIcon &icon, const QString &client_name)
         if (index != -1)
             _friend_list->setItemIcon(index, icon);
 
-        QList<QListWidgetItem *> items = _list->findItems(client_name, Qt::MatchExactly);
-        if (!items.isEmpty())
-            items.first()->setIcon(icon);
+        _model->update_online_icon(client_name, icon);
     }
 }
 
@@ -647,20 +644,16 @@ void client_main_window::on_text_message_received(const QString &sender, const Q
         {
             wid->text_message_background(text, time);
 
-            add_on_top(sender);
+            _model->add_on_top(sender, text);
         }
     }
 }
 
-void client_main_window::on_item_clicked(QListWidgetItem *item)
+void client_main_window::on_client_name_clicked(const QString &client_name)
 {
-    CustomListItem *item1 = static_cast<CustomListItem *>(item);
-    if (item1)
+    QWidget *wid = _window_map.value(client_name, this);
+    if (wid)
     {
-        item1->set_unread_messages(0);
-
-        QWidget *wid = _window_map.value(item1->get_client_name(), this);
-
         _stack->setCurrentIndex(_stack->indexOf(wid));
         client_chat_window *win = qobject_cast<client_chat_window *>(wid);
         if (win)
@@ -676,11 +669,7 @@ void client_main_window::on_client_name_changed(const QString &old_name, const Q
         _window_map.remove(old_name);
         _window_map.insert(client_name, win);
 
-        QList<QListWidgetItem *> items = _list->findItems(old_name, Qt::MatchExactly);
-        if (!items.empty())
-            items.first()->setText(client_name);
-
-        // I have to change the line Above to Accommodate CustomListItem class
+        _model->update_client_name(old_name, client_name);
 
         int index = _friend_list->findText(old_name);
         if (index != -1)
@@ -744,8 +733,8 @@ void client_main_window::on_lookup_friend_result(const int &conversation_ID, con
 
         client_chat_window *wid = new client_chat_window(conversation_ID, _search_phone_number->text(), name, this);
         connect(wid, &client_chat_window::swipe_right, this, &client_main_window::on_swipe_right);
-        connect(wid, &client_chat_window::data_sent, this, [=](const QString &first_name)
-                { add_on_top(first_name); });
+        connect(wid, &client_chat_window::data_sent, this, [=](const QString &first_name, const QString &last_message)
+                { _model->add_on_top(first_name, last_message); });
 
         wid->window_name(name);
 
@@ -784,8 +773,8 @@ void client_main_window::on_client_added_you(const int &conversation_ID, const Q
         if (wid)
         {
             connect(wid, &client_chat_window::swipe_right, this, &client_main_window::on_swipe_right);
-            connect(wid, &client_chat_window::data_sent, this, [=](const QString &first_name)
-                    { add_on_top(first_name); });
+            connect(wid, &client_chat_window::data_sent, this, [=](const QString &first_name, const QString &last_message)
+                    { _model->add_on_top(first_name, last_message); });
 
             wid->window_name(name);
 
@@ -807,7 +796,7 @@ void client_main_window::on_audio_received(const QString &sender, const QString 
         if (wid)
         {
             wid->add_audio(audio_name, false, time);
-            add_on_top(sender);
+            _model->add_on_top(sender, audio_name);
         }
     }
 }
@@ -821,7 +810,7 @@ void client_main_window::on_file_received(const QString &sender, const QString &
         if (wid)
         {
             wid->add_file(file_name, false, time);
-            add_on_top(sender);
+            _model->add_on_top(sender, file_name);
         }
     }
 }
@@ -886,8 +875,9 @@ void client_main_window::configure_group(const int &group_ID, const QString &gro
 
     client_chat_window *win = new client_chat_window(group_ID, group_name, names, adm, this);
     connect(win, &client_chat_window::swipe_right, this, &client_main_window::on_swipe_right);
-    connect(win, &client_chat_window::data_sent, this, [=](const QString &first_name)
-            { add_on_top(first_name); });
+    connect(win, &client_chat_window::data_sent, this, [=](const QString &first_name, const QString &last_message)
+            { _model->add_on_top(first_name, last_message); });
+
     connect(win, &client_chat_window::item_clicked, this, [=](const QString &name)
             {
                 int index = _friend_list->findText(name, Qt::MatchExactly);
@@ -989,7 +979,7 @@ void client_main_window::on_group_text_received(const int &group_ID, const QStri
         if (wid)
         {
             wid->text_message_background(message, time, sender);
-            add_on_top(group_name);
+            _model->add_on_top(group_name, message);
         }
     }
 }
@@ -1003,7 +993,7 @@ void client_main_window::on_group_audio_received(const int &group_ID, const QStr
         if (wid)
         {
             wid->add_audio(audio_name, false, time, sender);
-            add_on_top(group_name);
+            _model->add_on_top(group_name, audio_name);
         }
     }
 }
@@ -1017,7 +1007,8 @@ void client_main_window::on_group_file_received(const int &group_ID, const QStri
         if (wid)
         {
             wid->add_file(file_name, false, time, sender);
-            add_on_top(group_name);
+
+            _model->add_on_top(group_name, file_name);
         }
     }
 }
@@ -1036,30 +1027,6 @@ void client_main_window::on_removed_from_group(const int &group_ID, const QStrin
 }
 
 /*-------------------------------------------------------------------- Functions --------------------------------------------------------------*/
-
-void client_main_window::add_on_top(const QString &client_name)
-{
-    QList<QListWidgetItem *> items = _list->findItems(client_name, Qt::MatchExactly);
-    if (!items.empty())
-    {
-        QListWidgetItem *item_to_replace = items.first();
-
-        _list->takeItem(_list->row(item_to_replace));
-        _list->insertItem(0, item_to_replace);
-    }
-    else
-    {
-        QListWidgetItem *item = new QListWidgetItem(client_name);
-
-        int index = _friend_list->findText(client_name, Qt::MatchExactly);
-        if (index != -1)
-            item->setIcon(_friend_list->itemIcon(index));
-
-        _list->insertItem(0, item);
-    }
-
-    // I have to change the lines Above to Accommodate CustomListItem class
-}
 
 void client_main_window::mousePressEvent(QMouseEvent *event)
 {
