@@ -35,6 +35,7 @@ public:
         login_request,
 
         delete_message,
+        delete_group_message,
 
         new_group,
         added_to_group,
@@ -70,6 +71,7 @@ public:
     QByteArray set_login_request_message(const QString &phone_number, const QString &password);
 
     QByteArray set_delete_message(const int &conversation_ID, const QString &sender, const QString &receiver, const QString &time);
+    QByteArray set_delete_group_message(const int &group_ID, const QString &group_name, const QString &time);
 
     QByteArray set_new_group_message(const QString &adm, const QStringList &members, const QString &group_name);
 

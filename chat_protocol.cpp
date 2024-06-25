@@ -270,6 +270,18 @@ QByteArray chat_protocol::set_delete_message(const int &conversation_ID, const Q
     return byte;
 }
 
+QByteArray chat_protocol::set_delete_group_message(const int &group_ID, const QString &group_name, const QString &time)
+{
+    QByteArray byte;
+
+    QDataStream out(&byte, QIODevice::WriteOnly);
+    out.setVersion(QDataStream::Qt_6_7);
+
+    out << delete_group_message << group_ID << group_name << time;
+
+    return byte;
+}
+
 QByteArray chat_protocol::set_new_group_message(const QString &adm, const QStringList &members, const QString &group_name)
 {
     QByteArray byte;

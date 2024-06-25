@@ -37,6 +37,7 @@ public:
     void send_file(const QString &sender, const QString &receiver, const QString &file_name, const QByteArray &file_data, const QString &time);
 
     void send_delete_message(const int &conversation_ID, const QString &sender, const QString &receiver, const QString &time);
+    void send_delete_group_message(const int &group_ID, const QString &group_name, const QString &time);
 
     void send_create_new_group(const QString &adm, const QStringList &members, const QString &group_name);
 
@@ -67,8 +68,7 @@ public:
     void send_last_message_read(const int &conversation_ID, const QString &client_ID, const QString &time);
     void send_group_last_message_read(const int &group_ID, const QString &client_ID, const QString &time);
 
-    const QString &
-    my_ID() const;
+    const QString &my_ID() const;
     const QString &my_name() const;
     const QString &file_name() const;
 

@@ -46,7 +46,7 @@ void client_chat_window::message_deleted(const QString &time)
 {
     delete_message_received(time);
 
-    _client->send_delete_message(_conversation_ID, my_name(), _destinator, time);
+    (_group_name.isEmpty()) ? _client->send_delete_message(_conversation_ID, my_name(), _destinator, time) : _client->send_delete_group_message(_group_ID, _group_name, time);
 
     _client->send_last_message_read(_conversation_ID, _client->my_ID(), _list->item(_list->count() - 1)->data(Qt::UserRole).toString());
 }
@@ -414,10 +414,7 @@ void client_chat_window::set_up_window()
     _insert_message->setPlaceholderText("Insert New Message");
 
     connect(_insert_message, &CustomLineEdit::textChanged, this, [=]()
-            { if(_group_name.isEmpty()) 
-                _client->send_is_typing(my_name(), _destinator); 
-              else
-                 _client->send_group_is_typing(_group_ID, _group_name, my_name()); });
+            { (_group_name.isEmpty()) ? _client->send_is_typing(my_name(), _destinator) : _client->send_group_is_typing(_group_ID, _group_name, my_name()); });
 
     DisplayWidget *display_widget = new DisplayWidget(this);
     display_widget->hide();
@@ -742,10 +739,7 @@ void client_chat_window::retrieve_conversation(const QStringList &messages)
 
         _unread_messages = parts.last().toInt();
 
-        if (!sender_ID.compare(_client->my_ID()))
-            set_retrieve_message_window(type, content, date_time, true);
-        else
-            set_retrieve_message_window(type, content, date_time, false);
+        (!sender_ID.compare(_client->my_ID())) ? set_retrieve_message_window(type, content, date_time, true) : set_retrieve_message_window(type, content, date_time, false);
     }
 
     _last_message = Swipeable_list_widget::item_message(_list->item(_list->count() - 1));
@@ -767,10 +761,7 @@ void client_chat_window::retrieve_group_conversation(const QStringList &messages
 
         _unread_messages = parts.last().toInt();
 
-        if (!sender.compare(my_name()))
-            set_retrieve_message_window(type, content, date_time, true);
-        else
-            set_retrieve_message_window(type, content, date_time, false, sender);
+        (!sender.compare(my_name())) ? set_retrieve_message_window(type, content, date_time, true) : set_retrieve_message_window(type, content, date_time, false, sender);
     }
 
     _last_message = Swipeable_list_widget::item_message(_list->item(_list->count() - 1));

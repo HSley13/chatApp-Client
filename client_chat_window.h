@@ -313,6 +313,9 @@ public:
             {
                 QListWidgetItem *item = QListWidget::itemAt(drag_start_position);
 
+                if (item->background() != QBrush(QColorConstants::Svg::lightskyblue))
+                    return;
+
                 QStringList info;
                 info << "Do you really want to delete this Message: "
                      << item_message(item)
