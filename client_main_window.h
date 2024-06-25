@@ -72,6 +72,8 @@ private:
     QListView *_list_view;
     ChatModel *_model;
 
+    QString _active_conversation = QString();
+
 signals:
     void swipe_right();
 

@@ -45,6 +45,10 @@ client_chat_window::client_chat_window(const int &group_ID, const QString &group
 void client_chat_window::message_deleted(const QString &time)
 {
     _client->send_delete_message(_conversation_ID, my_name(), _destinator, time);
+
+    _client->send_last_message_read(_conversation_ID, _client->my_ID(), _list->item(_list->count() - 1)->data(Qt::UserRole).toString());
+
+    emit data_sent(_window_name, Swipeable_list_widget::item_message(_list->item(_list->count() - 1)));
 }
 
 /*-------------------------------------------------------------------- Slots --------------------------------------------------------------*/
@@ -278,6 +282,7 @@ void client_chat_window::send_message()
     line->setData(Qt::UserRole, current_time.split(" ").last());
     line->setBackground(QBrush(QColorConstants::Svg::lightskyblue));
 
+    line->setSizeHint(wid->sizeHint());
     _list->setItemWidget(line, wid);
 
     (_group_name.isEmpty()) ? _client->send_text(my_name(), _destinator, message, current_time.split(" ").last()) : _client->send_group_text(_group_ID, _group_name, my_name(), message, current_time);

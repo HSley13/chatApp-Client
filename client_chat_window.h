@@ -32,7 +32,6 @@ public:
 
     void delete_message_received(const QString &time);
     void message_deleted(const QString &time);
-    void message_widget(bool true_or_false, const QString &content, const QString &date_time, const QString &sender);
 
     void disable_chat();
     void enable_chat();

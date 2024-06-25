@@ -642,7 +642,7 @@ void client_main_window::on_text_message_received(const QString &sender, const Q
         {
             wid->text_message_background(text, time);
 
-            _model->add_on_top(sender, text, 1);
+            (_active_conversation.compare(sender)) ? _model->add_on_top(sender, text, 1) : _model->add_on_top(sender, text);
         }
     }
 }
@@ -658,6 +658,8 @@ void client_main_window::on_client_name_clicked(const QString &client_name)
         client_chat_window *win = qobject_cast<client_chat_window *>(wid);
         if (win)
             win->in_chat();
+
+        _active_conversation = client_name;
     }
 }
 
@@ -709,7 +711,10 @@ void client_main_window::on_client_name_changed(const QString &old_name, const Q
 void client_main_window::on_swipe_right()
 {
     if (_stack->currentIndex() > 2)
+    {
         _stack->setCurrentIndex(2);
+        _active_conversation = QString();
+    }
     else
         _stack->setCurrentIndex(0);
 }
@@ -797,7 +802,7 @@ void client_main_window::on_audio_received(const QString &sender, const QString 
         {
             wid->add_audio(audio_name, false, time);
 
-            _model->add_on_top(sender, audio_name, 1);
+            (_active_conversation.compare(sender)) ? _model->add_on_top(sender, audio_name, 1) : _model->add_on_top(sender, audio_name);
         }
     }
 }
@@ -812,7 +817,7 @@ void client_main_window::on_file_received(const QString &sender, const QString &
         {
             wid->add_file(file_name, false, time);
 
-            _model->add_on_top(sender, file_name, 1);
+            (_active_conversation.compare(sender)) ? _model->add_on_top(sender, file_name, 1) : _model->add_on_top(sender, file_name);
         }
     }
 }
@@ -982,7 +987,7 @@ void client_main_window::on_group_text_received(const int &group_ID, const QStri
         {
             wid->text_message_background(message, time, sender);
 
-            _model->add_on_top(group_name, message, 1);
+            (_active_conversation.compare(group_name)) ? _model->add_on_top(group_name, message, 1) : _model->add_on_top(group_name, message);
         }
     }
 }
@@ -997,7 +1002,7 @@ void client_main_window::on_group_audio_received(const int &group_ID, const QStr
         {
             wid->add_audio(audio_name, false, time, sender);
 
-            _model->add_on_top(group_name, audio_name, 1);
+            (_active_conversation.compare(group_name)) ? _model->add_on_top(group_name, audio_name, 1) : _model->add_on_top(group_name, audio_name);
         }
     }
 }
@@ -1012,7 +1017,7 @@ void client_main_window::on_group_file_received(const int &group_ID, const QStri
         {
             wid->add_file(file_name, false, time, sender);
 
-            _model->add_on_top(group_name, file_name, 1);
+            (_active_conversation.compare(group_name)) ? _model->add_on_top(group_name, file_name, 1) : _model->add_on_top(group_name, file_name);
         }
     }
 }
