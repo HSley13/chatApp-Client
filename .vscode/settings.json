@@ -8,6 +8,8 @@
         "sstream": "cpp",
         "chrono": "cpp",
         "text_encoding": "cpp",
-        "typeinfo": "cpp"
+        "typeinfo": "cpp",
+        "source_location": "cpp",
+        "system_error": "cpp"
     }
 }

@@ -17,6 +17,8 @@ public:
     client_main_window(QWidget *parent = nullptr);
     ~client_main_window();
 
+    QComboBox *_friend_list;
+
 private:
     QStackedWidget *_stack;
 
@@ -48,7 +50,6 @@ private:
 
     QComboBox *_group_list;
     QDialog *_group_dialog;
-    QComboBox *_friend_list;
     QDialog *_friend_dialog;
 
     QPushButton *_login_button;
@@ -132,9 +133,11 @@ public:
         OnlineIconRole
     };
 
+    client_main_window *_window;
+
     int _unread_count = 0;
 
-    explicit ChatModel(QObject *parent = nullptr) {}
+    explicit ChatModel(client_main_window *window, QObject *parent = nullptr) : _window(window), QStandardItemModel(parent) {}
 
     void add_chat(const QString &client_name, const QString &last_message, int unread_messages = 0, const QIcon &online_icon = QIcon())
     {
@@ -198,17 +201,19 @@ public:
         QModelIndex index = find_chat_row(client_name);
         if (index.isValid())
         {
-            QStandardItem *takenItem = QStandardItemModel::takeItem(index.row());
+            QStandardItem *taken_Item = QStandardItemModel::takeItem(index.row());
 
             removeRow(index.row());
 
-            takenItem->setData(last_message, LastMessageRole);
+            taken_Item->setData(last_message, LastMessageRole);
 
             (unread_messages) ? _unread_count += 1 : _unread_count = 0;
-            takenItem->setData(_unread_count, UnreadMessagesRole);
+            taken_Item->setData(_unread_count, UnreadMessagesRole);
 
-            insertRow(0, takenItem);
+            insertRow(0, taken_Item);
         }
+        else
+            add_chat(client_name, last_message, unread_messages, _window->_friend_list->itemIcon(_window->_friend_list->findText(client_name, Qt::MatchExactly)));
     }
 };
 
@@ -250,7 +255,7 @@ public:
         painter->drawText(last_message_rect, Qt::AlignLeft | Qt::TextWordWrap, last_message);
 
         int unread_messages = index.data(ChatModel::UnreadMessagesRole).toInt();
-        if (unread_messages)
+        if (unread_messages > 0)
         {
             QString unread_messages_text = QString::number(unread_messages);
             QRect unread_messages_rect = QRect(rect.right() - 40, rect.top() + 5, 20, 20);

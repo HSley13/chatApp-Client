@@ -49,8 +49,8 @@ public:
     QStringList _group_members = QStringList();
     QString _group_name = QString();
 
-    int _unread_messages;
-    QString _last_message;
+    int _unread_messages = 0;
+    QString _last_message = QString();
 
     QString my_name();
 
@@ -133,7 +133,7 @@ signals:
 
     void update_button_file();
 
-    void data_sent(const QString &client_name, const QString &last_message);
+    void data_sent(const QString &client_name, const QString &last_message, const int &unread_messages);
 
     void client_added_you(const int &conversation_ID, const QString &name, const QString &ID);
     void lookup_friend_result(const int &conversation_ID, const QString &name, bool true_or_false);
@@ -321,9 +321,7 @@ public:
                 ListDialog *dialog = new ListDialog(info, "Delete Message", this);
                 connect(dialog, &QDialog::accepted, this, [=]()
                         {   _window->message_deleted(item->data(Qt::UserRole).toString());
-                                            delete _window->_list->takeItem(_window->_list->row(item));
-
-                                        dialog->deleteLater(); });
+                            dialog->deleteLater(); });
 
                 dialog->open();
 

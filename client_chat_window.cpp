@@ -44,11 +44,11 @@ client_chat_window::client_chat_window(const int &group_ID, const QString &group
 
 void client_chat_window::message_deleted(const QString &time)
 {
+    delete_message_received(time);
+
     _client->send_delete_message(_conversation_ID, my_name(), _destinator, time);
 
     _client->send_last_message_read(_conversation_ID, _client->my_ID(), _list->item(_list->count() - 1)->data(Qt::UserRole).toString());
-
-    emit data_sent(_window_name, Swipeable_list_widget::item_message(_list->item(_list->count() - 1)));
 }
 
 /*-------------------------------------------------------------------- Slots --------------------------------------------------------------*/
@@ -134,7 +134,7 @@ void client_chat_window::start_recording()
         else
             _client->send_group_audio(_group_ID, _group_name, my_name(), audio_name, audio_data, current_time);
 
-        emit data_sent(_window_name, audio_name);
+        emit data_sent(_window_name, "voice note", _unread_messages);
     }
 }
 
@@ -267,6 +267,19 @@ void client_chat_window::on_settings()
 
 /*-------------------------------------------------------------------- Functions --------------------------------------------------------------*/
 
+void client_chat_window::delete_message_received(const QString &time)
+{
+    for (QListWidgetItem *item : _list->findItems(QString("*"), Qt::MatchWildcard))
+    {
+        if (!item->data(Qt::UserRole).toString().compare(time))
+            delete item;
+    }
+
+    (_unread_messages <= 0) ? _unread_messages : _unread_messages--;
+
+    emit data_sent(_window_name, Swipeable_list_widget::item_message(_list->item(_list->count() - 1)), _unread_messages);
+}
+
 void client_chat_window::send_message()
 {
     QString message = _insert_message->text();
@@ -289,7 +302,7 @@ void client_chat_window::send_message()
 
     _insert_message->clear();
 
-    emit data_sent(_window_name, message);
+    emit data_sent(_window_name, message, _unread_messages);
 
     if (_destinator.compare("Server"))
         _client->send_save_conversation(_conversation_ID, _client->my_ID(), _destinator, message, current_time);
@@ -336,15 +349,6 @@ void client_chat_window::text_message_background(const QString &content, const Q
     _list->setItemWidget(line, wid);
 }
 
-void client_chat_window::delete_message_received(const QString &time)
-{
-    for (QListWidgetItem *item : _list->findItems(QString("*"), Qt::MatchWildcard))
-    {
-        if (!item->data(Qt::UserRole).toString().compare(time))
-            delete item;
-    }
-}
-
 void client_chat_window::send_file()
 {
     std::function<void(const QString &, const QByteArray &)> file_content_ready = [=](const QString &file_name, const QByteArray &file_data)
@@ -357,7 +361,7 @@ void client_chat_window::send_file()
 
             add_file(IDBFS_file_name, true, current_time.split(" ").last());
 
-            emit data_sent(_window_name, QFileInfo(file_name).fileName());
+            emit data_sent(_window_name, QFileInfo(file_name).fileName(), _unread_messages);
 
             _client->IDBFS_save_file(IDBFS_file_name, file_data, static_cast<int>(file_data.size()));
 
@@ -795,5 +799,6 @@ void client_chat_window::delete_account()
 
 void client_chat_window::in_chat()
 {
+    _unread_messages = 0;
     _client->send_last_message_read(_conversation_ID, _client->my_ID(), _list->item(_list->count() - 1)->data(Qt::UserRole).toString());
 }
