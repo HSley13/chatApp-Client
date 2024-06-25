@@ -118,6 +118,7 @@ private:
     void set_retrieve_message_window(const QString &type, const QString &content, const QString &date_time, bool true_or_false, const QString &sender = QString());
 
     void audio_file_message_background(QWidget *wid, const bool &is_mine, const QString &sender, const QString &time, QVBoxLayout *vbox, QSlider *slider = nullptr);
+
 signals:
     void swipe_right();
 
@@ -336,6 +337,7 @@ public:
 
 class DisplayWidget : public QWidget
 {
+    Q_OBJECT
 private:
     QLineEdit *_lineEdit;
 
@@ -350,6 +352,7 @@ public:
         setLayout(layout);
     }
 
+public slots:
     void setText(const QString &text)
     {
         _lineEdit->setText(text);

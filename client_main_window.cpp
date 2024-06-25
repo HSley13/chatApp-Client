@@ -196,11 +196,12 @@ client_main_window::client_main_window(QWidget *parent)
     groups->setStyleSheet("border: none");
     connect(groups, &QPushButton::clicked, _group_dialog, &QDialog::open);
 
-    QLabel *chats_label = new QLabel("CHATS", this);
+    // QLabel *chats_label = new QLabel("CHATS", this);
 
     _model = new ChatModel(this, this);
 
     _list_view = new QListView(this);
+    _list_view->setWindowTitle("CHATS");
     _list_view->setModel(_model);
     _list_view->setItemDelegate(new ChatDelegate(this));
     _list_view->setSelectionMode(QAbstractItemView::NoSelection);
@@ -214,25 +215,15 @@ client_main_window::client_main_window(QWidget *parent)
     hbox_3->addWidget(groups);
     hbox_3->addWidget(settings);
 
-    _search_phone_number = new CustomLineEdit(this);
-    _search_phone_number->setPlaceholderText("ADD PEOPLE VIA PHONE NUMBER, THEN PRESS ENTER");
-    connect(_search_phone_number, &CustomLineEdit::returnPressed, this, [=]()
-            { _server_wid->_client->send_lookup_friend(_search_phone_number->text()); });
-
     DisplayWidget *display_widget = new DisplayWidget(this);
     display_widget->hide();
-
-    connect(_search_phone_number, &CustomLineEdit::textChanged, display_widget, &DisplayWidget::setText);
-    connect(_search_phone_number, &CustomLineEdit::focusGained, display_widget, &QWidget::show);
-    connect(_search_phone_number, &CustomLineEdit::focusLost, display_widget, &QWidget::hide);
 
     QVBoxLayout *VBOX_2 = new QVBoxLayout(chat_widget);
     VBOX_2->addWidget(display_widget);
     VBOX_2->addLayout(hbox_3);
 
-    VBOX_2->addWidget(chats_label);
+    // VBOX_2->addWidget(chats_label);
     VBOX_2->addWidget(_list_view);
-    VBOX_2->addWidget(_search_phone_number);
 
     /*-----------------------------------¬------------------------------------------------------------------------------------------------------------------------------------*/
 
@@ -482,7 +473,7 @@ void client_main_window::on_login_request(const QString &hashed_password, bool t
                                 new_conversation(name);
                             else
                             {
-                                _search_phone_number->setText(name);
+                                _search_phone_number = name;
                                 win->_client->send_lookup_friend(name);
                             } });
 
@@ -537,6 +528,25 @@ void client_main_window::configure_settings_choice()
     _settings_choices["Create New Group"] = [=]
     { create_group(); };
 
+    _settings_choices["Add People via Phone Number"] = [=]
+    {
+        QInputDialog *new_friend = new QInputDialog(this);
+        new_friend->setWindowTitle("New Friend");
+        new_friend->setLabelText("Enter the Phone Number: ");
+
+        connect(new_friend, &QInputDialog::finished, this, [=](int result)
+                {
+                    if(result == QDialog::Accepted)
+                    {
+                        _server_wid->_client->send_lookup_friend(new_friend->textValue());
+                        _search_phone_number = new_friend->textValue();
+                    }
+
+                    new_friend->deleteLater(); });
+
+        new_friend->open();
+    };
+
     _settings_choices["DELETE ACCOUNT"] = [=]
     { _server_wid->delete_account(); };
 }
@@ -547,6 +557,7 @@ void client_main_window::on_settings()
     choices << "Chat with an Agent"
             << "Change Name"
             << "Create New Group"
+            << "Add People via Phone Number"
             << "DELETE ACCOUNT";
 
     ListDialog *settings_dialog = new ListDialog(choices, "Settings", this);
@@ -740,9 +751,9 @@ void client_main_window::on_lookup_friend_result(const int &conversation_ID, con
         _friend_list->addItem(name);
 
         _friend_list->setItemIcon(_friend_list->count() - 1, valid_icon);
-        _friend_list->setItemData(_friend_list->count() - 1, _search_phone_number->text());
+        _friend_list->setItemData(_friend_list->count() - 1, _search_phone_number);
 
-        client_chat_window *wid = new client_chat_window(conversation_ID, _search_phone_number->text(), name, this);
+        client_chat_window *wid = new client_chat_window(conversation_ID, _search_phone_number, name, this);
         connect(wid, &client_chat_window::swipe_right, this, &client_main_window::on_swipe_right);
         connect(wid, &client_chat_window::data_sent, this, [=](const QString &first_name, const QString &last_message, const int &unread_messages)
                 { _model->add_on_top(first_name, last_message, unread_messages); });
@@ -753,12 +764,12 @@ void client_main_window::on_lookup_friend_result(const int &conversation_ID, con
 
         _window_map.insert(name, wid);
 
-        _status_bar->showMessage(QString("%1 known as %2 is now in your friend_list").arg(_search_phone_number->text(), name), 5000);
+        _status_bar->showMessage(QString("%1 known as %2 is now in your friend_list").arg(_search_phone_number, name), 5000);
     }
     else
-        _status_bar->showMessage(QString("%1 known as %2 is already in your friend_list").arg(_search_phone_number->text(), name), 5000);
+        _status_bar->showMessage(QString("%1 known as %2 is already in your friend_list").arg(_search_phone_number, name), 5000);
 
-    _search_phone_number->clear();
+    _search_phone_number.clear();
 }
 
 void client_main_window::new_conversation(const QString &name)
@@ -910,7 +921,7 @@ void client_main_window::configure_group(const int &group_ID, const QString &gro
                     new_conversation(name);
                 else
                 {
-                    _search_phone_number->setText(name);
+                    _search_phone_number = name;
                     win->_client->send_lookup_friend(name);
                 } });
 

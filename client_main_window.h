@@ -35,7 +35,7 @@ private:
     QLineEdit *_name;
     QLineEdit *_user_phone_number;
     QLineEdit *_user_password;
-    CustomLineEdit *_search_phone_number;
+    QString _search_phone_number = QString();
 
     QLineEdit *_insert_first_name;
     QLineEdit *_insert_last_name;
@@ -122,8 +122,6 @@ private slots:
 
 class ChatModel : public QStandardItemModel
 {
-    Q_OBJECT
-
 public:
     enum Roles
     {
@@ -219,8 +217,6 @@ public:
 
 class ChatDelegate : public QStyledItemDelegate
 {
-    Q_OBJECT
-
 public:
     ChatDelegate(QObject *parent = nullptr) : QStyledItemDelegate(parent) {}
 
