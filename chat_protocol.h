@@ -49,7 +49,9 @@ public:
         request_data,
 
         delete_account,
-        last_message_read
+
+        last_message_read,
+        group_last_message_read
     };
 
     QByteArray set_text_message(const QString &sender, const QString &receiver, const QString &message, const QString &time);
@@ -84,6 +86,7 @@ public:
     QByteArray set_delete_account_message(const QString &phone_number);
 
     QByteArray set_last_message_read(int conversation_ID, const QString &client_ID, const QString &time);
+    QByteArray set_group_last_message_read(int group_ID, const QString &client_ID, const QString &time);
 
     void load_data(const QByteArray &data);
 

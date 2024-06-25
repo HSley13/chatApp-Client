@@ -763,7 +763,9 @@ void client_chat_window::retrieve_group_conversation(const QStringList &messages
         QString sender = parts.first();
         QString content = parts.at(1);
         QString date_time = parts.at(2);
-        QString type = parts.last();
+        QString type = parts.at(3);
+
+        _unread_messages = parts.last().toInt();
 
         if (!sender.compare(my_name()))
             set_retrieve_message_window(type, content, date_time, true);
@@ -800,5 +802,9 @@ void client_chat_window::delete_account()
 void client_chat_window::in_chat()
 {
     _unread_messages = 0;
-    _client->send_last_message_read(_conversation_ID, _client->my_ID(), _list->item(_list->count() - 1)->data(Qt::UserRole).toString());
+
+    if (_group_name.isEmpty())
+        _client->send_last_message_read(_conversation_ID, _client->my_ID(), _list->item(_list->count() - 1)->data(Qt::UserRole).toString());
+    else
+        _client->send_group_last_message_read(_group_ID, _client->my_ID(), _list->item(_list->count() - 1)->data(Qt::UserRole).toString());
 }

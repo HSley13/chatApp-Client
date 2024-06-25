@@ -601,3 +601,8 @@ void client_manager::send_last_message_read(const int &conversation_ID, const QS
 {
     _socket->sendBinaryMessage(_protocol->set_last_message_read(conversation_ID, client_ID, time));
 }
+
+void client_manager::send_group_last_message_read(const int &group_ID, const QString &client_ID, const QString &time)
+{
+    _socket->sendBinaryMessage(_protocol->set_group_last_message_read(group_ID, client_ID, time));
+}

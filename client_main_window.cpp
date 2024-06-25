@@ -493,7 +493,7 @@ void client_main_window::on_login_request(const QString &hashed_password, bool t
                 _stack->addWidget(win);
 
                 if (!group_message.isEmpty())
-                    _model->add_chat(group_name_and_adm.values().first(), win->_last_message);
+                    _model->add_chat(group_name_and_adm.values().first(), win->_last_message, win->_unread_messages);
             }
         }
     }

@@ -390,6 +390,18 @@ QByteArray chat_protocol::set_last_message_read(int conversation_ID, const QStri
     return byte;
 }
 
+QByteArray chat_protocol::set_group_last_message_read(int group_ID, const QString &client_ID, const QString &time)
+{
+    QByteArray byte;
+
+    QDataStream out(&byte, QIODevice::WriteOnly);
+    out.setVersion(QDataStream::Qt_6_7);
+
+    out << group_last_message_read << group_ID << client_ID << time;
+
+    return byte;
+}
+
 chat_protocol::message_type chat_protocol::type() const
 {
     return _type;
