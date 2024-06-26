@@ -32,20 +32,14 @@ client_main_window::client_main_window(QWidget *parent)
 
     QWidget *login_widget = new QWidget();
 
-    QLabel *id_label = new QLabel("Enter Your Phone Number: ", this);
     _user_phone_number = new QLineEdit(this);
 
-    QHBoxLayout *hbox = new QHBoxLayout();
-    hbox->addWidget(id_label);
-    hbox->addWidget(_user_phone_number);
-
-    QLabel *password_label = new QLabel("Enter your Password: ", this);
     _user_password = new QLineEdit(this);
     _user_password->setEchoMode(QLineEdit::Password);
 
-    QHBoxLayout *hbox_1 = new QHBoxLayout();
-    hbox_1->addWidget(password_label);
-    hbox_1->addWidget(_user_password);
+    QFormLayout *login = new QFormLayout(this);
+    login->addRow("Enter Your Phone Number", _user_phone_number);
+    login->addRow("Enter your Password", _user_password);
 
     _login_button = new QPushButton("Log In", this);
     _login_button->setStyleSheet("background-color: #0077CC;"
@@ -56,8 +50,7 @@ client_main_window::client_main_window(QWidget *parent)
     connect(_login_button, &QPushButton::clicked, this, &client_main_window::login);
 
     QVBoxLayout *VBOX = new QVBoxLayout();
-    VBOX->addLayout(hbox);
-    VBOX->addLayout(hbox_1);
+    VBOX->addLayout(login);
     VBOX->addWidget(_login_button);
 
     QGroupBox *group_box = new QGroupBox();
@@ -81,49 +74,28 @@ client_main_window::client_main_window(QWidget *parent)
     QWidget *sign_up_widget = new QWidget();
     sign_up_widget->setWindowIconText("Sign Up");
 
-    QLabel *first_name_label = new QLabel("First Name: ", this);
     _insert_first_name = new QLineEdit(this);
-    QHBoxLayout *first_name_layout = new QHBoxLayout();
-    first_name_layout->addWidget(first_name_label);
-    first_name_layout->addWidget(_insert_first_name);
-
-    QLabel *last_name_label = new QLabel("Last Name: ", this);
     _insert_last_name = new QLineEdit(this);
-    QHBoxLayout *last_name_layout = new QHBoxLayout();
-    last_name_layout->addWidget(last_name_label);
-    last_name_layout->addWidget(_insert_last_name);
 
-    QLabel *phone_number_label = new QLabel("Phone Number: ", this);
     _insert_phone_number = new QLineEdit(this);
-    QHBoxLayout *phone_number_layout = new QHBoxLayout();
-    phone_number_layout->addWidget(phone_number_label);
-    phone_number_layout->addWidget(_insert_phone_number);
 
-    QLabel *password_label_2 = new QLabel("Password: ", this);
     _insert_password = new QLineEdit(this);
     _insert_password->setEchoMode(QLineEdit::Password);
-    QHBoxLayout *password_layout = new QHBoxLayout();
-    password_layout->addWidget(password_label_2);
-    password_layout->addWidget(_insert_password);
 
-    QLabel *password_confirm_label = new QLabel("Confirm Password: ", this);
     _insert_password_confirmation = new QLineEdit(this);
     _insert_password_confirmation->setEchoMode(QLineEdit::Password);
-    QHBoxLayout *password_confirm_layout = new QHBoxLayout();
-    password_confirm_layout->addWidget(password_confirm_label);
-    password_confirm_layout->addWidget(_insert_password_confirmation);
 
-    QLabel *secret_question_label = new QLabel("Secret Question: ", this);
     _insert_secret_question = new QLineEdit(this);
-    QHBoxLayout *secret_question_layout = new QHBoxLayout();
-    secret_question_layout->addWidget(secret_question_label);
-    secret_question_layout->addWidget(_insert_secret_question);
-
-    QLabel *secret_answer_label = new QLabel("Secret Answer: ", this);
     _insert_secret_answer = new QLineEdit(this);
-    QHBoxLayout *secret_answer_layout = new QHBoxLayout();
-    secret_answer_layout->addWidget(secret_answer_label);
-    secret_answer_layout->addWidget(_insert_secret_answer);
+
+    QFormLayout *signup = new QFormLayout(this);
+    signup->addRow("First Name", _insert_first_name);
+    signup->addRow("Last Name", _insert_last_name);
+    signup->addRow("Phone Number", _insert_phone_number);
+    signup->addRow("Password", _insert_password);
+    signup->addRow("Confirm Password", _insert_password_confirmation);
+    signup->addRow("Secret Question", _insert_secret_question);
+    signup->addRow("Secret Answer", _insert_secret_answer);
 
     QPushButton *sign_up_button = new QPushButton("Sign Up", this);
     sign_up_button->setStyleSheet("background-color: #0077CC;"
@@ -134,13 +106,7 @@ client_main_window::client_main_window(QWidget *parent)
     connect(sign_up_button, &QPushButton::clicked, this, &client_main_window::sign_up);
 
     QVBoxLayout *sign_up_layout = new QVBoxLayout();
-    sign_up_layout->addLayout(first_name_layout);
-    sign_up_layout->addLayout(last_name_layout);
-    sign_up_layout->addLayout(phone_number_layout);
-    sign_up_layout->addLayout(password_layout);
-    sign_up_layout->addLayout(password_confirm_layout);
-    sign_up_layout->addLayout(secret_question_layout);
-    sign_up_layout->addLayout(secret_answer_layout);
+    sign_up_layout->addLayout(signup);
     sign_up_layout->addWidget(sign_up_button);
 
     QGroupBox *group_box_2 = new QGroupBox();
@@ -586,11 +552,13 @@ void client_main_window::on_settings()
 
     connect(settings_dialog, &QDialog::accepted, this, [=]()
             {
-                client_chat_window::set_window_blur(this, false);
                 QString choice = settings_dialog->name_selected().first();
 
                 if(_settings_choices.contains(choice))
+                {
+                    client_chat_window::set_window_blur(this, false);
                     _settings_choices.value(choice)();
+                }
                 else
                     _status_bar->showMessage(QString("Choose 1 Option at a time and not 2"), 5000);
 

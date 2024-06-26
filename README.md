@@ -1,7 +1,6 @@
 BELOW ARE ALL THE REQUIREMENTS AND PREPARATIONS FOR THE DATABASE IN ORDER TO USE THIS PROJECT'S CODE. MAKE SURE THAT YOU HAVE MYSQL INSTALLED ON YOUR PC. YOU CAN USE EITHER VSCODE OR MYSQL WORKBENCH TO RUN THE FOLLOWING QUERIES.
 
 
-
     ------ This Project is an Illustration of HOW I UNDERSTAND Chat Applications.
     ------ I am using C++ along with Qt for the GUI implementation which will allow the app to be cross-platform.
     ------ Within Qt, I am mainly using QtCore, QtWidgets classes which encapsulates QWebSocket and QWebSocketServer for the Network/Web communication part. I Used QtMultimedia for recording audio files and the like.
@@ -18,11 +17,10 @@ BELOW ARE ALL THE REQUIREMENTS AND PREPARATIONS FOR THE DATABASE IN ORDER TO USE
     ------ Group Chats (Adding people from your friend_list). 
     ------ Allow only Admin to Add/Remove members within a Group.
     ------ Display Group Members by clicking on the Group's Name. When Clicking on one of them, You'll be forwarded to that person's conversation if in your friend_list, otherwise Add them to it. 
-    ------
+    ------ Read/Unread Messages Notification by making use of the TIMESTAMPS and the Database
     ------
     ------
 
     TO DO
-    --- Message read/unread
     --- Make the GUI more appealing.
     --- Upload Preview here once Finished.
