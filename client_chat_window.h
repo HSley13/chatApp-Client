@@ -201,17 +201,18 @@ class ListDialog : public QDialog
 private:
     QListWidget *name_list;
     QDialogButtonBox *button_box;
+    QLineEdit *_input_line;
 
 public:
-    explicit ListDialog(const QStringList &names, const QString &title, QWidget *parent = nullptr)
+    explicit ListDialog(const QStringList &names, const QString &title, QWidget *parent = nullptr, bool true_or_false = false)
         : QDialog(parent)
     {
         setWindowTitle(title);
-        resize(300, 400);
+        resize(200, 300);
         setStyleSheet("background-color: white;"
                       " border: 1px solid #4A90E2;"
                       " padding: 5px 10px;"
-                      " border-radius: 5px;");
+                      " border-radius: 10px;");
 
         QVBoxLayout *layout = new QVBoxLayout(this);
 
@@ -219,11 +220,22 @@ public:
         name_list->addItems(names);
         name_list->setSelectionMode(QAbstractItemView::MultiSelection);
 
+        layout->addWidget(name_list);
+
+        if (true_or_false)
+        {
+            QFormLayout *form_layout = new QFormLayout;
+            _input_line = new QLineEdit(this);
+            form_layout->addRow("Enter Value:", _input_line);
+            layout->addLayout(form_layout);
+        }
+        else
+            _input_line = nullptr;
+
         button_box = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
         connect(button_box, &QDialogButtonBox::accepted, this, &QDialog::accept);
         connect(button_box, &QDialogButtonBox::rejected, this, &QDialog::reject);
 
-        layout->addWidget(name_list);
         layout->addWidget(button_box);
 
         setLayout(layout);
@@ -232,7 +244,7 @@ public:
             QListWidget {
                 border: 2px solid #4A90E2;
                 color: black;
-                font-size: 14px;
+                font-size: 10px;
                 border-radius: 10px;
                 padding: 5px;
             }
@@ -253,7 +265,7 @@ public:
                 color: white;
                 border: 1px solid #4A90E2;
                 padding: 5px 10px;
-                border-radius: 5px;
+                border-radius: 10px;
             }
             QPushButton:pressed {
                 background-color: #2C5AA0;
@@ -267,10 +279,14 @@ public:
     QStringList name_selected() const
     {
         QStringList selected;
+
         for (QListWidgetItem *item : name_list->selectedItems())
             selected << item->text();
+
         return selected;
     }
+
+    QString value_entered() const { return (_input_line) ? _input_line->text() : QString(); }
 };
 
 class Swipeable_list_widget : public QListWidget

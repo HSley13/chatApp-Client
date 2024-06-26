@@ -224,43 +224,48 @@ void client_chat_window::on_settings()
             << "Remove Member";
 
     ListDialog *add_remove_dialog = new ListDialog(choices, "Add/Remove Member", this);
+
+    client_chat_window::set_window_blur(this, true);
+
     connect(add_remove_dialog, &QDialog::accepted, this, [=]()
             { 
-                                QString option = add_remove_dialog->name_selected().first();
+                QString option = add_remove_dialog->name_selected().first();
 
-                                if (!option.compare("Add New Member"))
-                                {
-                                    QInputDialog *add_dialog = new QInputDialog(this);
-                                    add_dialog->setWindowTitle("Add New Member");
-                                    add_dialog->setLabelText("Enter Phone Number");
+                if (!option.compare("Add New Member"))
+                {
+                    ListDialog *add_dialog = new ListDialog(QStringList("Enter Phone Number"), "Add New Member", this, true);
 
-                                    connect(add_dialog, &QInputDialog::finished, this, [=](int result)
-                                            { 
-                                                if(result == QDialog::Accepted)
-                                                    _client->send_new_group_member_message(_group_ID, _group_name, my_name(), add_dialog->textValue());
+                    client_chat_window::set_window_blur(this, false);
+                    client_chat_window::set_window_blur(this, true);
+                     
+                    connect(add_dialog, &QDialog::accepted, this, [=]()
+                            {  _client->send_new_group_member_message(_group_ID, _group_name, my_name(), add_dialog->value_entered()); add_dialog->deleteLater(); });
 
-                                                add_dialog->deleteLater(); 
-                                            });
+                    connect(add_dialog, &QDialog::finished, this, [=]()
+                            { client_chat_window::set_window_blur(this, false); });
 
-                                    add_dialog->open();
-                                }
-                                else 
-                                {
-                                    QInputDialog *remove_dialog = new QInputDialog(this);
-                                    remove_dialog->setWindowTitle("Remove Member");
-                                    remove_dialog->setLabelText("Enter Member Phone Number");
+                    add_dialog->open();
+                }
+                else 
+                {
+                    ListDialog *remove_dialog = new ListDialog(QStringList("Enter Member Phone Number"), "Remove Member", this, true);
 
-                                    connect(remove_dialog, &QInputDialog::finished, this, [=](int result)
-                                            {  
-                                                if(result == QDialog::Accepted) 
-                                                    _client->send_remove_group_member_message(_group_ID, _group_name, my_name(), remove_dialog->textValue()); 
+                    client_chat_window::set_window_blur(this, false);
+                    client_chat_window::set_window_blur(this, true);
 
-                                                remove_dialog->deleteLater(); 
-                                            });
+                    connect(remove_dialog, &QDialog::accepted, this, [=]()
+                            { _client->send_remove_group_member_message(_group_ID, _group_name, my_name(), remove_dialog->value_entered()); remove_dialog->deleteLater(); });
+                            
+                    connect(remove_dialog, &QDialog::finished, this, [=]()
+                            { client_chat_window::set_window_blur(this, false); });
 
-                                    remove_dialog->open();
-                                } 
-                                add_remove_dialog->deleteLater(); });
+                    remove_dialog->open();
+                } 
+
+    add_remove_dialog->deleteLater(); });
+
+    connect(add_remove_dialog, &QDialog::finished, this, [=]()
+            { client_chat_window::set_window_blur(this, false); });
 
     add_remove_dialog->open();
 }
@@ -406,11 +411,18 @@ void client_chat_window::set_up_window()
                 else
                 {
                     ListDialog *members = new ListDialog(_group_members, "Group Members", this);
+
+                    client_chat_window::set_window_blur(this, true);
+
                     connect(members, &QDialog::accepted, this, [=]()
-                            {   QString name = members->name_selected().first();
+                            {   
+                                QString name = members->name_selected().first();
                                 emit item_clicked(name);
 
                                 members->deleteLater(); });
+
+                    connect(members, &QDialog::finished, this, [=]()
+                            { client_chat_window::set_window_blur(this, false); });
 
                     members->open();
                 } });

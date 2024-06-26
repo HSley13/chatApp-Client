@@ -516,52 +516,59 @@ void client_main_window::configure_settings_choice()
             _stack->setCurrentIndex(_stack->indexOf(wid));
     };
 
-    _settings_choices["Change Name"] = [=]
+    _settings_choices["Change Name"] = [=]()
     {
-        QInputDialog *new_name = new QInputDialog(this);
-        new_name->setWindowTitle("Change Name");
-        new_name->setLabelText("Enter Desired New Name: ");
+        ListDialog *new_name = new ListDialog(QStringList("Enter Desired New Name:"), "Change Name", this, true);
 
         client_chat_window::set_window_blur(this, true);
 
-        connect(new_name, &QInputDialog::finished, this, [=](int result)
+        connect(new_name, &QDialog::finished, this, [=]()
                 {
-                    if(result == QDialog::Accepted)
-                        name_changed(new_name->textValue());
-
-                    client_chat_window::set_window_blur(this, false);
+                    name_changed(new_name->value_entered());
                     new_name->deleteLater(); });
+
+        connect(new_name, &QDialog::finished, this, [=]()
+                { client_chat_window::set_window_blur(this, false); });
 
         new_name->open();
     };
 
-    _settings_choices["Create New Group"] = [=]
+    _settings_choices["Create New Group"] = [=]()
     { create_group(); };
 
-    _settings_choices["Add People via Phone Number"] = [=]
+    _settings_choices["Add People via Phone Number"] = [=]()
     {
-        QInputDialog *new_friend = new QInputDialog(this);
-        new_friend->setWindowTitle("New Friend");
-        new_friend->setLabelText("Enter the Phone Number: ");
+        ListDialog *new_friend = new ListDialog(QStringList("Enter The Phone Number"), "New Friend", this, true);
 
         client_chat_window::set_window_blur(this, true);
 
-        connect(new_friend, &QInputDialog::finished, this, [=](int result)
+        connect(new_friend, &QDialog::accepted, this, [=]()
                 {
-                    if(result == QDialog::Accepted)
-                    {
-                        _server_wid->_client->send_lookup_friend(new_friend->textValue());
-                        _search_phone_number = new_friend->textValue();
-                    }
+                    _server_wid->_client->send_lookup_friend(new_friend->value_entered());
+                    _search_phone_number = new_friend->value_entered();
 
-                    client_chat_window::set_window_blur(this, false);
                     new_friend->deleteLater(); });
+
+        connect(new_friend, &QDialog::finished, this, [=]()
+                { client_chat_window::set_window_blur(this, false); });
 
         new_friend->open();
     };
 
-    _settings_choices["DELETE ACCOUNT"] = [=]
-    { _server_wid->delete_account(); };
+    _settings_choices["DELETE ACCOUNT"] = [=]()
+    {
+        ListDialog *delete_account = new ListDialog(QStringList("Are You Sure You wanna Delete the Account ?"), "Account Deletion", this);
+
+        client_chat_window::set_window_blur(this, true);
+
+        connect(delete_account, &QDialog::accepted, this, [=]()
+                { _server_wid->delete_account(); delete_account->deleteLater(); });
+
+        connect(delete_account, &QDialog::finished, this, [=]()
+                { client_chat_window::set_window_blur(this, false); });
+
+        delete_account->open();
+    };
 }
 
 void client_main_window::on_settings()
@@ -579,6 +586,7 @@ void client_main_window::on_settings()
 
     connect(settings_dialog, &QDialog::accepted, this, [=]()
             {
+                client_chat_window::set_window_blur(this, false);
                 QString choice = settings_dialog->name_selected().first();
 
                 if(_settings_choices.contains(choice))
@@ -963,53 +971,57 @@ void client_main_window::on_added_to_group(const int &group_ID, const QString &a
 
 void client_main_window::create_group()
 {
-    QInputDialog *input_dialog = new QInputDialog(this);
-    input_dialog->setWindowTitle("Group Name");
-    input_dialog->setLabelText("Enter Group Name");
+    ListDialog *input_dialog = new ListDialog(QStringList("Enter Group Name"), "Group Name", this, true);
 
     client_chat_window::set_window_blur(this, true);
 
-    connect(input_dialog, &QInputDialog::finished, this, [=](int result)
-            {
-                if (result == QDialog::Accepted)
+    connect(input_dialog, &QDialog::accepted, this, [=]()
+            {   
+                _group_name = input_dialog->value_entered();
+                if (!_group_name.isEmpty())
                 {
-                    _group_name = input_dialog->textValue();
-                    if (!_group_name.isEmpty())
-                    {
-                        QStringList friends_name;
-                        for (int i = 0; i < _friend_list->count(); i++)
-                            friends_name << _friend_list->itemText(i);
+                    QStringList friends_name;
+                    for (int i = 0; i < _friend_list->count(); i++)
+                        friends_name << _friend_list->itemText(i);
 
-                        ListDialog *members = new ListDialog(friends_name, "Select Group Members", this);
-                        members->setFixedSize(300, 400);
-
-                        client_chat_window::set_window_blur(this, true);
-
-                        connect(members, &QDialog::accepted, this, [=]()
-                                {
-                                    _group_members = members->name_selected();
-                                    QStringList IDs;
-                                    for (QString names : _group_members)
-                                    {
-                                        int index = _friend_list->findText(names, Qt::MatchExactly);
-                                        if (index != -1)
-                                        {
-                                            QVariant data = _friend_list->itemData(index);
-                                            IDs << data.toString();
-                                        }
-                                    }
-                                    _group_members << _server_wid->_client->my_ID();
-                                    _server_wid->_client->send_create_new_group(_server_wid->my_name(), IDs, _group_name);
-
-                                    client_chat_window::set_window_blur(this, false);
-                                    members->deleteLater(); });
-
-                        members->open();
-                    }
+                    ListDialog *members = new ListDialog(friends_name, "Select Group Members", this);
+                    members->setFixedSize(300, 400);
 
                     client_chat_window::set_window_blur(this, false);
-                    input_dialog->deleteLater();
-                } });
+                    client_chat_window::set_window_blur(this, true);
+
+                    connect(members, &QDialog::accepted, this, [=]()
+                    {
+                        _group_members = members->name_selected();
+
+                        QStringList IDs;
+                        for (QString names : _group_members)
+                        {
+                            int index = _friend_list->findText(names, Qt::MatchExactly);
+                            if (index != -1)
+                            {
+                                QVariant data = _friend_list->itemData(index);
+                                IDs << data.toString();
+                            }
+                        }
+
+                        _group_members << _server_wid->_client->my_ID();
+
+                        _server_wid->_client->send_create_new_group(_server_wid->my_name(), IDs, _group_name);
+
+                        members->deleteLater();
+                    });
+
+                    connect(members, &QDialog::finished, this, [=]()
+                    { client_chat_window::set_window_blur(this, false); });
+
+                    members->open();
+                }
+
+    input_dialog->deleteLater(); });
+
+    connect(input_dialog, &QDialog::finished, this, [=]()
+            { client_chat_window::set_window_blur(this, false); });
 
     input_dialog->open();
 }
