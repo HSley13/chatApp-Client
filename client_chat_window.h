@@ -210,7 +210,7 @@ public:
         setWindowTitle(title);
         resize(200, 300);
         setStyleSheet("background-color: white;"
-                      " border: 2px solid #4A90E2;"
+                      " border: 1px solid #4A90E2;"
                       " padding: 5px 10px;"
                       " border-radius: 10px;");
 

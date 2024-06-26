@@ -42,6 +42,11 @@ client_main_window::client_main_window(QWidget *parent)
     login->addRow("Enter your Password", _user_password);
 
     _login_button = new QPushButton("Log In", this);
+    _login_button->setStyleSheet("background-color: #0077CC;"
+                                 "color: white;"
+                                 "border: 1px solid #0055AA;"
+                                 "border-radius: 5px;"
+                                 "padding: 5px 10px;");
     connect(_login_button, &QPushButton::clicked, this, &client_main_window::login);
 
     QVBoxLayout *VBOX = new QVBoxLayout();
@@ -52,6 +57,11 @@ client_main_window::client_main_window(QWidget *parent)
     group_box->setLayout(VBOX);
 
     QPushButton *sign_up = new QPushButton("Sign Up", this);
+    sign_up->setStyleSheet("background-color: #0077CC;"
+                           "color: white;"
+                           "border: 1px solid #0055AA;"
+                           "border-radius: 5px;"
+                           "padding: 5px 10px;");
     connect(sign_up, &QPushButton::clicked, this, [=]()
             { _stack->setCurrentIndex(1); });
 
@@ -88,6 +98,11 @@ client_main_window::client_main_window(QWidget *parent)
     signup->addRow("Secret Answer", _insert_secret_answer);
 
     QPushButton *sign_up_button = new QPushButton("Sign Up", this);
+    sign_up_button->setStyleSheet("background-color: #0077CC;"
+                                  "color: white;"
+                                  "border: 1px solid #0055AA;"
+                                  "border-radius: 5px;"
+                                  "padding: 5px 10px;");
     connect(sign_up_button, &QPushButton::clicked, this, &client_main_window::sign_up);
 
     QVBoxLayout *sign_up_layout = new QVBoxLayout();
@@ -117,6 +132,24 @@ client_main_window::client_main_window(QWidget *parent)
     settings->addItem("Create New Group");
     settings->addItem("Add People via Phone Number");
     settings->addItem("DELETE ACCOUNT");
+    settings->setStyleSheet(R"(
+                            QListWidget {
+                                border: 2px solid #4A90E2;
+                                color: black;
+                                font-size: 10px;
+                                border-radius: 10px;
+                                padding: 5px;
+                            }
+                            QListWidget::item {
+                                border: none;
+                                background-color: #EAF4FE;
+                                padding: 5px;
+                            }
+                            QListWidget::item:selected {
+                                background-color: #4A90E2;
+                                color: white;
+                            }
+                            )");
 
     QVBoxLayout *sidebar_layout = new QVBoxLayout(_sidebar);
     sidebar_layout->addWidget(settings);
