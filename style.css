@@ -25,13 +25,22 @@ QComboBox {
 }
 
 QListWidget {
-    background-color: #FFFFFF;
-    border: 1px solid #0055AA;
-    border-radius: 5px;
+    border: 2px solid #4A90E2;
+    color: black;
+    font-size: 10px;
+    border-radius: 10px;
+    padding: 5px;
 }
 
 QListWidget::item {
-    color: #000000;
+    border: none;
+    background-color: #EAF4FE;
+    padding: 5px;
+}
+
+QListWidget::item:selected {
+    background-color: #4A90E2;
+    color: white;
 }
 
 QStatusBar {
@@ -47,9 +56,19 @@ QDialog {
     border-radius: 5px;
 }
 
-QInputDialog {
-    background-color: white;
-    border: 1px solid #4A90E2;
-    padding: 5px 10px;
+QPushButton {
+    background-color: #0077CC;
+    color: white;
+    border: 1px solid #0055AA;
     border-radius: 5px;
+    padding: 5px 10px;
+}
+
+QPushButton:pressed {
+    background-color: #063b8a;
+    border: 1px solid #0545a5;
+}
+
+QDialogButtonBox {
+    background-color: #F5F5F5;
 }

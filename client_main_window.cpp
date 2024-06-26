@@ -42,11 +42,6 @@ client_main_window::client_main_window(QWidget *parent)
     login->addRow("Enter your Password", _user_password);
 
     _login_button = new QPushButton("Log In", this);
-    _login_button->setStyleSheet("background-color: #0077CC;"
-                                 "color: white;"
-                                 "border: 1px solid #0055AA;"
-                                 "border-radius: 5px;"
-                                 "padding: 5px 10px;");
     connect(_login_button, &QPushButton::clicked, this, &client_main_window::login);
 
     QVBoxLayout *VBOX = new QVBoxLayout();
@@ -57,11 +52,6 @@ client_main_window::client_main_window(QWidget *parent)
     group_box->setLayout(VBOX);
 
     QPushButton *sign_up = new QPushButton("Sign Up", this);
-    sign_up->setStyleSheet("background-color: #0077CC;"
-                           "color: white;"
-                           "border: 1px solid #0055AA;"
-                           "border-radius: 5px;"
-                           "padding: 5px 10px;");
     connect(sign_up, &QPushButton::clicked, this, [=]()
             { _stack->setCurrentIndex(1); });
 
@@ -98,11 +88,6 @@ client_main_window::client_main_window(QWidget *parent)
     signup->addRow("Secret Answer", _insert_secret_answer);
 
     QPushButton *sign_up_button = new QPushButton("Sign Up", this);
-    sign_up_button->setStyleSheet("background-color: #0077CC;"
-                                  "color: white;"
-                                  "border: 1px solid #0055AA;"
-                                  "border-radius: 5px;"
-                                  "padding: 5px 10px;");
     connect(sign_up_button, &QPushButton::clicked, this, &client_main_window::sign_up);
 
     QVBoxLayout *sign_up_layout = new QVBoxLayout();
@@ -124,6 +109,7 @@ client_main_window::client_main_window(QWidget *parent)
     _sidebar = new QFrame(this);
     _sidebar->setFrameShape(QFrame::StyledPanel);
     _sidebar->setFixedWidth(200);
+    _sidebar->setStyleSheet("QFrame:hover { background-color: #e0e0e0; }");
 
     QListWidget *settings = new QListWidget(_sidebar);
     settings->addItem("Chat with an Agent");
@@ -143,7 +129,7 @@ client_main_window::client_main_window(QWidget *parent)
                 else
                     _status_bar->showMessage(QString("Choose 1 Option at a time and not 2"), 5000); });
 
-    QPushButton *toggle_button = new QPushButton("Settings", this);
+    QPushButton *toggle_button = new QPushButton("...", this);
     toggle_button->setFixedSize(50, 20);
     connect(toggle_button, &QPushButton::clicked, this, [=]()
             { _sidebar->setVisible(!_sidebar->isVisible()); });
@@ -215,12 +201,16 @@ client_main_window::client_main_window(QWidget *parent)
     DisplayWidget *display_widget = new DisplayWidget(this);
     display_widget->hide();
 
-    QVBoxLayout *VBOX_2 = new QVBoxLayout(chat_widget);
+    QVBoxLayout *VBOX_2 = new QVBoxLayout();
     VBOX_2->addWidget(display_widget);
     VBOX_2->addLayout(hbox_3);
 
     VBOX_2->addWidget(chats_label);
     VBOX_2->addWidget(_list_view);
+
+    QHBoxLayout *HBOX = new QHBoxLayout(chat_widget);
+    HBOX->addLayout(VBOX_2);
+    HBOX->addWidget(_sidebar);
 
     /*-----------------------------------¬------------------------------------------------------------------------------------------------------------------------------------*/
 
