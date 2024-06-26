@@ -22,6 +22,8 @@ public:
 private:
     QStackedWidget *_stack;
 
+    QFrame *_sidebar;
+
     QStatusBar *_status_bar;
 
     QTabWidget *_tabs;

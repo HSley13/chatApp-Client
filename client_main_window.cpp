@@ -120,9 +120,33 @@ client_main_window::client_main_window(QWidget *parent)
     QWidget *chat_widget = new QWidget();
 
     configure_settings_choice();
-    QPushButton *settings = new QPushButton("...", this);
-    settings->setFixedSize(50, 20);
-    connect(settings, &QPushButton::clicked, this, &client_main_window::on_settings);
+
+    _sidebar = new QFrame(this);
+    _sidebar->setFrameShape(QFrame::StyledPanel);
+    _sidebar->setFixedWidth(200);
+
+    QListWidget *settings = new QListWidget(_sidebar);
+    settings->addItem("Chat with an Agent");
+    settings->addItem("Change Name");
+    settings->addItem("Create New Group");
+    settings->addItem("Add People via Phone Number");
+    settings->addItem("DELETE ACCOUNT");
+
+    QVBoxLayout *sidebar_layout = new QVBoxLayout(_sidebar);
+    sidebar_layout->addWidget(settings);
+    _sidebar->hide();
+
+    connect(settings, &QListWidget::itemClicked, this, [=](QListWidgetItem *item)
+            {
+                if(_settings_choices.contains(item->text()))
+                    _settings_choices.value(item->text())();
+                else
+                    _status_bar->showMessage(QString("Choose 1 Option at a time and not 2"), 5000); });
+
+    QPushButton *toggle_button = new QPushButton("Settings", this);
+    toggle_button->setFixedSize(50, 20);
+    connect(toggle_button, &QPushButton::clicked, this, [=]()
+            { _sidebar->setVisible(!_sidebar->isVisible()); });
 
     _friend_list = new QComboBox(this);
     connect(_friend_list, &QComboBox::textActivated, this, &client_main_window::new_conversation);
@@ -186,7 +210,7 @@ client_main_window::client_main_window(QWidget *parent)
     QHBoxLayout *hbox_3 = new QHBoxLayout();
     hbox_3->addWidget(friend_button);
     hbox_3->addWidget(groups);
-    hbox_3->addWidget(settings);
+    hbox_3->addWidget(toggle_button);
 
     DisplayWidget *display_widget = new DisplayWidget(this);
     display_widget->hide();
