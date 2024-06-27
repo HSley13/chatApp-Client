@@ -557,6 +557,22 @@ void client_manager::delete_file_IDBFS(const QString &file_name)
         file_path.c_str());
 }
 
+const QString client_manager::get_user_time() const
+{
+    char *time_zone = (char *)EM_ASM_PTR({
+        var tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+        var lengthBytes = lengthBytesUTF8(tz) + 1;
+        var stringOnWasmHeap = _malloc(lengthBytes);
+        stringToUTF8(tz, stringOnWasmHeap, lengthBytes);
+        return stringOnWasmHeap;
+    });
+
+    QString time_zone_str = QString::fromUtf8(time_zone);
+    free((void *)time_zone);
+
+    return time_zone_str;
+}
+
 const QString &client_manager::my_ID() const
 {
     return _my_ID;

@@ -72,6 +72,8 @@ public:
     const QString &my_name() const;
     const QString &file_name() const;
 
+    const QString get_user_time() const;
+
 private:
     static QWebSocket *_socket;
 

@@ -37,7 +37,7 @@ client_main_window::client_main_window(QWidget *parent)
     _user_password = new QLineEdit(this);
     _user_password->setEchoMode(QLineEdit::Password);
 
-    QFormLayout *login = new QFormLayout(this);
+    QFormLayout *login = new QFormLayout();
     login->addRow("Enter Your Phone Number", _user_phone_number);
     login->addRow("Enter your Password", _user_password);
 

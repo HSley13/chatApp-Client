@@ -183,7 +183,7 @@ void client_chat_window::play_audio(const QUrl &source, QPushButton *audio, QSli
 
                 connect(_player, &QMediaPlayer::durationChanged, this, [=](qint64 duration)
                         {   slider->setRange(0, static_cast<int>(duration));
-                        slider->setValue(static_cast<int>(duration)); });
+                            slider->setValue(static_cast<int>(duration)); });
 
                 connect(_player, &QMediaPlayer::playbackStateChanged, this, [=](QMediaPlayer::PlaybackState state)
                         {
@@ -389,6 +389,8 @@ void client_chat_window::send_file()
 
 void client_chat_window::set_up_window()
 {
+    qDebug() << "User Time: " << _client->get_user_time();
+
     QWidget *central_widget = new QWidget();
     setCentralWidget(central_widget);
 
