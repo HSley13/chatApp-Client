@@ -187,32 +187,31 @@ void client_chat_window::play_audio(const QUrl &source, QPushButton *audio, QSli
 
                 connect(_player, &QMediaPlayer::playbackStateChanged, this, [=](QMediaPlayer::PlaybackState state)
                         {
-                        if (state == QMediaPlayer::StoppedState)
-                        {
-                            _paused_position = 0;
+                            if (state == QMediaPlayer::StoppedState)
+                            {
+                                _paused_position = 0;
 
-                            slider->hide();
+                                slider->hide();
 
-                            _is_playing = false;
+                                _is_playing = false;
 
-                            audio->setText("▶️");
-                        } });
+                                audio->setText("▶️");
+                            } });
             }
+
+            slider->show();
+            audio->setText("⏸️");
 
             _player->setSource(source);
             _audio_output->setVolume(50);
             _player->play();
 
-            slider->show();
-
             _is_playing = true;
-
-            audio->setText("⏸️");
 
             QTimer *timer = new QTimer(this);
             connect(timer, &QTimer::timeout, this, [=]()
                     { slider->setValue(static_cast<int>(_player->position())); });
-            timer->start(100);
+            timer->start(1000);
         }
     }
     else
