@@ -125,20 +125,24 @@ void client_chat_window::start_recording()
 
         QString current_time = QDateTime::currentDateTime().toString("yyyy-MM-dd HH:mm:ss");
 
-        QString audio_name = current_time + "_audio.m4a";
+        const QString &time_UTC = QDateTime::fromString(current_time, "yyyy-MM-dd HH:mm:ss")
+                                      .toUTC()
+                                      .toString("yyyy-MM-dd HH:mm:ss");
 
-        _client->IDBFS_save_audio(audio_name, audio_data, static_cast<int>(audio_data.size()));
+        QString audio_name = _client->my_ID() + "audio.m4a";
 
-        add_audio(audio_name, true, current_time.split(" ").last());
+        _client->IDBFS_save_audio(current_time + "_" + audio_name, audio_data, static_cast<int>(audio_data.size()));
+
+        add_audio(current_time + "_" + audio_name, true, current_time.split(" ").last());
 
         if (_group_name.isEmpty())
         {
-            _client->send_audio(my_name(), _destinator, audio_name, audio_data, current_time.split(" ").last());
+            _client->send_audio(my_name(), _destinator, audio_name, audio_data, time_UTC);
 
-            _client->send_save_data(_conversation_ID, _client->my_ID(), _destinator, "audio.m4a", audio_data, "audio", current_time);
+            _client->send_save_data(_conversation_ID, _client->my_ID(), _destinator, audio_name, audio_data, "audio", time_UTC);
         }
         else
-            _client->send_group_audio(_group_ID, _group_name, my_name(), audio_name, audio_data, current_time);
+            _client->send_group_audio(_group_ID, _group_name, my_name(), audio_name, audio_data, time_UTC);
 
         emit data_sent(_window_name, "voice note", _unread_messages);
     }
@@ -299,22 +303,26 @@ void client_chat_window::send_message()
     wid->setStyleSheet("color: black;");
     wid->set_message(message, true, current_time.split(" ").last());
 
+    const QString &time_UTC = QDateTime::fromString(current_time, "yyyy-MM-dd HH:mm:ss")
+                                  .toUTC()
+                                  .toString("yyyy-MM-dd HH:mm:ss");
+
     QListWidgetItem *line = new QListWidgetItem(_list);
     line->setSizeHint(QSize(0, 60));
-    line->setData(Qt::UserRole, current_time.split(" ").last());
+    line->setData(Qt::UserRole, time_UTC);
     line->setBackground(QBrush(QColorConstants::Svg::lightskyblue));
 
     line->setSizeHint(wid->sizeHint());
     _list->setItemWidget(line, wid);
 
-    (_group_name.isEmpty()) ? _client->send_text(my_name(), _destinator, message, current_time.split(" ").last()) : _client->send_group_text(_group_ID, _group_name, my_name(), message, current_time);
+    (_group_name.isEmpty()) ? _client->send_text(my_name(), _destinator, message, time_UTC) : _client->send_group_text(_group_ID, _group_name, my_name(), message, time_UTC);
 
     _insert_message->clear();
 
     emit data_sent(_window_name, message, _unread_messages);
 
     if (_destinator.compare("Server"))
-        _client->send_save_conversation(_conversation_ID, _client->my_ID(), _destinator, message, current_time);
+        _client->send_save_conversation(_conversation_ID, _client->my_ID(), _destinator, message, time_UTC);
 }
 
 void client_chat_window::text_message_background(const QString &content, const QString &date_time, const QString &sender, bool true_or_false)
@@ -366,6 +374,10 @@ void client_chat_window::send_file()
         {
             QString current_time = QDateTime::currentDateTime().toString("yyyy-MM-dd HH:mm:ss");
 
+            const QString &time_UTC = QDateTime::fromString(current_time, "yyyy-MM-dd HH:mm:ss")
+                                          .toUTC()
+                                          .toString("yyyy-MM-dd HH:mm:ss");
+
             QString IDBFS_file_name = QString("%1_%2").arg(current_time, QFileInfo(file_name).fileName());
 
             add_file(IDBFS_file_name, true, current_time.split(" ").last());
@@ -376,11 +388,11 @@ void client_chat_window::send_file()
 
             if (_group_name.isEmpty())
             {
-                _client->send_file(my_name(), _destinator, IDBFS_file_name, file_data, current_time.split(" ").last());
-                _client->send_save_data(_conversation_ID, _client->my_ID(), _destinator, QFileInfo(file_name).fileName(), file_data, "file", current_time);
+                _client->send_file(my_name(), _destinator, QFileInfo(file_name).fileName(), file_data, time_UTC);
+                _client->send_save_data(_conversation_ID, _client->my_ID(), _destinator, QFileInfo(file_name).fileName(), file_data, "file", time_UTC);
             }
             else
-                _client->send_group_file(_group_ID, _group_name, my_name(), IDBFS_file_name, file_data, current_time);
+                _client->send_group_file(_group_ID, _group_name, my_name(), QFileInfo(file_name).fileName(), file_data, time_UTC);
         }
     };
 
@@ -389,8 +401,6 @@ void client_chat_window::send_file()
 
 void client_chat_window::set_up_window()
 {
-    qDebug() << "User Time: " << _client->get_user_time();
-
     QWidget *central_widget = new QWidget();
     setCentralWidget(central_widget);
 

@@ -88,7 +88,7 @@ client_main_window::client_main_window(QWidget *parent)
     _insert_secret_question = new QLineEdit(this);
     _insert_secret_answer = new QLineEdit(this);
 
-    QFormLayout *signup = new QFormLayout(this);
+    QFormLayout *signup = new QFormLayout();
     signup->addRow("First Name", _insert_first_name);
     signup->addRow("Last Name", _insert_last_name);
     signup->addRow("Phone Number", _insert_phone_number);
@@ -351,7 +351,7 @@ void client_main_window::login()
         _server_wid = new client_chat_window(this);
 
     QTimer::singleShot(2000, this, [=]()
-                       { _server_wid->_client->send_login_request(_user_phone_number->text(), _user_password->text()); });
+                       { _server_wid->_client->send_login_request(_user_phone_number->text(), _user_password->text(), _server_wid->_client->time_zone()); });
 
     _status_bar->showMessage("LOADING YOUR DATA, WAIT!!!!!! ...", 30000);
 

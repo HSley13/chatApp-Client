@@ -68,7 +68,7 @@ public:
     QByteArray set_save_message_message(const int &conversation_ID, const QString &sender, const QString &receiver, const QString &content, const QString &time);
 
     QByteArray set_sign_up_message(const QString &phone_number, const QString &first_name, const QString &last_name, const QString &password, const QString &secret_question, const QString &secret_answer);
-    QByteArray set_login_request_message(const QString &phone_number, const QString &password);
+    QByteArray set_login_request_message(const QString &phone_number, const QString &password, const QString &time_zone);
 
     QByteArray set_delete_message(const int &conversation_ID, const QString &sender, const QString &receiver, const QString &time);
     QByteArray set_delete_group_message(const int &group_ID, const QString &group_name, const QString &time);

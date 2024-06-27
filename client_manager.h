@@ -32,7 +32,7 @@ public:
     void send_save_data(const int &conversation_ID, const QString &sender, const QString &receiver, const QString &data_name, const QByteArray &data_data, const QString &type, const QString &time);
 
     void send_sign_up(const QString &phone_number, const QString &first_name, const QString &last_name, const QString &password, const QString &secret_question, const QString &secret_answer);
-    void send_login_request(const QString &phone_number, const QString &password);
+    void send_login_request(const QString &phone_number, const QString &password, const QString &time_zone);
 
     void send_file(const QString &sender, const QString &receiver, const QString &file_name, const QByteArray &file_data, const QString &time);
 
@@ -72,7 +72,9 @@ public:
     const QString &my_name() const;
     const QString &file_name() const;
 
-    const QString get_user_time() const;
+    const void get_user_time() const;
+
+    const QString &time_zone() const;
 
 private:
     static QWebSocket *_socket;
@@ -86,6 +88,8 @@ private:
     static QString _my_name;
 
     static QString _file_name;
+
+    static QString _time_zone;
 
     QString _type;
 

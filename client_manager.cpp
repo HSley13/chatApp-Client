@@ -8,6 +8,7 @@ QWebSocketServer *client_manager::_file_server = nullptr;
 QString client_manager::_my_ID;
 QString client_manager::_my_name;
 QString client_manager::_file_name;
+QString client_manager::_time_zone;
 
 client_manager::client_manager(QWidget *parent)
     : QMainWindow(parent)
@@ -30,6 +31,8 @@ client_manager::client_manager(QWidget *parent)
 
         mount_audio_IDBFS();
         mount_file_IDBFS();
+
+        get_user_time();
     }
 }
 
@@ -171,9 +174,11 @@ void client_manager::send_is_typing(const QString &sender, const QString &receiv
 
 void client_manager::save_file(const QString &sender, const QString &file_name, const QByteArray &file_data, const QString &time)
 {
-    IDBFS_save_file(file_name, file_data, static_cast<int>(file_data.size()));
+    QString IDBFS_file_name = QString("%1_%2").arg(time, file_name);
 
-    emit file_received(sender, file_name, time);
+    IDBFS_save_file(IDBFS_file_name, file_data, static_cast<int>(file_data.size()));
+
+    emit file_received(sender, IDBFS_file_name, time.split(" ").last());
 }
 
 void client_manager::send_save_data(const int &conversation_ID, const QString &sender, const QString &receiver, const QString &data_name, const QByteArray &data_data, const QString &type, const QString &time)
@@ -183,23 +188,29 @@ void client_manager::send_save_data(const int &conversation_ID, const QString &s
 
 void client_manager::save_audio(const QString &sender, const QString &audio_name, const QByteArray &audio_data, const QString &time)
 {
-    IDBFS_save_audio(audio_name, audio_data, static_cast<int>(audio_data.size()));
+    QString IDBFS_audio_name = QString("%1_%2").arg(time, audio_name);
 
-    emit audio_received(sender, audio_name, time);
+    IDBFS_save_audio(IDBFS_audio_name, audio_data, static_cast<int>(audio_data.size()));
+
+    emit audio_received(sender, IDBFS_audio_name, time.split(" ").last());
 }
 
 void client_manager::save_group_file(const int &group_ID, const QString &group_name, const QString &sender, const QString &file_name, const QByteArray &file_data, const QString &time)
 {
-    IDBFS_save_file(file_name, file_data, static_cast<int>(file_data.size()));
+    QString IDBFS_file_name = QString("%1_%2").arg(time, file_name);
 
-    emit group_file_received(group_ID, group_name, sender, file_name, time);
+    IDBFS_save_file(IDBFS_file_name, file_data, static_cast<int>(file_data.size()));
+
+    emit group_file_received(group_ID, group_name, sender, IDBFS_file_name, time.split(" ").last());
 }
 
 void client_manager::save_group_audio(const int &group_ID, const QString &group_name, const QString &sender, const QString &audio_name, const QByteArray &audio_data, const QString &time)
 {
-    IDBFS_save_audio(audio_name, audio_data, static_cast<int>(audio_data.size()));
+    QString IDBFS_audio_name = QString("%1_%2").arg(time, audio_name);
 
-    emit group_audio_received(group_ID, group_name, sender, audio_name, time);
+    IDBFS_save_audio(IDBFS_audio_name, audio_data, static_cast<int>(audio_data.size()));
+
+    emit group_audio_received(group_ID, group_name, sender, IDBFS_audio_name, time.split(" ").last());
 }
 
 void client_manager::send_audio(const QString &sender, const QString &receiver, const QString &audio_name, const QByteArray &audio_data, const QString &time)
@@ -230,11 +241,11 @@ void client_manager::send_sign_up(const QString &phone_number, const QString &fi
     _socket->sendBinaryMessage(_protocol->set_sign_up_message(phone_number, first_name, last_name, password, secret_question, secret_answer));
 }
 
-void client_manager::send_login_request(const QString &phone_number, const QString &password)
+void client_manager::send_login_request(const QString &phone_number, const QString &password, const QString &time_zone)
 {
     _my_ID = phone_number;
 
-    _socket->sendBinaryMessage(_protocol->set_login_request_message(phone_number, password));
+    _socket->sendBinaryMessage(_protocol->set_login_request_message(phone_number, password, time_zone));
 }
 
 void client_manager::send_file(const QString &sender, const QString &receiver, const QString &file_name, const QByteArray &file_data, const QString &time)
@@ -557,7 +568,7 @@ void client_manager::delete_file_IDBFS(const QString &file_name)
         file_path.c_str());
 }
 
-const QString client_manager::get_user_time() const
+const void client_manager::get_user_time() const
 {
     char *time_zone = (char *)EM_ASM_PTR({
         var tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
@@ -567,10 +578,8 @@ const QString client_manager::get_user_time() const
         return stringOnWasmHeap;
     });
 
-    QString time_zone_str = QString::fromUtf8(time_zone);
+    _time_zone = QString::fromUtf8(time_zone);
     free((void *)time_zone);
-
-    return time_zone_str;
 }
 
 const QString &client_manager::my_ID() const
@@ -581,6 +590,11 @@ const QString &client_manager::my_ID() const
 const QString &client_manager::my_name() const
 {
     return _my_name;
+}
+
+const QString &client_manager::time_zone() const
+{
+    return _time_zone;
 }
 
 void client_manager::send_group_is_typing(const int &group_ID, const QString &group_name, const QString &sender)

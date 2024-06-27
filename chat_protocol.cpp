@@ -224,14 +224,14 @@ QByteArray chat_protocol::set_sign_up_message(const QString &phone_number, const
     return byte;
 }
 
-QByteArray chat_protocol::set_login_request_message(const QString &phone_number, const QString &password)
+QByteArray chat_protocol::set_login_request_message(const QString &phone_number, const QString &password, const QString &time_zone)
 {
     QByteArray byte;
 
     QDataStream out(&byte, QIODevice::WriteOnly);
     out.setVersion(QDataStream::Qt_6_7);
 
-    out << login_request << phone_number << password;
+    out << login_request << phone_number << password << time_zone;
 
     return byte;
 }
