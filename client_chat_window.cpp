@@ -10,6 +10,12 @@ QColor client_chat_window::_last_color;
 int client_chat_window::_color_counter = 0;
 QString client_chat_window::_last_sender = nullptr;
 
+bool client_chat_window::_is_recording = false;
+
+bool client_chat_window::_is_playing = false;
+
+int client_chat_window::_paused_position = 0;
+
 QColor client_chat_window::_colors[] = {QColorConstants::Svg::lightsalmon, QColorConstants::Svg::lightgreen, QColorConstants::Svg::lightgray, QColorConstants::Svg::lightgoldenrodyellow, QColorConstants::Svg::lightpink};
 
 client_chat_window::client_chat_window(QWidget *parent)
@@ -89,7 +95,7 @@ void client_chat_window::start_recording()
 {
     QString audio_path = _recorder->outputLocation().toLocalFile();
 
-    if (!is_recording)
+    if (!_is_recording)
     {
         if (QFile::exists(audio_path))
         {
@@ -99,12 +105,12 @@ void client_chat_window::start_recording()
 
         _recorder->record();
         _duration_label->show();
-        is_recording = true;
+        _is_recording = true;
     }
     else
     {
         _recorder->stop();
-        is_recording = false;
+        _is_recording = false;
         _duration_label->hide();
         _duration_label->clear();
 
@@ -152,51 +158,54 @@ void client_chat_window::on_duration_changed(const qint64 &duration)
 
 void client_chat_window::play_audio(const QUrl &source, QPushButton *audio, QSlider *slider)
 {
-    if (!is_playing)
+    if (!_is_playing)
     {
         slider->show();
 
-        if (paused_position)
+        if (_paused_position)
         {
-            _player->setPosition(paused_position);
+            _player->setPosition(_paused_position);
             _player->play();
 
-            is_playing = true;
+            _is_playing = true;
             audio->setText("⏸️");
         }
         else
         {
-            _player = new QMediaPlayer(this);
-            _audio_output = new QAudioOutput(this);
-            _player->setAudioOutput(_audio_output);
-            _player->setSource(source);
-            _audio_output->setVolume(50);
+            if (!_player)
+            {
+                _player = new QMediaPlayer(this);
+                _audio_output = new QAudioOutput(this);
+                _player->setAudioOutput(_audio_output);
 
-            connect(slider, &QSlider::valueChanged, _player, [=](int position)
-                    { _player->setPosition(static_cast<qint64>(position)); });
+                connect(slider, &QSlider::valueChanged, _player, [=](int position)
+                        { _player->setPosition(static_cast<qint64>(position)); });
 
-            connect(_player, &QMediaPlayer::durationChanged, this, [=](qint64 duration)
-                    {   slider->setRange(0, static_cast<int>(duration));
+                connect(_player, &QMediaPlayer::durationChanged, this, [=](qint64 duration)
+                        {   slider->setRange(0, static_cast<int>(duration));
                         slider->setValue(static_cast<int>(duration)); });
 
-            connect(_player, &QMediaPlayer::playbackStateChanged, this, [=](QMediaPlayer::PlaybackState state)
-                    {
+                connect(_player, &QMediaPlayer::playbackStateChanged, this, [=](QMediaPlayer::PlaybackState state)
+                        {
                         if (state == QMediaPlayer::StoppedState)
                         {
-                            paused_position = 0;
+                            _paused_position = 0;
 
                             slider->hide();
 
-                            is_playing = false;
+                            _is_playing = false;
 
                             audio->setText("▶️");
                         } });
+            }
 
+            _player->setSource(source);
+            _audio_output->setVolume(50);
             _player->play();
 
             slider->show();
 
-            is_playing = true;
+            _is_playing = true;
 
             audio->setText("⏸️");
 
@@ -208,10 +217,10 @@ void client_chat_window::play_audio(const QUrl &source, QPushButton *audio, QSli
     }
     else
     {
-        paused_position = _player->position();
+        _paused_position = _player->position();
         _player->pause();
 
-        is_playing = false;
+        _is_playing = false;
 
         audio->setText("▶️");
     }

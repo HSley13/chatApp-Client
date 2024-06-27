@@ -94,11 +94,9 @@ private:
     QMediaPlayer *_player;
     QAudioOutput *_audio_output;
 
-    bool is_recording = false;
-
-    bool is_playing = false;
-
-    int paused_position = 0;
+    static bool _is_recording;
+    static bool _is_playing;
+    static int _paused_position;
 
     int _group_ID;
 
