@@ -198,10 +198,29 @@ public:
 
 class ListDialog : public QDialog
 {
+    Q_OBJECT
+
 private:
     QListWidget *name_list;
     QDialogButtonBox *button_box;
     QLineEdit *_input_line;
+
+protected:
+    void showEvent(QShowEvent *event) override
+    {
+        if (parentWidget())
+            client_chat_window::set_window_blur(parentWidget(), true);
+
+        QDialog::showEvent(event);
+    }
+
+    void hideEvent(QHideEvent *event) override
+    {
+        if (parentWidget())
+            client_chat_window::set_window_blur(parentWidget(), false);
+
+        QDialog::hideEvent(event);
+    }
 
 public:
     explicit ListDialog(const QStringList &names, const QString &title, QWidget *parent = nullptr, bool true_or_false = false)
@@ -226,6 +245,7 @@ public:
         {
             QFormLayout *form_layout = new QFormLayout;
             _input_line = new QLineEdit(this);
+
             form_layout->addRow("Enter Value:", _input_line);
             layout->addLayout(form_layout);
         }
@@ -342,14 +362,9 @@ public:
 
                 ListDialog *dialog = new ListDialog(info, "Delete Message", this);
 
-                client_chat_window::set_window_blur(_window, true);
-
                 connect(dialog, &QDialog::accepted, this, [=]()
                         {   _window->message_deleted(item->data(Qt::UserRole).toString());
                             dialog->deleteLater(); });
-
-                connect(dialog, &QDialog::finished, this, [=]()
-                        { client_chat_window::set_window_blur(_window, false); });
 
                 dialog->open();
 

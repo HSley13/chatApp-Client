@@ -533,15 +533,10 @@ void client_main_window::configure_settings_choice()
     {
         ListDialog *new_name = new ListDialog(QStringList("Enter Desired New Name:"), "Change Name", this, true);
 
-        client_chat_window::set_window_blur(this, true);
-
         connect(new_name, &QDialog::finished, this, [=]()
                 {
                     name_changed(new_name->value_entered());
                     new_name->deleteLater(); });
-
-        connect(new_name, &QDialog::finished, this, [=]()
-                { client_chat_window::set_window_blur(this, false); });
 
         new_name->open();
     };
@@ -553,17 +548,12 @@ void client_main_window::configure_settings_choice()
     {
         ListDialog *new_friend = new ListDialog(QStringList("Enter The Phone Number"), "New Friend", this, true);
 
-        client_chat_window::set_window_blur(this, true);
-
         connect(new_friend, &QDialog::accepted, this, [=]()
                 {
                     _server_wid->_client->send_lookup_friend(new_friend->value_entered());
                     _search_phone_number = new_friend->value_entered();
 
                     new_friend->deleteLater(); });
-
-        connect(new_friend, &QDialog::finished, this, [=]()
-                { client_chat_window::set_window_blur(this, false); });
 
         new_friend->open();
     };
@@ -572,13 +562,8 @@ void client_main_window::configure_settings_choice()
     {
         ListDialog *delete_account = new ListDialog(QStringList("Are You Sure You wanna Delete the Account ?"), "Account Deletion", this);
 
-        client_chat_window::set_window_blur(this, true);
-
         connect(delete_account, &QDialog::accepted, this, [=]()
                 { _server_wid->delete_account(); delete_account->deleteLater(); });
-
-        connect(delete_account, &QDialog::finished, this, [=]()
-                { client_chat_window::set_window_blur(this, false); });
 
         delete_account->open();
     };
@@ -595,24 +580,16 @@ void client_main_window::on_settings()
 
     ListDialog *settings_dialog = new ListDialog(choices, "Settings", this);
 
-    client_chat_window::set_window_blur(this, true);
-
     connect(settings_dialog, &QDialog::accepted, this, [=]()
             {
                 QString choice = settings_dialog->name_selected().first();
 
                 if(_settings_choices.contains(choice))
-                {
-                    client_chat_window::set_window_blur(this, false);
                     _settings_choices.value(choice)();
-                }
                 else
                     _status_bar->showMessage(QString("Choose 1 Option at a time and not 2"), 5000);
 
                     settings_dialog->deleteLater(); });
-
-    connect(settings_dialog, &QDialog::finished, this, [=]()
-            { client_chat_window::set_window_blur(this, false); });
 
     settings_dialog->open();
 }
@@ -988,8 +965,6 @@ void client_main_window::create_group()
 {
     ListDialog *input_dialog = new ListDialog(QStringList("Enter Group Name"), "Group Name", this, true);
 
-    client_chat_window::set_window_blur(this, true);
-
     connect(input_dialog, &QDialog::accepted, this, [=]()
             {   
                 _group_name = input_dialog->value_entered();
@@ -1001,9 +976,6 @@ void client_main_window::create_group()
 
                     ListDialog *members = new ListDialog(friends_name, "Select Group Members", this);
                     members->setFixedSize(300, 400);
-
-                    client_chat_window::set_window_blur(this, false);
-                    client_chat_window::set_window_blur(this, true);
 
                     connect(members, &QDialog::accepted, this, [=]()
                     {
@@ -1027,16 +999,10 @@ void client_main_window::create_group()
                         members->deleteLater();
                     });
 
-                    connect(members, &QDialog::finished, this, [=]()
-                    { client_chat_window::set_window_blur(this, false); });
-
                     members->open();
                 }
 
     input_dialog->deleteLater(); });
-
-    connect(input_dialog, &QDialog::finished, this, [=]()
-            { client_chat_window::set_window_blur(this, false); });
 
     input_dialog->open();
 }
