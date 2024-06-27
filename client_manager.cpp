@@ -136,7 +136,7 @@ void client_manager::on_binary_message_received(const QByteArray &message)
         break;
 
     case chat_protocol::request_data:
-        (!_protocol->file_name().compare("file")) ? IDBFS_save_file(_file_name, _protocol->file_data(), _protocol->file_data().size()) : IDBFS_save_audio(_file_name, _protocol->file_data(), _protocol->file_data().size());
+        (!_protocol->data_type().compare("file")) ? IDBFS_save_file(_file_name, _protocol->file_data(), _protocol->file_data().size()) : IDBFS_save_audio(_file_name, _protocol->file_data(), _protocol->file_data().size());
 
         break;
 

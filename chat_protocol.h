@@ -146,6 +146,7 @@ public:
     const QHash<int, QHash<int, QString>> &group_list() const;
     const QHash<int, QStringList> &group_messages() const;
     const QHash<int, QStringList> &groups_members() const;
+    const QString &data_type() const;
 
 private:
     QByteArray get_data(message_type type, const QString &data);
@@ -192,6 +193,7 @@ private:
     bool _true_or_false;
 
     QString _time;
+    QString _data_type;
 
     int _group_ID;
     QString _adm;

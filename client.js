@@ -706,23 +706,23 @@ function dbg(text) {
 }
 
 var ASM_CONSTS = {
- 9412976: () => {
+ 9413040: () => {
   FS.mkdir("/audio");
   FS.mount(IDBFS, {}, "/audio");
   FS.syncfs(true);
  },
- 9413048: () => {
+ 9413112: () => {
   FS.mkdir("/file");
   FS.mount(IDBFS, {}, "/file");
   FS.syncfs(true);
  },
- 9413118: () => {
+ 9413182: () => {
   FS.syncfs();
  },
- 9413135: () => {
+ 9413199: () => {
   FS.syncfs();
  },
- 9413152: $0 => {
+ 9413216: $0 => {
   var audio_path = UTF8ToString($0);
   var audio_data = FS.readFile(audio_path);
   if (!audio_data) return null;
@@ -735,7 +735,7 @@ var ASM_CONSTS = {
   stringToUTF8(url, stringOnWasmHeap, url_length);
   return stringOnWasmHeap;
  },
- 9413517: $0 => {
+ 9413581: $0 => {
   var file_path = UTF8ToString($0);
   var file_data = FS.readFile(file_path);
   if (!file_data) return null;
@@ -927,13 +927,13 @@ var ASM_CONSTS = {
   stringToUTF8(url, stringOnWasmHeap, url_length);
   return stringOnWasmHeap;
  },
- 9416454: $0 => {
+ 9416518: $0 => {
   var audioPath = UTF8ToString($0);
   var audioStatus = FS.analyzePath(audioPath);
   if (audioStatus.exists) FS.unlink(audioPath);
   FS.syncfs(false);
  },
- 9416601: $0 => {
+ 9416665: $0 => {
   var filePath = UTF8ToString($0);
   var fileStatus = FS.analyzePath(filePath);
   if (fileStatus.exists) FS.unlink(filePath);
@@ -15788,9 +15788,9 @@ var ___cxa_can_catch = createExportWrapper("__cxa_can_catch");
 
 var ___cxa_is_pointer_type = createExportWrapper("__cxa_is_pointer_type");
 
-var ___start_em_js = Module["___start_em_js"] = 9416743;
+var ___start_em_js = Module["___start_em_js"] = 9416807;
 
-var ___stop_em_js = Module["___stop_em_js"] = 9417833;
+var ___stop_em_js = Module["___stop_em_js"] = 9417897;
 
 function invoke_viiii(index, a1, a2, a3, a4) {
  var sp = stackSave();

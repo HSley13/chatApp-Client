@@ -112,7 +112,9 @@ void chat_protocol::load_data(const QByteArray &data)
         break;
 
     case request_data:
-        in >> _file_data >> _file_name;
+        in >> _file_data >> _data_type;
+
+        qDebug() << "Data request received for :" << _file_name;
 
         break;
 
@@ -375,6 +377,8 @@ QByteArray chat_protocol::set_request_data_message(const int &conversation_ID, c
 
     out << request_data << conversation_ID << date_time << type;
 
+    qDebug() << "Data request for :" << date_time << " in Conversation: " << conversation_ID;
+
     return byte;
 }
 
@@ -617,4 +621,9 @@ const QHash<int, QStringList> &chat_protocol::group_messages() const
 const QHash<int, QStringList> &chat_protocol::groups_members() const
 {
     return _groups_members;
+}
+
+const QString &chat_protocol::data_type() const
+{
+    return _data_type;
 }

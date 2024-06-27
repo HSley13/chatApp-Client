@@ -85,6 +85,8 @@ private:
 
     static QString _file_name;
 
+    QString _type;
+
 signals:
     void text_message_received(const QString &sender, const QString &message, const QString &time);
     void is_typing_received(const QString &sender);
