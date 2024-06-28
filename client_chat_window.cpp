@@ -527,8 +527,8 @@ void client_chat_window::set_up_window()
         connect(_client, &client_manager::group_file_received, this, [=](const int &group_ID, const QString &group_name, const QString &sender, const QString &file_name, const QString &time)
                 { emit group_file_received(group_ID, group_name, sender, file_name, time); });
 
-        connect(_client, &client_manager::removed_from_group, this, [=](const int &group_ID, const QString &group_name, const QString &adm)
-                { emit removed_from_group(group_ID, group_name, adm); });
+        connect(_client, &client_manager::removed_from_group, this, [=](const int &group_ID, const QString &group_name, const QString &adm, const QString &removed_member)
+                { emit removed_from_group(group_ID, group_name, adm, removed_member); });
     }
 }
 

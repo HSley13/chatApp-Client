@@ -117,7 +117,7 @@ private slots:
     void on_group_audio_received(const int &group_ID, const QString &group_name, const QString &sender, const QString &audio_name, const QString &time);
     void on_group_file_received(const int &group_ID, const QString &group_name, const QString &sender, const QString &file_name, const QString &time);
 
-    void on_removed_from_group(const int &group_ID, const QString &group_name, const QString &adm);
+    void on_removed_from_group(const int &group_ID, const QString &group_name, const QString &adm, const QString &removed_member);
 
     void on_client_name_clicked(const QString &client_name);
 };

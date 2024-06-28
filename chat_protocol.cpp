@@ -107,7 +107,7 @@ void chat_protocol::load_data(const QByteArray &data)
         break;
 
     case remove_group_member:
-        in >> _group_ID >> _group_name >> _adm;
+        in >> _group_ID >> _group_name >> _adm >> _client_ID;
 
         break;
 

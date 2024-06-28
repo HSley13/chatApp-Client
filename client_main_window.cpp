@@ -406,7 +406,7 @@ void client_main_window::on_login_request(const QString &hashed_password, bool t
         connect(_server_wid, &client_chat_window::removed_from_group, this, &client_main_window::on_removed_from_group);
 
         connect(_server_wid, &client_chat_window::new_group_ID, this, [=](const int &group_ID)
-                { configure_group(group_ID, _group_name, _group_members, _server_wid->my_name()); });
+                { configure_group(group_ID, _group_name, authenticate_group_members(_group_members), _server_wid->_client->my_ID()); });
 
         connect(_server_wid, &client_chat_window::is_typing_received, this, [=](const QString &sender)
                 { _status_bar->showMessage(QString("%1 is typing...").arg(sender), 1000); });
@@ -921,7 +921,10 @@ void client_main_window::configure_group(const int &group_ID, const QString &gro
         {
             client_chat_window *wid = qobject_cast<client_chat_window *>(win);
             if (wid)
+            {
                 wid->enable_chat();
+                wid->_group_members = names;
+            }
         }
 
         return;
@@ -950,6 +953,8 @@ void client_main_window::configure_group(const int &group_ID, const QString &gro
     _stack->addWidget(win);
 
     _group_list->addItem(group_name);
+
+    _status_bar->showMessage(QString("%1 Added you do to a Group called: %2").arg(adm, group_name), 5000);
 }
 
 void client_main_window::on_added_to_group(const int &group_ID, const QString &adm, const QStringList &group_members, const QString &group_name)
@@ -957,8 +962,6 @@ void client_main_window::on_added_to_group(const int &group_ID, const QString &a
     QStringList names = authenticate_group_members(group_members);
 
     configure_group(group_ID, group_name, names, adm);
-
-    _status_bar->showMessage(QString("%1 Added you do to a Group called: %2").arg(adm, group_name), 5000);
 }
 
 void client_main_window::create_group()
@@ -1085,16 +1088,22 @@ void client_main_window::on_group_file_received(const int &group_ID, const QStri
     }
 }
 
-void client_main_window::on_removed_from_group(const int &group_ID, const QString &group_name, const QString &adm)
+void client_main_window::on_removed_from_group(const int &group_ID, const QString &group_name, const QString &adm, const QString &removed_member)
 {
     QWidget *win = _window_map.value(group_name);
     if (win)
     {
         client_chat_window *wid = qobject_cast<client_chat_window *>(win);
         if (wid)
-            wid->disable_chat();
-
-        _status_bar->showMessage(QString("You were removed from the Group: %1 by %2").arg(group_name, adm), 5000);
+        {
+            if (!removed_member.compare(_server_wid->_client->my_ID()))
+            {
+                wid->disable_chat();
+                _status_bar->showMessage(QString("You were removed from the Group: %1 by %2").arg(group_name, adm), 5000);
+            }
+            else
+                wid->_group_members.removeAll(removed_member);
+        }
     }
 }
 

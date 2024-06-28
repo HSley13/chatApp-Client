@@ -134,7 +134,7 @@ void client_manager::on_binary_message_received(const QByteArray &message)
         break;
 
     case chat_protocol::remove_group_member:
-        removed_from_group(_protocol->group_ID(), _protocol->group_name(), _protocol->adm());
+        removed_from_group(_protocol->group_ID(), _protocol->group_name(), _protocol->adm(), _protocol->clients_ID());
 
         break;
 

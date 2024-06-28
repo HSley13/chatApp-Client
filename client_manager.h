@@ -125,7 +125,7 @@ signals:
     void group_audio_received(const int &group_ID, const QString &group_name, const QString &sender, const QString &audio, const QString &time);
     void group_file_received(const int &group_ID, const QString &group_name, const QString &sender, const QString &file_name, const QString &time);
 
-    void removed_from_group(const int &group_ID, const QString &group_name, const QString &adm);
+    void removed_from_group(const int &group_ID, const QString &group_name, const QString &adm, const QString &removed_member);
 
 private slots:
     void on_disconnected();
