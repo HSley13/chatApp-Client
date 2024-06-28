@@ -123,17 +123,19 @@ void client_chat_window::start_recording()
             audio.close();
         }
 
-        QString current_time = QDateTime::currentDateTime().toString("yyyy-MM-dd HH:mm:ss");
+        const QString &current_time = QDateTime::currentDateTime().toString("yyyy-MM-dd HH:mm:ss");
 
         const QString &time_UTC = QDateTime::fromString(current_time, "yyyy-MM-dd HH:mm:ss")
                                       .toUTC()
-                                      .toString("yyyy-MM-dd HH:mm:ss");
+                                      .toString();
 
-        QString audio_name = _client->my_ID() + "audio.m4a";
+        const QString &audio_name = _client->my_ID() + "audio.m4a";
 
-        _client->IDBFS_save_audio(current_time + "_" + audio_name, audio_data, static_cast<int>(audio_data.size()));
+        const QString &IDBFS_audio_name = QString("%1_%2").arg(current_time, audio_name);
 
-        add_audio(current_time + "_" + audio_name, true, current_time.split(" ").last());
+        _client->IDBFS_save_audio(IDBFS_audio_name, audio_data, static_cast<int>(audio_data.size()));
+
+        add_audio(IDBFS_audio_name, true, current_time);
 
         if (_group_name.isEmpty())
         {
@@ -305,7 +307,7 @@ void client_chat_window::send_message()
 
     const QString &time_UTC = QDateTime::fromString(current_time, "yyyy-MM-dd HH:mm:ss")
                                   .toUTC()
-                                  .toString("yyyy-MM-dd HH:mm:ss");
+                                  .toString();
 
     QListWidgetItem *line = new QListWidgetItem(_list);
     line->setSizeHint(QSize(0, 60));
@@ -376,11 +378,11 @@ void client_chat_window::send_file()
 
             const QString &time_UTC = QDateTime::fromString(current_time, "yyyy-MM-dd HH:mm:ss")
                                           .toUTC()
-                                          .toString("yyyy-MM-dd HH:mm:ss");
+                                          .toString();
 
             QString IDBFS_file_name = QString("%1_%2").arg(current_time, QFileInfo(file_name).fileName());
 
-            add_file(IDBFS_file_name, true, current_time.split(" ").last());
+            add_file(IDBFS_file_name, true, current_time);
 
             emit data_sent(_window_name, QFileInfo(file_name).fileName(), _unread_messages);
 
@@ -430,7 +432,7 @@ void client_chat_window::set_up_window()
             { member_list->setText(QString("%1's Conversation").arg(_window_name)); });
 
     _list = new Swipeable_list_widget(this, this);
-    _list->setItemDelegate(new separator_delegate(_list));
+    _list->setItemDelegate(new SeparatorDelegate(_list));
     _list->setSelectionMode(QAbstractItemView::NoSelection);
 
     _insert_message = new CustomLineEdit(this);
@@ -599,7 +601,7 @@ void client_chat_window::add_file(const QString &file_name, bool is_mine, const 
 
     QPixmap image(":/images/file_icon.webp");
 
-    QLabel *time_label = new QLabel(time, this);
+    QLabel *time_label = new QLabel(time.split(" ").last(), this);
 
     const QString &type = (_group_name.isEmpty()) ? "normal" : "group";
     const int &ID = (_group_name.isEmpty()) ? _conversation_ID : _group_ID;
@@ -616,7 +618,11 @@ void client_chat_window::add_file(const QString &file_name, bool is_mine, const 
     vbox->addWidget(file);
     vbox->addWidget(time_label, 0, Qt::AlignHCenter);
 
-    audio_file_message_background(wid, is_mine, sender, time, vbox);
+    const QString &time_UTC = QDateTime::fromString(time, "yyyy-MM-dd HH:mm:ss")
+                                  .toUTC()
+                                  .toString();
+
+    audio_file_message_background(wid, is_mine, sender, time_UTC, vbox);
 }
 
 void client_chat_window::add_audio(const QString &audio_name, bool is_mine, const QString &time, const QString &sender)
@@ -624,7 +630,7 @@ void client_chat_window::add_audio(const QString &audio_name, bool is_mine, cons
     QWidget *wid = new QWidget();
     wid->setStyleSheet("color: black;");
 
-    QLabel *time_label = new QLabel(time, this);
+    QLabel *time_label = new QLabel(time.split(" ").last(), this);
 
     QSlider *slider = new QSlider(Qt::Horizontal, this);
     slider->hide();
@@ -640,7 +646,11 @@ void client_chat_window::add_audio(const QString &audio_name, bool is_mine, cons
     vbox->addWidget(audio);
     vbox->addWidget(time_label, 0, Qt::AlignHCenter);
 
-    audio_file_message_background(wid, is_mine, sender, time, vbox, slider);
+    const QString &time_UTC = QDateTime::fromString(time, "yyyy-MM-dd HH:mm:ss")
+                                  .toUTC()
+                                  .toString();
+
+    audio_file_message_background(wid, is_mine, sender, time_UTC, vbox, slider);
 }
 
 void client_chat_window::audio_file_message_background(QWidget *wid, const bool &is_mine, const QString &sender, const QString &time, QVBoxLayout *vbox, QSlider *slider)

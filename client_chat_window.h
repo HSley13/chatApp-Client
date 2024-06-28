@@ -172,25 +172,38 @@ private slots:
     void play_audio(const QUrl &source, QPushButton *audio, QSlider *slider);
 };
 
-class separator_delegate : public QStyledItemDelegate
+class SeparatorDelegate : public QStyledItemDelegate
 {
 private:
     QListWidget *m_parent;
 
 public:
-    explicit separator_delegate(QListWidget *parent) : QStyledItemDelegate(parent), m_parent(parent) {}
+    explicit SeparatorDelegate(QListWidget *parent) : QStyledItemDelegate(parent), m_parent(parent) {}
 
     void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const override
     {
-        QStyledItemDelegate::paint(painter, option, index);
+        painter->save();
 
-        if (index.row() != m_parent->count() - 1)
-        {
-            painter->save();
-            painter->setPen(Qt::green);
-            painter->drawLine(option.rect.bottomLeft(), option.rect.bottomRight());
-            painter->restore();
-        }
+        QRect rect = option.rect.adjusted(2, 2, -2, -2);
+
+        painter->setBrush(QBrush(Qt::white));
+        painter->setPen(Qt::NoPen);
+        painter->drawRoundedRect(rect, 50, 50);
+
+        QStyleOptionViewItem adjustedOption = option;
+        adjustedOption.rect = rect;
+        adjustedOption.displayAlignment = Qt::AlignCenter;
+        QStyledItemDelegate::paint(painter, adjustedOption, index);
+
+        painter->restore();
+    }
+
+    QSize sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const override
+    {
+        QSize size = QStyledItemDelegate::sizeHint(option, index);
+        size.setHeight(size.height() + 2);
+
+        return size;
     }
 };
 

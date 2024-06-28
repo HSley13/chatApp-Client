@@ -29,10 +29,10 @@ client_manager::client_manager(QWidget *parent)
 
         _protocol = new chat_protocol(this);
 
+        get_user_time();
+
         mount_audio_IDBFS();
         mount_file_IDBFS();
-
-        get_user_time();
     }
 }
 
