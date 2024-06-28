@@ -706,23 +706,23 @@ function dbg(text) {
 }
 
 var ASM_CONSTS = {
- 9413168: () => {
+ 9413200: () => {
   FS.mkdir("/audio");
   FS.mount(IDBFS, {}, "/audio");
   FS.syncfs(true);
  },
- 9413240: () => {
+ 9413272: () => {
   FS.mkdir("/file");
   FS.mount(IDBFS, {}, "/file");
   FS.syncfs(true);
  },
- 9413310: () => {
+ 9413342: () => {
   FS.syncfs();
  },
- 9413327: () => {
+ 9413359: () => {
   FS.syncfs();
  },
- 9413344: $0 => {
+ 9413376: $0 => {
   var audio_path = UTF8ToString($0);
   var audio_data = FS.readFile(audio_path);
   if (!audio_data) return null;
@@ -735,7 +735,7 @@ var ASM_CONSTS = {
   stringToUTF8(url, stringOnWasmHeap, url_length);
   return stringOnWasmHeap;
  },
- 9413709: $0 => {
+ 9413741: $0 => {
   var file_path = UTF8ToString($0);
   var file_data = FS.readFile(file_path);
   if (!file_data) return null;
@@ -927,19 +927,19 @@ var ASM_CONSTS = {
   stringToUTF8(url, stringOnWasmHeap, url_length);
   return stringOnWasmHeap;
  },
- 9416646: $0 => {
+ 9416678: $0 => {
   var audioPath = UTF8ToString($0);
   var audioStatus = FS.analyzePath(audioPath);
   if (audioStatus.exists) FS.unlink(audioPath);
   FS.syncfs(false);
  },
- 9416793: $0 => {
+ 9416825: $0 => {
   var filePath = UTF8ToString($0);
   var fileStatus = FS.analyzePath(filePath);
   if (fileStatus.exists) FS.unlink(filePath);
   FS.syncfs(false);
  },
- 9416935: () => {
+ 9416967: () => {
   var tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
   var lengthBytes = lengthBytesUTF8(tz) + 1;
   var stringOnWasmHeap = _malloc(lengthBytes);
@@ -15795,9 +15795,9 @@ var ___cxa_can_catch = createExportWrapper("__cxa_can_catch");
 
 var ___cxa_is_pointer_type = createExportWrapper("__cxa_is_pointer_type");
 
-var ___start_em_js = Module["___start_em_js"] = 9417160;
+var ___start_em_js = Module["___start_em_js"] = 9417192;
 
-var ___stop_em_js = Module["___stop_em_js"] = 9418250;
+var ___stop_em_js = Module["___stop_em_js"] = 9418282;
 
 function invoke_viiii(index, a1, a2, a3, a4) {
  var sp = stackSave();

@@ -327,24 +327,27 @@ void client_chat_window::send_message()
         _client->send_save_conversation(_conversation_ID, _client->my_ID(), _destinator, message, time_UTC);
 }
 
-void client_chat_window::text_message_background(const QString &content, const QString &date_time, const QString &sender, bool true_or_false)
+void client_chat_window::text_message_background(const QString &content, const QString &time, const QString &sender, bool true_or_false)
 {
+    QString time_display;
+    (time_difference(time, QDateTime::currentDateTime().toString("yyyy-MM-dd HH:mm:ss")) >= 24) ? time_display = time : time_display = time.split(" ").last();
+
     chat_line *wid = new chat_line(this);
     wid->setStyleSheet("color: black;");
 
     QListWidgetItem *line = new QListWidgetItem(_list);
     line->setSizeHint(QSize(0, 60));
-    line->setData(Qt::UserRole, date_time);
+    line->setData(Qt::UserRole, time);
 
     if (sender.isEmpty())
     {
         (true_or_false) ? line->setBackground(QBrush(QColorConstants::Svg::lightskyblue)) : line->setBackground(QBrush(QColorConstants::Svg::lightgray));
 
-        wid->set_message(content, true_or_false, date_time);
+        wid->set_message(content, true_or_false, time_display);
     }
     else
     {
-        wid->set_group_message(content, sender, true_or_false, date_time);
+        wid->set_group_message(content, sender, true_or_false, time_display);
 
         if (true_or_false)
             line->setBackground(QBrush(QColorConstants::Svg::lightskyblue));
@@ -596,12 +599,15 @@ void client_chat_window::mouseMoveEvent(QMouseEvent *event)
 }
 void client_chat_window::add_file(const QString &file_name, bool is_mine, const QString &time, const QString &sender)
 {
+    QString time_display;
+    (time_difference(time, QDateTime::currentDateTime().toString("yyyy-MM-dd HH:mm:ss")) >= 24) ? time_display = time : time_display = time.split(" ").last();
+
     QWidget *wid = new QWidget();
     wid->setStyleSheet("color: black;");
 
     QPixmap image(":/images/file_icon.webp");
 
-    QLabel *time_label = new QLabel(time.split(" ").last(), this);
+    QLabel *time_label = new QLabel(time_display, this);
 
     const QString &type = (_group_name.isEmpty()) ? "normal" : "group";
     const int &ID = (_group_name.isEmpty()) ? _conversation_ID : _group_ID;
@@ -627,10 +633,13 @@ void client_chat_window::add_file(const QString &file_name, bool is_mine, const 
 
 void client_chat_window::add_audio(const QString &audio_name, bool is_mine, const QString &time, const QString &sender)
 {
+    QString time_display;
+    (time_difference(time, QDateTime::currentDateTime().toString("yyyy-MM-dd HH:mm:ss")) >= 24) ? time_display = time : time_display = time.split(" ").last();
+
     QWidget *wid = new QWidget();
     wid->setStyleSheet("color: black;");
 
-    QLabel *time_label = new QLabel(time.split(" ").last(), this);
+    QLabel *time_label = new QLabel(time_display, this);
 
     QSlider *slider = new QSlider(Qt::Horizontal, this);
     slider->hide();
@@ -721,14 +730,11 @@ void client_chat_window::audio_file_message_background(QWidget *wid, const bool 
 
 void client_chat_window::set_retrieve_message_window(const QString &type, const QString &content, const QString &date_time, bool true_or_false, const QString &sender)
 {
-    QString time_display;
-    (time_difference(date_time, QDateTime::currentDateTime().toString("yyyy-MM-dd HH:mm:ss")) >= 24) ? time_display = date_time : time_display = date_time.split(" ").last();
-
     if (!type.compare("file"))
     {
         QString file_name = QString("%1_%2").arg(date_time, content);
 
-        (sender.isEmpty()) ? add_file(file_name, true_or_false, time_display) : add_file(file_name, true_or_false, time_display, sender);
+        (sender.isEmpty()) ? add_file(file_name, true_or_false, date_time) : add_file(file_name, true_or_false, date_time, sender);
 
         return;
     }
@@ -736,12 +742,12 @@ void client_chat_window::set_retrieve_message_window(const QString &type, const 
     {
         QString audio_name = QString("%1_%2").arg(date_time, content);
 
-        (sender.isEmpty()) ? add_audio(audio_name, true_or_false, time_display) : add_audio(audio_name, true_or_false, time_display, sender);
+        (sender.isEmpty()) ? add_audio(audio_name, true_or_false, date_time) : add_audio(audio_name, true_or_false, date_time, sender);
 
         return;
     }
 
-    text_message_background(content, time_display, sender, true_or_false);
+    text_message_background(content, date_time, sender, true_or_false);
 }
 
 int client_chat_window::time_difference(const QString &date_time1, const QString &date_time2)
@@ -750,9 +756,8 @@ int client_chat_window::time_difference(const QString &date_time1, const QString
     QDateTime dt2 = QDateTime::fromString(date_time2, "yyyy-MM-dd HH:mm:ss");
 
     qint64 seconds_difference = dt1.secsTo(dt2);
-    int hours_difference = seconds_difference / 3600;
 
-    return hours_difference;
+    return seconds_difference / 3600;
 }
 
 void client_chat_window::retrieve_conversation(const QStringList &messages)

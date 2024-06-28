@@ -318,6 +318,8 @@ QUrl client_manager::get_audio_url(const QString &audio_name, const int &convers
 {
     const QString full_audio_path = "/audio/" + audio_name;
 
+    qDebug() << "Audio Name: " << audio_name;
+
     char *url = (char *)EM_ASM_PTR(
         {
             var audio_path = UTF8ToString($0);
@@ -357,6 +359,8 @@ QUrl client_manager::get_audio_url(const QString &audio_name, const int &convers
 QUrl client_manager::get_file_url(const QString &file_name, const int &conversation_ID, const QString &type)
 {
     const QString full_file_path = "/file/" + file_name;
+
+    qDebug() << "File Name: " << file_name;
 
     char *url = (char *)EM_ASM_PTR(
         {
