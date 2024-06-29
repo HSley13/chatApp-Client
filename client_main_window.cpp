@@ -1103,6 +1103,9 @@ void client_main_window::on_removed_from_group(const int &group_ID, const QStrin
             }
             else
                 wid->_group_members.removeAll(removed_member);
+            // {
+            //     wid->_group_members = authenticate_group_members()
+            // }
         }
     }
 }

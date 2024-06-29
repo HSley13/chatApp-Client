@@ -45,11 +45,11 @@ public:
     void mount_file_IDBFS();
 
     void IDBFS_save_audio(const QString &audio_name, const QByteArray &audio_data, const int &size);
-    QUrl get_audio_url(const QString &audio_name, const int &conversation_ID, const QString &type);
+    QUrl get_audio_url(const QString &audio_name, const int &conversation_ID, const QString &type, const QString &time_UTC);
     void delete_audio_IDBFS(const QString &audio_name);
 
     void IDBFS_save_file(const QString &file_name, const QByteArray &file_data, const int &size);
-    QUrl get_file_url(const QString &file_name, const int &conversation_ID, const QString &type);
+    QUrl get_file_url(const QString &file_name, const int &conversation_ID, const QString &type, const QString &time_UTC);
     void delete_file_IDBFS(const QString &file_name);
 
     void send_group_is_typing(const int &group_ID, const QString &group_name, const QString &sender);

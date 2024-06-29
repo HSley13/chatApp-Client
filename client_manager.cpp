@@ -314,30 +314,36 @@ void client_manager::IDBFS_save_file(const QString &file_name, const QByteArray 
     EM_ASM({ FS.syncfs(); });
 }
 
-QUrl client_manager::get_audio_url(const QString &audio_name, const int &conversation_ID, const QString &type)
+QUrl client_manager::get_audio_url(const QString &audio_name, const int &conversation_ID, const QString &type, const QString &UTC_time)
 {
     const QString full_audio_path = "/audio/" + audio_name;
-
-    qDebug() << "Audio Name: " << audio_name;
 
     char *url = (char *)EM_ASM_PTR(
         {
             var audio_path = UTF8ToString($0);
-            var audio_data = FS.readFile(audio_path);
+            try
+            {
+                var audio_data = FS.readFile(audio_path);
 
-            if (!audio_data)
-                return null;
+                if (!audio_data)
+                    throw 'Audio data not found';
 
-            var blob = new Blob([audio_data],
-                                { type: 'audio/*' });
-            var url = URL.createObjectURL(blob);
+                var blob = new Blob([audio_data],
+                                    { type: 'audio/*' });
+                var url = URL.createObjectURL(blob);
 
-            var url_length = lengthBytesUTF8(url) + 1;
-            var stringOnWasmHeap = _malloc(url_length);
+                var url_length = lengthBytesUTF8(url) + 1;
+                var stringOnWasmHeap = _malloc(url_length);
 
-            stringToUTF8(url, stringOnWasmHeap, url_length);
+                stringToUTF8(url, stringOnWasmHeap, url_length);
 
-            return stringOnWasmHeap;
+                return stringOnWasmHeap;
+            }
+            catch (e)
+            {
+                console.error('Error creating Audio URL:', e);
+                return 0;
+            }
         },
         full_audio_path.toUtf8().constData());
 
@@ -345,7 +351,7 @@ QUrl client_manager::get_audio_url(const QString &audio_name, const int &convers
     {
         _file_name = audio_name;
 
-        _socket->sendBinaryMessage(_protocol->set_request_data_message(conversation_ID, audio_name.split("_").first(), type));
+        _socket->sendBinaryMessage(_protocol->set_request_data_message(conversation_ID, UTC_time, type));
 
         return QUrl();
     }
@@ -356,172 +362,178 @@ QUrl client_manager::get_audio_url(const QString &audio_name, const int &convers
     return QUrl(qUrl);
 }
 
-QUrl client_manager::get_file_url(const QString &file_name, const int &conversation_ID, const QString &type)
+QUrl client_manager::get_file_url(const QString &file_name, const int &conversation_ID, const QString &type, const QString &UTC_time)
 {
     const QString full_file_path = "/file/" + file_name;
-
-    qDebug() << "File Name: " << file_name;
 
     char *url = (char *)EM_ASM_PTR(
         {
             var file_path = UTF8ToString($0);
-            var file_data = FS.readFile(file_path);
-
-            if (!file_data)
-                return null;
-
-            var mime_type = 'application/octet-stream';
-            var extension = file_path.split('.').pop().toLowerCase();
-
-            switch (extension)
+            try
             {
-            case 'pdf':
-                mime_type = 'application/pdf';
-                break;
-            case 'jpg':
-            case 'jpeg':
-            case 'png':
-            case 'webp':
-            case 'gif':
-            case 'bmp':
-            case 'svg':
-                mime_type = 'image/*';
-                break;
-            case 'txt':
-                mime_type = 'text/plain';
-                break;
-            case 'html':
-            case 'htm':
-                mime_type = 'text/html';
-                break;
-            case 'css':
-                mime_type = 'text/css';
-                break;
-            case 'js':
-                mime_type = 'application/javascript';
-                break;
-            case 'json':
-                mime_type = 'application/json';
-                break;
-            case 'xml':
-                mime_type = 'application/xml';
-                break;
-            case 'csv':
-                mime_type = 'text/csv';
-                break;
-            case 'doc':
-                mime_type = 'application/msword';
-                break;
-            case 'docx':
-                mime_type = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
-                break;
-            case 'xls':
-                mime_type = 'application/vnd.ms-excel';
-                break;
-            case 'xlsx':
-                mime_type = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
-                break;
-            case 'ppt':
-                mime_type = 'application/vnd.ms-powerpoint';
-                break;
-            case 'pptx':
-                mime_type = 'application/vnd.openxmlformats-officedocument.presentationml.presentation';
-                break;
-            case 'mp4':
-                mime_type = 'video/mp4';
-                break;
-            case 'avi':
-                mime_type = 'video/x-msvideo';
-                break;
-            case 'mov':
-                mime_type = 'video/quicktime';
-                break;
-            case 'zip':
-                mime_type = 'application/zip';
-                break;
-            case 'rar':
-                mime_type = 'application/vnd.rar';
-                break;
-            case 'tar':
-                mime_type = 'application/x-tar';
-                break;
-            case '7z':
-                mime_type = 'application/x-7z-compressed';
-                break;
-            case 'epub':
-                mime_type = 'application/epub+zip';
-                break;
-            case 'mobi':
-                mime_type = 'application/x-mobipocket-ebook';
-                break;
-            case 'azw':
-                mime_type = 'application/vnd.amazon.ebook';
-                break;
-            case 'webm':
-                mime_type = 'video/webm';
-                break;
-            case 'mkv':
-                mime_type = 'video/x-matroska';
-                break;
-            case 'rtf':
-                mime_type = 'application/rtf';
-                break;
-            case 'psd':
-                mime_type = 'image/vnd.adobe.photoshop';
-                break;
-            case 'ai':
-            case 'eps':
-            case 'ps':
-                mime_type = 'application/postscript';
-                break;
-            case 'tex':
-                mime_type = 'application/x-tex';
-                break;
-            case 'latex':
-                mime_type = 'application/x-latex';
-                break;
-            case 'md':
-                mime_type = 'text/markdown';
-                break;
-            case 'log':
-                mime_type = 'text/plain';
-                break;
-            case 'c':
-            case 'cpp':
-            case 'h':
-            case 'hpp':
-                mime_type = 'text/x-c';
-                break;
-            case 'py':
-                mime_type = 'text/x-python';
-                break;
-            case 'java':
-                mime_type = 'text/x-java-source';
-                break;
-            case 'sh':
-                mime_type = 'application/x-sh';
-                break;
-            case 'bat':
-                mime_type = 'application/x-msdos-program';
-                break;
-            case 'exe':
-                mime_type = 'application/x-msdownload';
-                break;
-            default:
-                console.warn("Unknown file extension:", extension);
-                break;
+                var file_data = FS.readFile(file_path);
+
+                if (!file_data)
+                    return null;
+
+                var mime_type = 'application/octet-stream';
+                var extension = file_path.split('.').pop().toLowerCase();
+
+                switch (extension)
+                {
+                case 'pdf':
+                    mime_type = 'application/pdf';
+                    break;
+                case 'jpg':
+                case 'jpeg':
+                case 'png':
+                case 'webp':
+                case 'gif':
+                case 'bmp':
+                case 'svg':
+                    mime_type = 'image/*';
+                    break;
+                case 'txt':
+                    mime_type = 'text/plain';
+                    break;
+                case 'html':
+                case 'htm':
+                    mime_type = 'text/html';
+                    break;
+                case 'css':
+                    mime_type = 'text/css';
+                    break;
+                case 'js':
+                    mime_type = 'application/javascript';
+                    break;
+                case 'json':
+                    mime_type = 'application/json';
+                    break;
+                case 'xml':
+                    mime_type = 'application/xml';
+                    break;
+                case 'csv':
+                    mime_type = 'text/csv';
+                    break;
+                case 'doc':
+                    mime_type = 'application/msword';
+                    break;
+                case 'docx':
+                    mime_type = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+                    break;
+                case 'xls':
+                    mime_type = 'application/vnd.ms-excel';
+                    break;
+                case 'xlsx':
+                    mime_type = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+                    break;
+                case 'ppt':
+                    mime_type = 'application/vnd.ms-powerpoint';
+                    break;
+                case 'pptx':
+                    mime_type = 'application/vnd.openxmlformats-officedocument.presentationml.presentation';
+                    break;
+                case 'mp4':
+                    mime_type = 'video/mp4';
+                    break;
+                case 'avi':
+                    mime_type = 'video/x-msvideo';
+                    break;
+                case 'mov':
+                    mime_type = 'video/quicktime';
+                    break;
+                case 'zip':
+                    mime_type = 'application/zip';
+                    break;
+                case 'rar':
+                    mime_type = 'application/vnd.rar';
+                    break;
+                case 'tar':
+                    mime_type = 'application/x-tar';
+                    break;
+                case '7z':
+                    mime_type = 'application/x-7z-compressed';
+                    break;
+                case 'epub':
+                    mime_type = 'application/epub+zip';
+                    break;
+                case 'mobi':
+                    mime_type = 'application/x-mobipocket-ebook';
+                    break;
+                case 'azw':
+                    mime_type = 'application/vnd.amazon.ebook';
+                    break;
+                case 'webm':
+                    mime_type = 'video/webm';
+                    break;
+                case 'mkv':
+                    mime_type = 'video/x-matroska';
+                    break;
+                case 'rtf':
+                    mime_type = 'application/rtf';
+                    break;
+                case 'psd':
+                    mime_type = 'image/vnd.adobe.photoshop';
+                    break;
+                case 'ai':
+                case 'eps':
+                case 'ps':
+                    mime_type = 'application/postscript';
+                    break;
+                case 'tex':
+                    mime_type = 'application/x-tex';
+                    break;
+                case 'latex':
+                    mime_type = 'application/x-latex';
+                    break;
+                case 'md':
+                    mime_type = 'text/markdown';
+                    break;
+                case 'log':
+                    mime_type = 'text/plain';
+                    break;
+                case 'c':
+                case 'cpp':
+                case 'h':
+                case 'hpp':
+                    mime_type = 'text/x-c';
+                    break;
+                case 'py':
+                    mime_type = 'text/x-python';
+                    break;
+                case 'java':
+                    mime_type = 'text/x-java-source';
+                    break;
+                case 'sh':
+                    mime_type = 'application/x-sh';
+                    break;
+                case 'bat':
+                    mime_type = 'application/x-msdos-program';
+                    break;
+                case 'exe':
+                    mime_type = 'application/x-msdownload';
+                    break;
+                default:
+                    console.warn("Unknown file extension:", extension);
+                    break;
+                }
+
+                var blob = new Blob([file_data],
+                                    { type: mime_type });
+                var url = URL.createObjectURL(blob);
+
+                var url_length = lengthBytesUTF8(url) + 1;
+                var stringOnWasmHeap = _malloc(url_length);
+
+                stringToUTF8(url, stringOnWasmHeap, url_length);
+
+                return stringOnWasmHeap;
             }
-
-            var blob = new Blob([file_data],
-                                { type: mime_type });
-            var url = URL.createObjectURL(blob);
-
-            var url_length = lengthBytesUTF8(url) + 1;
-            var stringOnWasmHeap = _malloc(url_length);
-
-            stringToUTF8(url, stringOnWasmHeap, url_length);
-
-            return stringOnWasmHeap;
+            catch (e)
+            {
+                console.error('Error creating File URL:', e);
+                return 0;
+            }
         },
         full_file_path.toUtf8().constData());
 
@@ -529,7 +541,7 @@ QUrl client_manager::get_file_url(const QString &file_name, const int &conversat
     {
         _file_name = file_name;
 
-        _socket->sendBinaryMessage(_protocol->set_request_data_message(conversation_ID, file_name.split("_").first(), type));
+        _socket->sendBinaryMessage(_protocol->set_request_data_message(conversation_ID, UTC_time, type));
 
         return QUrl();
     }

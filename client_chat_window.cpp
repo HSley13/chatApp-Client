@@ -125,7 +125,7 @@ void client_chat_window::start_recording()
 
         const QString &current_time = QDateTime::currentDateTime().toString("yyyy-MM-dd HH:mm:ss");
 
-        const QString &time_UTC = QDateTime::fromString(current_time, "yyyy-MM-dd HH:mm:ss")
+        const QString &UTC_time = QDateTime::fromString(current_time, "yyyy-MM-dd HH:mm:ss")
                                       .toUTC()
                                       .toString();
 
@@ -139,12 +139,12 @@ void client_chat_window::start_recording()
 
         if (_group_name.isEmpty())
         {
-            _client->send_audio(my_name(), _destinator, audio_name, audio_data, time_UTC);
+            _client->send_audio(my_name(), _destinator, audio_name, audio_data, UTC_time);
 
-            _client->send_save_data(_conversation_ID, _client->my_ID(), _destinator, audio_name, audio_data, "audio", time_UTC);
+            _client->send_save_data(_conversation_ID, _client->my_ID(), _destinator, audio_name, audio_data, "audio", UTC_time);
         }
         else
-            _client->send_group_audio(_group_ID, _group_name, my_name(), audio_name, audio_data, time_UTC);
+            _client->send_group_audio(_group_ID, _group_name, my_name(), audio_name, audio_data, UTC_time);
 
         emit data_sent(_window_name, "voice note", _unread_messages);
     }
@@ -258,7 +258,8 @@ void client_chat_window::on_settings()
 
                     connect(remove_dialog, &QDialog::accepted, this, [=]()
                             { _client->send_remove_group_member_message(_group_ID, _group_name, my_name(), remove_dialog->value_entered()); remove_dialog->deleteLater(); });
-                            
+
+                    emit removed_from_group(_group_ID, _group_name, _adm, remove_dialog->value_entered());
 
                     remove_dialog->open();
                 } 
@@ -305,26 +306,26 @@ void client_chat_window::send_message()
     wid->setStyleSheet("color: black;");
     wid->set_message(message, true, current_time.split(" ").last());
 
-    const QString &time_UTC = QDateTime::fromString(current_time, "yyyy-MM-dd HH:mm:ss")
+    const QString &UTC_time = QDateTime::fromString(current_time, "yyyy-MM-dd HH:mm:ss")
                                   .toUTC()
                                   .toString();
 
     QListWidgetItem *line = new QListWidgetItem(_list);
     line->setSizeHint(QSize(0, 60));
-    line->setData(Qt::UserRole, time_UTC);
+    line->setData(Qt::UserRole, UTC_time);
     line->setBackground(QBrush(QColorConstants::Svg::lightskyblue));
 
     line->setSizeHint(wid->sizeHint());
     _list->setItemWidget(line, wid);
 
-    (_group_name.isEmpty()) ? _client->send_text(my_name(), _destinator, message, time_UTC) : _client->send_group_text(_group_ID, _group_name, my_name(), message, time_UTC);
+    (_group_name.isEmpty()) ? _client->send_text(my_name(), _destinator, message, UTC_time) : _client->send_group_text(_group_ID, _group_name, my_name(), message, UTC_time);
 
     _insert_message->clear();
 
     emit data_sent(_window_name, message, _unread_messages);
 
     if (_destinator.compare("Server"))
-        _client->send_save_conversation(_conversation_ID, _client->my_ID(), _destinator, message, time_UTC);
+        _client->send_save_conversation(_conversation_ID, _client->my_ID(), _destinator, message, UTC_time);
 }
 
 void client_chat_window::text_message_background(const QString &content, const QString &time, const QString &sender, bool true_or_false)
@@ -332,12 +333,16 @@ void client_chat_window::text_message_background(const QString &content, const Q
     QString time_display;
     (time_difference(time, QDateTime::currentDateTime().toString("yyyy-MM-dd HH:mm:ss")) >= 24) ? time_display = time : time_display = time.split(" ").last();
 
+    const QString &UTC_time = QDateTime::fromString(time, "yyyy-MM-dd HH:mm:ss")
+                                  .toUTC()
+                                  .toString();
+
     chat_line *wid = new chat_line(this);
     wid->setStyleSheet("color: black;");
 
     QListWidgetItem *line = new QListWidgetItem(_list);
     line->setSizeHint(QSize(0, 60));
-    line->setData(Qt::UserRole, time);
+    line->setData(Qt::UserRole, UTC_time);
 
     if (sender.isEmpty())
     {
@@ -379,7 +384,7 @@ void client_chat_window::send_file()
         {
             QString current_time = QDateTime::currentDateTime().toString("yyyy-MM-dd HH:mm:ss");
 
-            const QString &time_UTC = QDateTime::fromString(current_time, "yyyy-MM-dd HH:mm:ss")
+            const QString &UTC_time = QDateTime::fromString(current_time, "yyyy-MM-dd HH:mm:ss")
                                           .toUTC()
                                           .toString();
 
@@ -393,11 +398,11 @@ void client_chat_window::send_file()
 
             if (_group_name.isEmpty())
             {
-                _client->send_file(my_name(), _destinator, QFileInfo(file_name).fileName(), file_data, time_UTC);
-                _client->send_save_data(_conversation_ID, _client->my_ID(), _destinator, QFileInfo(file_name).fileName(), file_data, "file", time_UTC);
+                _client->send_file(my_name(), _destinator, QFileInfo(file_name).fileName(), file_data, UTC_time);
+                _client->send_save_data(_conversation_ID, _client->my_ID(), _destinator, QFileInfo(file_name).fileName(), file_data, "file", UTC_time);
             }
             else
-                _client->send_group_file(_group_ID, _group_name, my_name(), QFileInfo(file_name).fileName(), file_data, time_UTC);
+                _client->send_group_file(_group_ID, _group_name, my_name(), QFileInfo(file_name).fileName(), file_data, UTC_time);
         }
     };
 
@@ -599,6 +604,9 @@ void client_chat_window::mouseMoveEvent(QMouseEvent *event)
 }
 void client_chat_window::add_file(const QString &file_name, bool is_mine, const QString &time, const QString &sender)
 {
+    const QString &UTC_time = QDateTime::fromString(time, "yyyy-MM-dd HH:mm:ss")
+                                  .toUTC()
+                                  .toString();
     QString time_display;
     (time_difference(time, QDateTime::currentDateTime().toString("yyyy-MM-dd HH:mm:ss")) >= 24) ? time_display = time : time_display = time.split(" ").last();
 
@@ -618,21 +626,20 @@ void client_chat_window::add_file(const QString &file_name, bool is_mine, const 
     file->setFixedSize(QSize(30, 30));
     file->setStyleSheet("border: none");
     connect(file, &QPushButton::clicked, this, [=]()
-            { QDesktopServices::openUrl(_client->get_file_url(file_name, ID, type)); });
+            { QDesktopServices::openUrl(_client->get_file_url(file_name, ID, type, UTC_time)); });
 
     QVBoxLayout *vbox = new QVBoxLayout();
     vbox->addWidget(file);
     vbox->addWidget(time_label, 0, Qt::AlignHCenter);
 
-    const QString &time_UTC = QDateTime::fromString(time, "yyyy-MM-dd HH:mm:ss")
-                                  .toUTC()
-                                  .toString();
-
-    audio_file_message_background(wid, is_mine, sender, time_UTC, vbox);
+    audio_file_message_background(wid, is_mine, sender, UTC_time, vbox);
 }
 
 void client_chat_window::add_audio(const QString &audio_name, bool is_mine, const QString &time, const QString &sender)
 {
+    const QString &UTC_time = QDateTime::fromString(time, "yyyy-MM-dd HH:mm:ss")
+                                  .toUTC()
+                                  .toString();
     QString time_display;
     (time_difference(time, QDateTime::currentDateTime().toString("yyyy-MM-dd HH:mm:ss")) >= 24) ? time_display = time : time_display = time.split(" ").last();
 
@@ -649,17 +656,13 @@ void client_chat_window::add_audio(const QString &audio_name, bool is_mine, cons
 
     QPushButton *audio = new QPushButton("▶️", this);
     connect(audio, &QPushButton::clicked, this, [=]()
-            { play_audio(_client->get_audio_url(audio_name, ID, type), audio, slider); });
+            { play_audio(_client->get_audio_url(audio_name, ID, type, UTC_time), audio, slider); });
 
     QVBoxLayout *vbox = new QVBoxLayout();
     vbox->addWidget(audio);
     vbox->addWidget(time_label, 0, Qt::AlignHCenter);
 
-    const QString &time_UTC = QDateTime::fromString(time, "yyyy-MM-dd HH:mm:ss")
-                                  .toUTC()
-                                  .toString();
-
-    audio_file_message_background(wid, is_mine, sender, time_UTC, vbox, slider);
+    audio_file_message_background(wid, is_mine, sender, UTC_time, vbox, slider);
 }
 
 void client_chat_window::audio_file_message_background(QWidget *wid, const bool &is_mine, const QString &sender, const QString &time, QVBoxLayout *vbox, QSlider *slider)
