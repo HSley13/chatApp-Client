@@ -130,7 +130,8 @@ public:
         ClientNameRole = Qt::UserRole + 1,
         LastMessageRole,
         UnreadMessagesRole,
-        OnlineIconRole
+        OnlineIconRole,
+        dateTimeRole
     };
 
     client_main_window *_window;
@@ -139,11 +140,12 @@ public:
 
     explicit ChatModel(client_main_window *window, QObject *parent = nullptr) : _window(window), QStandardItemModel(parent) {}
 
-    void add_chat(const QString &client_name, const QString &last_message, int unread_messages = 0, const QIcon &online_icon = QIcon())
+    void add_chat(const QString &client_name, const QString &last_message, const QString &date_time, int unread_messages = 0, const QIcon &online_icon = QIcon())
     {
         QStandardItem *item = new QStandardItem();
         item->setData(client_name, ClientNameRole);
         item->setData(last_message, LastMessageRole);
+        item->setData(date_time, dateTimeRole);
         item->setData(unread_messages, UnreadMessagesRole);
         if (!online_icon.isNull())
             item->setData(QVariant::fromValue(online_icon), OnlineIconRole);
@@ -196,24 +198,26 @@ public:
         }
     }
 
-    void add_on_top(const QString &client_name, const QString &last_message, int unread_messages = 0)
+    void add_on_top(const QString &client_name, const QString &last_message, const QString &date_time, int unread_messages = 0)
     {
         QModelIndex index = find_chat_row(client_name);
         if (index.isValid())
         {
-            QStandardItem *taken_Item = QStandardItemModel::takeItem(index.row());
+            QStandardItem *taken_item = QStandardItemModel::takeItem(index.row());
 
             removeRow(index.row());
 
-            taken_Item->setData(last_message, LastMessageRole);
+            taken_item->setData(last_message, LastMessageRole);
+
+            taken_item->setData(date_time, dateTimeRole);
 
             (unread_messages) ? _unread_count += 1 : _unread_count = 0;
-            taken_Item->setData(_unread_count, UnreadMessagesRole);
+            taken_item->setData(_unread_count, UnreadMessagesRole);
 
-            insertRow(0, taken_Item);
+            insertRow(0, taken_item);
         }
         else
-            add_chat(client_name, last_message, unread_messages, _window->_friend_list->itemIcon(_window->_friend_list->findText(client_name, Qt::MatchExactly)));
+            add_chat(client_name, last_message, date_time, unread_messages, _window->_friend_list->itemIcon(_window->_friend_list->findText(client_name, Qt::MatchExactly)));
     }
 };
 
@@ -228,40 +232,41 @@ public:
 
         QRect rect = option.rect;
         QFont font = QApplication::font();
-        font.setPointSize(10);
 
         QIcon online_icon = index.data(ChatModel::OnlineIconRole).value<QIcon>();
         if (!online_icon.isNull())
         {
-            QRect icon_rect = rect.adjusted(10, 5, 10 + 20, 5 + 20);
+            QRect icon_rect = QRect(rect.left() + 10, rect.top() + 5, 20, 20);
             online_icon.paint(painter, icon_rect, Qt::AlignLeft);
         }
 
         QString client_name = index.data(ChatModel::ClientNameRole).toString();
-        QRect client_name_rect = rect;
-        client_name_rect.setLeft(rect.left() + 40);
-        client_name_rect.setTop(rect.top() + 5);
+        QRect client_name_rect = QRect(rect.left() + 40, rect.top() + 5, rect.width() - 150, 20);
+        font.setPointSize(10);
         painter->setFont(font);
         painter->drawText(client_name_rect, Qt::AlignLeft, client_name);
 
         QString last_message = index.data(ChatModel::LastMessageRole).toString();
-        QRect last_message_rect = rect;
-        last_message_rect.setLeft(rect.left() + 40);
-        last_message_rect.setTop(rect.top() + 25);
+        QRect last_message_rect = QRect(rect.left() + 40, rect.top() + 30, rect.width() - 50, 20);
         font.setPointSize(8);
         painter->setFont(font);
         painter->drawText(last_message_rect, Qt::AlignLeft | Qt::TextWordWrap, last_message);
+
+        QString date_time = index.data(ChatModel::dateTimeRole).toString();
+        QRect date_time_rect = QRect(rect.right() - 100, rect.top() + 5, 90, 20);
+        font.setPointSize(8);
+        painter->setFont(font);
+        painter->drawText(date_time_rect, Qt::AlignRight, date_time);
 
         int unread_messages = index.data(ChatModel::UnreadMessagesRole).toInt();
         if (unread_messages > 0)
         {
             QString unread_messages_text = QString::number(unread_messages);
-            QRect unread_messages_rect = QRect(rect.right() - 40, rect.top() + 5, 20, 20);
-            painter->setBrush(QColorConstants::Svg::lightskyblue);
+            QRect unread_messages_rect = QRect(rect.right() - 40, rect.top() + 20, 20, 20);
+            painter->setBrush(Qt::blue);
             painter->setPen(Qt::NoPen);
             painter->drawEllipse(unread_messages_rect);
-
-            painter->setPen(Qt::black);
+            painter->setPen(Qt::white);
             painter->setFont(font);
             painter->drawText(unread_messages_rect, Qt::AlignCenter, unread_messages_text);
         }

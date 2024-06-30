@@ -38,7 +38,7 @@ public:
 
     void delete_account();
 
-    int time_difference(const QString &date_time1, const QString &date_time2);
+    bool new_day_or_not(const QString &date_time1, const QString &date_time2);
 
     static void set_window_blur(QWidget *window, bool blur);
 
@@ -53,6 +53,7 @@ public:
 
     int _unread_messages = 0;
     QString _last_message = QString();
+    QString _last_date_time = QString();
 
     QString my_name();
 
@@ -134,7 +135,7 @@ signals:
 
     void update_button_file();
 
-    void data_sent(const QString &client_name, const QString &last_message, const int &unread_messages);
+    void data_sent(const QString &client_name, const QString &last_message, const QString &date_time, const int &unread_messages);
 
     void client_added_you(const int &conversation_ID, const QString &name, const QString &ID);
     void lookup_friend_result(const int &conversation_ID, const QString &name, bool true_or_false);

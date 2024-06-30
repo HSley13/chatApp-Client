@@ -146,7 +146,7 @@ void client_chat_window::start_recording()
         else
             _client->send_group_audio(_group_ID, _group_name, my_name(), audio_name, audio_data, UTC_time);
 
-        emit data_sent(_window_name, "voice note", _unread_messages);
+        emit data_sent(_window_name, "voice note", current_time.split(" ").last(), _unread_messages);
     }
 }
 
@@ -293,7 +293,8 @@ void client_chat_window::delete_message_received(const QString &time)
 
     (_unread_messages <= 0) ? _unread_messages : _unread_messages--;
 
-    emit data_sent(_window_name, Swipeable_list_widget::item_message(_list->item(_list->count() - 1)), _unread_messages);
+    emit data_sent(_window_name, Swipeable_list_widget::item_message(_list->item(_list->count() - 1)), _last_date_time, _unread_messages);
+    // Line above to fix, date_time
 }
 
 void client_chat_window::send_message()
@@ -322,7 +323,7 @@ void client_chat_window::send_message()
 
     _insert_message->clear();
 
-    emit data_sent(_window_name, message, _unread_messages);
+    emit data_sent(_window_name, message, current_time.split(" ").last(), 0);
 
     if (_destinator.compare("Server"))
         _client->send_save_conversation(_conversation_ID, _client->my_ID(), _destinator, message, UTC_time);
@@ -331,7 +332,9 @@ void client_chat_window::send_message()
 void client_chat_window::text_message_background(const QString &content, const QString &time, const QString &sender, bool true_or_false)
 {
     QString time_display;
-    (time_difference(time, QDateTime::currentDateTime().toString("yyyy-MM-dd HH:mm:ss")) >= 24) ? time_display = time : time_display = time.split(" ").last();
+    (new_day_or_not(time, QDateTime::currentDateTime().toString("yyyy-MM-dd HH:mm:ss"))) ? time_display = time : time_display = time.split(" ").last();
+
+    _last_date_time = time_display;
 
     const QString &UTC_time = QDateTime::fromString(time, "yyyy-MM-dd HH:mm:ss")
                                   .toUTC()
@@ -392,7 +395,7 @@ void client_chat_window::send_file()
 
             add_file(IDBFS_file_name, true, current_time);
 
-            emit data_sent(_window_name, QFileInfo(file_name).fileName(), _unread_messages);
+            emit data_sent(_window_name, QFileInfo(file_name).fileName(), current_time.split(" ").last(), _unread_messages);
 
             _client->IDBFS_save_file(IDBFS_file_name, file_data, static_cast<int>(file_data.size()));
 
@@ -608,7 +611,9 @@ void client_chat_window::add_file(const QString &file_name, bool is_mine, const 
                                   .toUTC()
                                   .toString();
     QString time_display;
-    (time_difference(time, QDateTime::currentDateTime().toString("yyyy-MM-dd HH:mm:ss")) >= 24) ? time_display = time : time_display = time.split(" ").last();
+    (new_day_or_not(time, QDateTime::currentDateTime().toString("yyyy-MM-dd HH:mm:ss"))) ? time_display = time : time_display = time.split(" ").last();
+
+    _last_date_time = time_display;
 
     QWidget *wid = new QWidget();
     wid->setStyleSheet("color: black;");
@@ -641,7 +646,9 @@ void client_chat_window::add_audio(const QString &audio_name, bool is_mine, cons
                                   .toUTC()
                                   .toString();
     QString time_display;
-    (time_difference(time, QDateTime::currentDateTime().toString("yyyy-MM-dd HH:mm:ss")) >= 24) ? time_display = time : time_display = time.split(" ").last();
+    (new_day_or_not(time, QDateTime::currentDateTime().toString("yyyy-MM-dd HH:mm:ss"))) ? time_display = time : time_display = time.split(" ").last();
+
+    _last_date_time = time_display;
 
     QWidget *wid = new QWidget();
     wid->setStyleSheet("color: black;");
@@ -753,14 +760,12 @@ void client_chat_window::set_retrieve_message_window(const QString &type, const 
     text_message_background(content, date_time, sender, true_or_false);
 }
 
-int client_chat_window::time_difference(const QString &date_time1, const QString &date_time2)
+bool client_chat_window::new_day_or_not(const QString &date_time1, const QString &date_time2)
 {
     QDateTime dt1 = QDateTime::fromString(date_time1, "yyyy-MM-dd HH:mm:ss");
     QDateTime dt2 = QDateTime::fromString(date_time2, "yyyy-MM-dd HH:mm:ss");
 
-    qint64 seconds_difference = dt1.secsTo(dt2);
-
-    return seconds_difference / 3600;
+    return !(dt1.date() == dt2.date());
 }
 
 void client_chat_window::retrieve_conversation(const QStringList &messages)
@@ -780,10 +785,10 @@ void client_chat_window::retrieve_conversation(const QStringList &messages)
 
         _unread_messages = parts.last().toInt();
 
+        _last_message = content;
+
         (!sender_ID.compare(_client->my_ID())) ? set_retrieve_message_window(type, content, date_time, true) : set_retrieve_message_window(type, content, date_time, false);
     }
-
-    _last_message = Swipeable_list_widget::item_message(_list->item(_list->count() - 1));
 }
 
 void client_chat_window::retrieve_group_conversation(const QStringList &messages)
@@ -802,10 +807,10 @@ void client_chat_window::retrieve_group_conversation(const QStringList &messages
 
         _unread_messages = parts.last().toInt();
 
+        _last_message = content;
+
         (!sender.compare(my_name())) ? set_retrieve_message_window(type, content, date_time, true) : set_retrieve_message_window(type, content, date_time, false, sender);
     }
-
-    _last_message = Swipeable_list_widget::item_message(_list->item(_list->count() - 1));
 }
 
 void client_chat_window::disable_chat()

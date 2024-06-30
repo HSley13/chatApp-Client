@@ -414,8 +414,8 @@ void client_main_window::on_login_request(const QString &hashed_password, bool t
         connect(_server_wid, &client_chat_window::socket_disconnected, this, [=]()
                 { _stack->setDisabled(true); _status_bar->showMessage("SERVER DISCONNECTED YOU", 999999); });
 
-        connect(_server_wid, &client_chat_window::data_sent, this, [=](const QString &first_name, const QString &last_message, const int &unread_messages)
-                { _model->add_on_top(first_name, last_message, unread_messages); });
+        connect(_server_wid, &client_chat_window::data_sent, this, [=](const QString &first_name, const QString &last_message, const QString &date_time, const int &unread_messages)
+                { _model->add_on_top(first_name, last_message, date_time, unread_messages); });
 
         QIcon offline_icon = create_dot_icon(Qt::red, 10);
         QIcon online_icon = create_dot_icon(Qt::green, 10);
@@ -444,8 +444,8 @@ void client_main_window::on_login_request(const QString &hashed_password, bool t
                     wid->retrieve_conversation(message);
 
                     connect(wid, &client_chat_window::swipe_right, this, &client_main_window::on_swipe_right);
-                    connect(wid, &client_chat_window::data_sent, this, [=](const QString &first_name, const QString &last_message, const int &unread_messages)
-                            { _model->add_on_top(first_name, last_message, unread_messages); });
+                    connect(wid, &client_chat_window::data_sent, this, [=](const QString &first_name, const QString &last_message, const QString &date_time, const int &unread_messages)
+                            { _model->add_on_top(first_name, last_message, date_time, unread_messages); });
 
                     wid->window_name(name);
 
@@ -454,7 +454,7 @@ void client_main_window::on_login_request(const QString &hashed_password, bool t
                     _stack->addWidget(wid);
 
                     if (!message.isEmpty())
-                        _model->add_chat(name, wid->_last_message, wid->_unread_messages, valid_icon);
+                        _model->add_chat(name, wid->_last_message, wid->_last_date_time, wid->_unread_messages, valid_icon);
                 }
             }
         }
@@ -483,8 +483,8 @@ void client_main_window::on_login_request(const QString &hashed_password, bool t
                 win->retrieve_group_conversation(group_message);
 
                 connect(win, &client_chat_window::swipe_right, this, &client_main_window::on_swipe_right);
-                connect(win, &client_chat_window::data_sent, this, [=](const QString &first_name, const QString &last_message, const int &unread_messages)
-                        { _model->add_on_top(first_name, last_message, unread_messages); });
+                connect(win, &client_chat_window::data_sent, this, [=](const QString &first_name, const QString &last_message, const QString &date_time, const int &unread_messages)
+                        { _model->add_on_top(first_name, last_message, date_time, unread_messages); });
 
                 connect(win, &client_chat_window::item_clicked, this, [=](const QString &name)
                         {
@@ -504,7 +504,7 @@ void client_main_window::on_login_request(const QString &hashed_password, bool t
                 _stack->addWidget(win);
 
                 if (!group_message.isEmpty())
-                    _model->add_chat(group_name_and_adm.values().first(), win->_last_message, win->_unread_messages);
+                    _model->add_chat(group_name_and_adm.values().first(), win->_last_message, win->_last_date_time, win->_unread_messages);
             }
         }
     }
@@ -673,11 +673,11 @@ void client_main_window::on_text_message_received(const QString &sender, const Q
 
             if (_active_conversation.compare(sender))
             {
-                _model->add_on_top(sender, text, 1);
+                _model->add_on_top(sender, text, time.split(" ").last(), 1);
                 wid->_unread_messages++;
             }
             else
-                _model->add_on_top(sender, text);
+                _model->add_on_top(sender, text, time.split(" ").last());
         }
     }
 }
@@ -773,8 +773,8 @@ void client_main_window::on_lookup_friend_result(const int &conversation_ID, con
 
         client_chat_window *wid = new client_chat_window(conversation_ID, _search_phone_number, name, this);
         connect(wid, &client_chat_window::swipe_right, this, &client_main_window::on_swipe_right);
-        connect(wid, &client_chat_window::data_sent, this, [=](const QString &first_name, const QString &last_message, const int &unread_messages)
-                { _model->add_on_top(first_name, last_message, unread_messages); });
+        connect(wid, &client_chat_window::data_sent, this, [=](const QString &first_name, const QString &last_message, const QString &date_time, const int &unread_messages)
+                { _model->add_on_top(first_name, last_message, date_time, unread_messages); });
 
         wid->window_name(name);
 
@@ -813,8 +813,8 @@ void client_main_window::on_client_added_you(const int &conversation_ID, const Q
         if (wid)
         {
             connect(wid, &client_chat_window::swipe_right, this, &client_main_window::on_swipe_right);
-            connect(wid, &client_chat_window::data_sent, this, [=](const QString &first_name, const QString &last_message, const int &unread_messages)
-                    { _model->add_on_top(first_name, last_message, unread_messages); });
+            connect(wid, &client_chat_window::data_sent, this, [=](const QString &first_name, const QString &last_message, const QString &date_time, const int &unread_messages)
+                    { _model->add_on_top(first_name, last_message, date_time, unread_messages); });
 
             wid->window_name(name);
 
@@ -839,11 +839,11 @@ void client_main_window::on_audio_received(const QString &sender, const QString 
 
             if (_active_conversation.compare(sender))
             {
-                _model->add_on_top(sender, "voice note", 1);
+                _model->add_on_top(sender, "voice note", time.split(" ").last(), 1);
                 wid->_unread_messages++;
             }
             else
-                _model->add_on_top(sender, "voice note");
+                _model->add_on_top(sender, "voice note", time.split(" ").last());
         }
     }
 }
@@ -860,11 +860,11 @@ void client_main_window::on_file_received(const QString &sender, const QString &
 
             if (_active_conversation.compare(sender))
             {
-                _model->add_on_top(sender, file_name.split("_").last(), 1);
+                _model->add_on_top(sender, file_name.split("_").last(), time.split(" ").last(), 1);
                 wid->_unread_messages++;
             }
             else
-                _model->add_on_top(sender, file_name.split("_").last());
+                _model->add_on_top(sender, file_name.split("_").last(), time.split(" ").last());
         }
     }
 }
@@ -932,8 +932,8 @@ void client_main_window::configure_group(const int &group_ID, const QString &gro
 
     client_chat_window *win = new client_chat_window(group_ID, group_name, names, adm, this);
     connect(win, &client_chat_window::swipe_right, this, &client_main_window::on_swipe_right);
-    connect(win, &client_chat_window::data_sent, this, [=](const QString &first_name, const QString &last_message, const int &unread_messages)
-            { _model->add_on_top(first_name, last_message, unread_messages); });
+    connect(win, &client_chat_window::data_sent, this, [=](const QString &first_name, const QString &last_message, const QString &date_time, const int &unread_messages)
+            { _model->add_on_top(first_name, last_message, date_time, unread_messages); });
 
     connect(win, &client_chat_window::item_clicked, this, [=](const QString &name)
             {
@@ -1037,11 +1037,11 @@ void client_main_window::on_group_text_received(const int &group_ID, const QStri
 
             if (_active_conversation.compare(sender))
             {
-                _model->add_on_top(group_name, message, 1);
+                _model->add_on_top(group_name, message, time.split(" ").last(), 1);
                 wid->_unread_messages++;
             }
             else
-                _model->add_on_top(group_name, message);
+                _model->add_on_top(group_name, message, time.split(" ").last());
         }
     }
 }
@@ -1058,11 +1058,11 @@ void client_main_window::on_group_audio_received(const int &group_ID, const QStr
 
             if (_active_conversation.compare(sender))
             {
-                _model->add_on_top(group_name, "voice note", 1);
+                _model->add_on_top(group_name, "voice note", time.split(" ").last(), 1);
                 wid->_unread_messages++;
             }
             else
-                _model->add_on_top(group_name, "voice note");
+                _model->add_on_top(group_name, "voice note", time.split(" ").last());
         }
     }
 }
@@ -1079,11 +1079,11 @@ void client_main_window::on_group_file_received(const int &group_ID, const QStri
 
             if (_active_conversation.compare(sender))
             {
-                _model->add_on_top(group_name, file_name.split("_").last(), 1);
+                _model->add_on_top(group_name, file_name.split("_").last(), time.split(" ").last(), 1);
                 wid->_unread_messages++;
             }
             else
-                _model->add_on_top(group_name, file_name.split("_").last());
+                _model->add_on_top(group_name, file_name.split("_").last(), time.split(" ").last());
         }
     }
 }

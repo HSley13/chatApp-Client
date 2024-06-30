@@ -377,8 +377,6 @@ QByteArray chat_protocol::set_request_data_message(const int &conversation_ID, c
 
     out << request_data << conversation_ID << date_time << type;
 
-    qDebug() << "Data request for :" << date_time << " in Conversation: " << conversation_ID;
-
     return byte;
 }
 
