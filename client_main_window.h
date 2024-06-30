@@ -150,7 +150,7 @@ public:
         if (!online_icon.isNull())
             item->setData(QVariant::fromValue(online_icon), OnlineIconRole);
 
-        QStandardItemModel::appendRow(item);
+        insertRow(0, item);
     }
 
     QModelIndex find_chat_row(const QString &client_name) const

@@ -146,7 +146,7 @@ void client_chat_window::start_recording()
         else
             _client->send_group_audio(_group_ID, _group_name, my_name(), audio_name, audio_data, UTC_time);
 
-        emit data_sent(_window_name, "voice note", current_time.split(" ").last(), _unread_messages);
+        emit data_sent(_window_name, "Me: voice note", current_time.split(" ").last(), 0);
     }
 }
 
@@ -293,7 +293,7 @@ void client_chat_window::delete_message_received(const QString &time)
 
     (_unread_messages <= 0) ? _unread_messages : _unread_messages--;
 
-    emit data_sent(_window_name, Swipeable_list_widget::item_message(_list->item(_list->count() - 1)), _last_date_time, _unread_messages);
+    emit data_sent(_window_name, "Me: " + Swipeable_list_widget::item_message(_list->item(_list->count() - 1)), _last_date_time, _unread_messages);
     // Line above to fix, date_time
 }
 
@@ -323,7 +323,7 @@ void client_chat_window::send_message()
 
     _insert_message->clear();
 
-    emit data_sent(_window_name, message, current_time.split(" ").last(), 0);
+    emit data_sent(_window_name, "Me: " + message, current_time.split(" ").last(), 0);
 
     if (_destinator.compare("Server"))
         _client->send_save_conversation(_conversation_ID, _client->my_ID(), _destinator, message, UTC_time);
@@ -395,7 +395,7 @@ void client_chat_window::send_file()
 
             add_file(IDBFS_file_name, true, current_time);
 
-            emit data_sent(_window_name, QFileInfo(file_name).fileName(), current_time.split(" ").last(), _unread_messages);
+            emit data_sent(_window_name, "Me: " + QFileInfo(file_name).fileName(), current_time.split(" ").last(), 0);
 
             _client->IDBFS_save_file(IDBFS_file_name, file_data, static_cast<int>(file_data.size()));
 
@@ -688,7 +688,7 @@ void client_chat_window::audio_file_message_background(QWidget *wid, const bool 
 
             hbox->addLayout(vbox);
 
-            if (slider != nullptr)
+            if (slider)
                 hbox->addWidget(slider);
 
             line->setBackground(QBrush(QColorConstants::Svg::lightskyblue));
@@ -699,7 +699,7 @@ void client_chat_window::audio_file_message_background(QWidget *wid, const bool 
 
             hbox->addLayout(vbox);
 
-            if (slider != nullptr)
+            if (slider)
                 hbox->addWidget(slider);
 
             hbox->addSpacerItem(new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Minimum));
@@ -711,7 +711,7 @@ void client_chat_window::audio_file_message_background(QWidget *wid, const bool 
         hbox->addWidget(lab);
         hbox->addLayout(vbox);
 
-        if (slider != nullptr)
+        if (slider)
             hbox->addWidget(slider);
 
         hbox->addSpacerItem(new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Minimum));
@@ -787,7 +787,16 @@ void client_chat_window::retrieve_conversation(const QStringList &messages)
 
         _last_message = content;
 
-        (!sender_ID.compare(_client->my_ID())) ? set_retrieve_message_window(type, content, date_time, true) : set_retrieve_message_window(type, content, date_time, false);
+        if (!sender_ID.compare(_client->my_ID()))
+        {
+            _last_message = "Me: " + content;
+            set_retrieve_message_window(type, content, date_time, true);
+        }
+        else
+        {
+            _last_message = content;
+            set_retrieve_message_window(type, content, date_time, false);
+        }
     }
 }
 
@@ -807,9 +816,16 @@ void client_chat_window::retrieve_group_conversation(const QStringList &messages
 
         _unread_messages = parts.last().toInt();
 
-        _last_message = content;
-
-        (!sender.compare(my_name())) ? set_retrieve_message_window(type, content, date_time, true) : set_retrieve_message_window(type, content, date_time, false, sender);
+        if (!sender.compare(my_name()))
+        {
+            _last_message = "Me: " + content;
+            set_retrieve_message_window(type, content, date_time, true);
+        }
+        else
+        {
+            _last_message = sender + ": " + content;
+            set_retrieve_message_window(type, content, date_time, false, sender);
+        }
     }
 }
 

@@ -677,7 +677,10 @@ void client_main_window::on_text_message_received(const QString &sender, const Q
                 wid->_unread_messages++;
             }
             else
+            {
                 _model->add_on_top(sender, text, time.split(" ").last());
+                wid->in_chat();
+            }
         }
     }
 }
@@ -843,7 +846,10 @@ void client_main_window::on_audio_received(const QString &sender, const QString 
                 wid->_unread_messages++;
             }
             else
+            {
                 _model->add_on_top(sender, "voice note", time.split(" ").last());
+                wid->in_chat();
+            }
         }
     }
 }
@@ -864,7 +870,10 @@ void client_main_window::on_file_received(const QString &sender, const QString &
                 wid->_unread_messages++;
             }
             else
+            {
                 _model->add_on_top(sender, file_name.split("_").last(), time.split(" ").last());
+                wid->in_chat();
+            }
         }
     }
 }
@@ -1041,7 +1050,10 @@ void client_main_window::on_group_text_received(const int &group_ID, const QStri
                 wid->_unread_messages++;
             }
             else
+            {
                 _model->add_on_top(group_name, message, time.split(" ").last());
+                wid->in_chat();
+            }
         }
     }
 }
@@ -1062,7 +1074,10 @@ void client_main_window::on_group_audio_received(const int &group_ID, const QStr
                 wid->_unread_messages++;
             }
             else
+            {
                 _model->add_on_top(group_name, "voice note", time.split(" ").last());
+                wid->in_chat();
+            }
         }
     }
 }
@@ -1083,7 +1098,10 @@ void client_main_window::on_group_file_received(const int &group_ID, const QStri
                 wid->_unread_messages++;
             }
             else
+            {
                 _model->add_on_top(group_name, file_name.split("_").last(), time.split(" ").last());
+                wid->in_chat();
+            }
         }
     }
 }
