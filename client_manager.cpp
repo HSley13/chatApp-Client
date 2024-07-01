@@ -297,6 +297,8 @@ void client_manager::IDBFS_save_audio(const QString &audio_name, const QByteArra
         fclose(file);
     }
 
+    qDebug() << "Saving: " << audio_name;
+
     EM_ASM({ FS.syncfs(); });
 }
 
@@ -310,6 +312,8 @@ void client_manager::IDBFS_save_file(const QString &file_name, const QByteArray 
         fwrite(file_data, 1, size, file);
         fclose(file);
     }
+
+    qDebug() << "Saving: " << file_name;
 
     EM_ASM({ FS.syncfs(); });
 }

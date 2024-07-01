@@ -97,12 +97,6 @@ void client_chat_window::start_recording()
 
     if (!_is_recording)
     {
-        if (QFile::exists(audio_path))
-        {
-            if (!QFile::remove(audio_path))
-                return;
-        }
-
         _recorder->record();
         _duration_label->show();
         _is_recording = true;
@@ -164,69 +158,68 @@ void client_chat_window::on_duration_changed(const qint64 &duration)
 
 void client_chat_window::play_audio(const QUrl &source, QPushButton *audio, QSlider *slider)
 {
+    if (!_player)
+    {
+        _player = new QMediaPlayer(this);
+        _audio_output = new QAudioOutput(this);
+        _player->setAudioOutput(_audio_output);
+
+        bool userIsChangingSlider = false;
+
+        connect(slider, &QSlider::valueChanged, this, [=, &userIsChangingSlider](int position)
+                {
+                    if (!userIsChangingSlider)
+                        _player->setPosition(static_cast<qint64>(position)); });
+
+        connect(_player, &QMediaPlayer::durationChanged, this, [=](qint64 duration)
+                { slider->setRange(0, static_cast<int>(duration)); });
+
+        connect(_player, &QMediaPlayer::positionChanged, this, [=, &userIsChangingSlider](qint64 position)
+                {
+                    userIsChangingSlider = true;
+                    slider->setValue(static_cast<int>(position));
+                    userIsChangingSlider = false; });
+
+        connect(_player, &QMediaPlayer::playbackStateChanged, this, [=](QMediaPlayer::PlaybackState state)
+                {
+                    if (state == QMediaPlayer::StoppedState)
+                    {
+                        _paused_position = 0;
+                        slider->hide();
+                        _is_playing = false;
+                        audio->setText("▶️");
+                    } });
+
+        QTimer *timer = new QTimer(this);
+        connect(timer, &QTimer::timeout, this, [=]()
+                {
+                    if (_is_playing)
+                        slider->setValue(static_cast<int>(_player->position())); });
+        timer->start(1000);
+    }
+
     if (!_is_playing)
     {
         slider->show();
 
         if (_paused_position)
-        {
             _player->setPosition(_paused_position);
-            _player->play();
 
-            _is_playing = true;
-            audio->setText("⏸️");
-        }
         else
         {
-            if (!_player)
-            {
-                _player = new QMediaPlayer(this);
-                _audio_output = new QAudioOutput(this);
-                _player->setAudioOutput(_audio_output);
-
-                connect(slider, &QSlider::valueChanged, _player, [=](int position)
-                        { _player->setPosition(static_cast<qint64>(position)); });
-
-                connect(_player, &QMediaPlayer::durationChanged, this, [=](qint64 duration)
-                        {   slider->setRange(0, static_cast<int>(duration));
-                            slider->setValue(static_cast<int>(duration)); });
-
-                connect(_player, &QMediaPlayer::playbackStateChanged, this, [=](QMediaPlayer::PlaybackState state)
-                        {
-                            if (state == QMediaPlayer::StoppedState)
-                            {
-                                _paused_position = 0;
-
-                                slider->hide();
-
-                                _is_playing = false;
-
-                                audio->setText("▶️");
-                            } });
-            }
-
-            slider->show();
-            audio->setText("⏸️");
-
             _player->setSource(source);
-            _audio_output->setVolume(50);
-            _player->play();
-
-            _is_playing = true;
-
-            QTimer *timer = new QTimer(this);
-            connect(timer, &QTimer::timeout, this, [=]()
-                    { slider->setValue(static_cast<int>(_player->position())); });
-            timer->start(1000);
+            slider->setValue(0);
         }
+
+        _player->play();
+        _is_playing = true;
+        audio->setText("⏸️");
     }
     else
     {
         _paused_position = _player->position();
         _player->pause();
-
         _is_playing = false;
-
         audio->setText("▶️");
     }
 }
